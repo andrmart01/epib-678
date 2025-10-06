@@ -21,6 +21,16 @@ library(lhs)
 library(psych)
 ```
 
+## To explore
+
+Incorporating Additional Evidence as Prior Information to Resolve Non-Identifiability in Bayesian Disease Model Calibration: A Tutorial
+
+[**https://doi.org/10.1002/sim.70039**](https://doi.org/10.1002/sim.70039)
+
+RobustCalibration: Robust Calibration of Computer Models in R
+
+<http://arxiv.org/abs/2201.01476>
+
 ## Today
 
 -   **Model calibration**

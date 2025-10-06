@@ -1,6 +1,6 @@
 ---
 title: "Course introduction"
-subtitle: "EPIB  676 session 1, McGill University"
+subtitle: "EPIB  678 session 1, McGill University"
 author: "Alton Russell"
 date: "29 Aug 2024"
 format: revealjs
@@ -33,7 +33,7 @@ editor: visual
 
 ## Why decision analysis?
 
-::: columns
+::::: columns
 ::: {.column width="60%"}
 -   Demand for health resources nearly infinite
 -   Resources (budgets) are limited
@@ -43,7 +43,7 @@ editor: visual
 ::: {.column width="40%"}
 ![From <https://blog.flexis.com>](figs/tradeoffs.jpeg)
 :::
-:::
+:::::
 
 ## Opportunity cost
 
@@ -174,7 +174,7 @@ The value of the next-best thing I could have done with these inputs (often, mon
 
 ## Learning objectives
 
-After EPIB 676, students will be able to:
+After EPIB 678, students will be able to:
 
 -   Develop decision analytic models to inform health policy and clinical decisions
 -   Understand and critically appraise model-based decision analyses
@@ -184,15 +184,15 @@ After EPIB 676, students will be able to:
 
 Many economic evaluations use decision analytic models
 
--   **Exception**: prospective/data-driven (trial-based) economic evaluation may use only statistical models
+-   **Exception**: prospective/data-driven (trial-based) economic evaluation often use only statistical models
 
 Many decision-analytic models used for economic evaluation
 
 -   **Exception**: decision models that do not consider costs don't count
 
-## EPIB 676 vs PPHS 528
+## EPIB 678 vs PPHS 528
 
--   **EPIB 676:** decision analytic modeling (deeper)
+-   **EPIB 678:** decision analytic modeling (deeper)
 
     -   \~20% economic evaluation
     -   PhD level, research-oriented
@@ -204,23 +204,23 @@ Many decision-analytic models used for economic evaluation
     -   MSc level, research and practice
     -   Prereqs: Stats, basic programming
 
-## EPIB 676 course materials
+## EPIB 678 course materials
 
 **MyCourses** (<https://mycourses2.mcgill.ca/>)
 
 -   Submit assignments
 -   Access readings, assignment solutions, and feedback/grades
 
-**Public Github repo** (<https://github.com/altonrus/epib-676>)
+**Public Github repo** ([https://github.com/altonrus/epib-](https://github.com/altonrus/epib-676){.uri}678)
 
 -   Everything else
 -   To read HTML documents hosted on Github
     -   Download and open in web browser **or**
     -   <https://htmlpreview.github.io/?>
 
-## Two overlapping phases
+## EPIB 678: Two overlapping phases
 
-::: columns
+::::: columns
 ::: {.column width="49%"}
 **Methods phase**
 
@@ -240,7 +240,7 @@ Many decision-analytic models used for economic evaluation
 
 -   Build model; analyze open source publication
 :::
-:::
+:::::
 
 ## Two overlapping phases
 
@@ -250,13 +250,13 @@ Many decision-analytic models used for economic evaluation
 
 Quarto → PDF
 
-<https://github.com/altonrus/epib-676/blob/main/syllabus/epid-676_syllabus.pdf>
+[https://github.com/altonrus/epib-678/blob/main/syllabus/epid-678_syllabus.pdf](https://github.com/altonrus/epib-676/blob/main/syllabus/epid-676_syllabus.pdf){.uri}
 
 <br>
 
 Quarto → HTML
 
-<https://htmlpreview.github.io/?https://github.com/altonrus/epib-676/blob/main/syllabus/epid-676_syllabus.html>
+[https://htmlpreview.github.io/?https://github.com/altonrus/epib-678/blob/main/syllabus/epid-678_syllabus.html](https://htmlpreview.github.io/?https://github.com/altonrus/epib-676/blob/main/syllabus/epid-676_syllabus.html){.uri}
 
 ## Agenda for today
 
@@ -321,7 +321,7 @@ We will:
 
 Can
 
--   'Pull' most recent epid-676 repo from github
+-   'Pull' most recent epid-678 repo from github
 
 -   [**Rename**]{.underline} assignment .qmd file (e.g. add your initials) before editing to avoid merge conflicts in future pulls
 
@@ -384,7 +384,7 @@ Depends on context; often **multiple**
 
 ## The impact inventory
 
-::: columns
+::::: columns
 ::: {.column width="55%"}
 ![](figs/impact-inventory.png)
 :::
@@ -396,7 +396,7 @@ Lists all potentially relevant cost categories and comments on their inclusion
 
 Often included as a supplemental table
 :::
-:::
+:::::
 
 ## Recap
 

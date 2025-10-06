@@ -8,6 +8,16 @@ editor: visual
 ---
 
 
+## TO EXPLORE FOR UPDATING
+
+<https://quarto.org/docs/manuscripts/>
+
+<https://mine.quarto.pub/quarto-manuscripts-rmed/#/title-slide>
+
+<https://quarto.org/docs/blog/posts/2023-05-22-quarto-for-academics/>
+
+<https://claudiozandonella.github.io/trackdown/>
+
 ## Today
 
 -   **Open and reproducible principles**
@@ -640,6 +650,8 @@ It talks longer to write inline code than hard-code numbers.
 -   [Intro to Dockers for R Users](https://colinfay.me/docker-r-reproducibility/) by Colin Fay
 
 -   [ISPOR open source models interest group](https://www.ispor.org/member-groups/special-interest-groups/open-source-models)
+
+-  [Quarto journal extensions](https://quarto.org/docs/extensions/listing-journals.html)
 
 ## Non-programing assignments
 

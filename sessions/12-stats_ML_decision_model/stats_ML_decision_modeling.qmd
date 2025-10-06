@@ -7,6 +7,10 @@ format: revealjs
 editor: visual
 ---
 
+## To look into
+
+<https://journals.sagepub.com/doi/full/10.1177/0272989X241279459>
+
 ## Today
 
 -   Using stats/ML in decision analysis
