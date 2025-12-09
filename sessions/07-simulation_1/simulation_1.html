@@ -410,14 +410,16 @@ Alton Russell
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="fu">library</span>(fitdistrplus) <span class="co">#fit distributions to data</span></span>
 <span id="cb1-2"><a href=""></a><span class="fu">library</span>(rriskDistributions) <span class="co">#fit distributions given quantiles</span></span>
-<span id="cb1-3"><a href=""></a><span class="fu">library</span>(dplyr) <span class="co">#use rename, mutate</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href=""></a><span class="fu">library</span>(dplyr) <span class="co">#use rename, mutate</span></span>
+<span id="cb1-4"><a href=""></a><span class="fu">library</span>(ggplot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="today" class="slide level2">
 <h2>Today</h2>
 <ul>
 <li><p><strong>Microsimulation basics</strong></p></li>
-<li><p>Sampling values</p></li>
+<li><p>Sampling</p></li>
+<li><p>Convergence</p></li>
 <li><p>Simulating decision trees</p></li>
 <li><p>Simulating state transition models</p></li>
 </ul>
@@ -476,7 +478,7 @@ Alton Russell
 <section id="code-for-estimating-pi" class="slide level2">
 <h2>Code for estimating <span class="math inline">\(\pi\)</span></h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a>monte_carlo <span class="ot">=</span> <span class="cf">function</span>(N) {</span>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a>monte_carlo_pi <span class="ot">=</span> <span class="cf">function</span>(N) {</span>
 <span id="cb2-2"><a href=""></a>  hits <span class="ot">=</span> <span class="dv">0</span></span>
 <span id="cb2-3"><a href=""></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>N) {</span>
 <span id="cb2-4"><a href=""></a>    u1 <span class="ot">=</span> <span class="fu">runif</span>(<span class="dv">1</span>)</span>
@@ -488,9 +490,9 @@ Alton Russell
 <span id="cb2-10"><a href=""></a>  <span class="fu">return</span>(<span class="dv">4</span><span class="sc">*</span>hits <span class="sc">/</span> N)</span>
 <span id="cb2-11"><a href=""></a>}</span>
 <span id="cb2-12"><a href=""></a>N <span class="ot">=</span> <span class="dv">500000</span></span>
-<span id="cb2-13"><a href=""></a><span class="fu">monte_carlo</span>(N)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-13"><a href=""></a><span class="fu">monte_carlo_pi</span>(N)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 3.142544</code></pre>
+<pre><code>[1] 3.143608</code></pre>
 </div>
 </div>
 </section>
@@ -515,7 +517,7 @@ Alton Russell
 <h2>Microsimulation defined</h2>
 <ul>
 <li><p>Simulates individuals (usually patients)</p></li>
-<li><p>Tracks characteristics and health outcomes</p></li>
+<li><p>Tracks characteristics, health states, outcomes</p></li>
 <li><p><u>No interactions</u> between individuals</p>
 <ul>
 <li>Contagion <span class="math inline">\(\rightarrow\)</span> agent based simulation</li>
@@ -538,7 +540,7 @@ Alton Russell
 </section>
 <section id="memory-in-a-microsimulation" class="slide level2">
 <h2>“Memory” in a microsimulation</h2>
-<p>Risks, costs, and health impacts can depend on any variable you track</p>
+<p>Risks, costs, and health outcomes may depend on any variable you choose to track</p>
 <ul>
 <li><p>Patient baseline characteristics</p></li>
 <li><p>Simulation time (or patient age)</p></li>
@@ -547,13 +549,13 @@ Alton Russell
 <li>Risk differs based on number of prior cancers, overdoses, relapses…</li>
 </ul></li>
 </ul>
-<p>Think conditional probabilities (given age, sex, history, etc.)</p>
+<p>Think <u><strong>conditional distributions</strong></u> (given age, sex, history, etc.)</p>
 </section>
 <section id="variation-microsim-vs.-cohort" class="slide level2">
 <h2>Variation: microsim vs.&nbsp;cohort</h2>
 <p><strong>Cohort model</strong></p>
 <ul>
-<li><p>Within health state population is homogeneous</p></li>
+<li><p>Population is homogeneous within a health state</p></li>
 <li><p>Parameters reflect population averages</p></li>
 </ul>
 <p><strong>Microsimulation</strong></p>
@@ -566,21 +568,21 @@ Alton Russell
 <section id="downside-complexity-and-compute" class="slide level2">
 <h2>Downside: complexity and compute</h2>
 <ul>
-<li><p>Flexibility/functionality comes with complexity</p></li>
+<li><p>Flexibility &amp; functionality comes with complexity</p></li>
 <li><p>Harder to program and parameterize</p></li>
 <li><p>Long runtime, particularly with rare events and without code optimization</p></li>
 </ul>
-<p><strong>Strategy:</strong> get a minimally viable model working, add complexity where warranted</p>
+<p><u><strong>Strategy:</strong></u> get a minimally viable model working, add complexity where warranted</p>
 </section>
 <section id="key-microsimulation-components" class="slide level2">
 <h2>Key microsimulation components</h2>
-<p><strong>Vector of individual variables</strong></p>
+<p><u><strong>Vector of individual variables</strong></u></p>
 <ul>
-<li><p>Baseline characteristics (age, sex, race, initial cancer stage, CD4 count, etc.)</p></li>
-<li><p>History-tracking variables (costs, QALYs, infections, recurrences, transfusions, etc.)</p></li>
+<li><p>Baseline characteristics (e.g., age, sex, race, initial cancer stage, CD4 count…)</p></li>
+<li><p>History-tracking variables (e.g., costs, QALYs, infections, recurrences, transfusions…)</p></li>
 </ul>
-<p><strong>Model parameters:</strong> probabilities, distributions over outcomes</p>
-<p><strong>Model:</strong> function that generates individuals and applies parameters to calculate outcomes</p>
+<p><u><strong>Model parameters:</strong></u> probabilities, distributions over outcomes</p>
+<p><u><strong>Model:</strong></u> function that generates individuals and applies parameters to calculate outcomes</p>
 </section>
 <section id="today-1" class="slide level2">
 <h2>Today</h2>
@@ -602,7 +604,7 @@ Alton Russell
 <li><p>My risk of getting cancer? <span class="math inline">\(\rightarrow\)</span> parametric uncertainty</p></li>
 <li><p>Will I get cancer? <span class="math inline">\(\rightarrow\)</span> stochasticity</p></li>
 </ul>
-<p>Microsimulations model <u>stochasticity</u>. Parametric uncertainty assessed through sensitivity analysis (planned for session 11)</p>
+<p>Microsimulations simulate <u>stochasticity</u>. Parametric uncertainty assessed through sensitivity analysis (planned for session 11)</p>
 </section>
 <section id="bayesian-analog" class="slide level2">
 <h2>Bayesian analog</h2>
@@ -616,32 +618,32 @@ Alton Russell
 <li><p>Sampling from dataset directly</p></li>
 </ul>
 </section>
-<section id="sampling-binary-outcome" class="slide level2">
-<h2>Sampling binary outcome</h2>
-<p>Parameter: probability the outcome happens</p>
-<p>Simulate with binomial distribution:</p>
+<section id="sampling-a-binary-outcome" class="slide level2">
+<h2>Sampling a binary outcome</h2>
+<p><u><strong>Parameter</strong></u>: probability the outcome happens</p>
+<p>Option 1: binomial distribution</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a><span class="co">#Sampling gender for 100 simulants (rbinomial)</span></span>
 <span id="cb4-2"><a href=""></a>p_female <span class="ot">=</span> <span class="fl">0.7</span></span>
 <span id="cb4-3"><a href=""></a>v_isFemale <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n=</span><span class="dv">100</span>, <span class="at">size=</span><span class="dv">1</span>, <span class="at">p=</span>p_female)</span>
 <span id="cb4-4"><a href=""></a><span class="fu">sum</span>(v_isFemale)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 64</code></pre>
+<pre><code>[1] 77</code></pre>
 </div>
 </div>
-<p>Simulate by sampling from uniform distribution</p>
+<p>Option 2: sampling from uniform distribution</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a><span class="co">#Sampling gender for 100 simulants (runif)</span></span>
 <span id="cb6-2"><a href=""></a>v_isFemale <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(<span class="fu">runif</span>(<span class="at">n=</span><span class="dv">100</span>) <span class="sc">&lt;</span> <span class="fl">0.7</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
 <span id="cb6-3"><a href=""></a><span class="fu">sum</span>(v_isFemale)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 60</code></pre>
+<pre><code>[1] 71</code></pre>
 </div>
 </div>
 </section>
 <section id="sampling-discrete-multiclass-outcome" class="slide level2">
 <h2>Sampling discrete multiclass outcome</h2>
-<p>Input: probability for each outcome (or all but one outcome)</p>
+<p><u><strong>Parameters</strong></u>: probability for each outcome (or all but one outcome)</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a>race_dist <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.05</span>, <span class="fl">0.2</span>, <span class="fl">0.15</span>, <span class="fl">0.4</span>)</span>
 <span id="cb8-2"><a href=""></a><span class="fu">names</span>(race_dist) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"black"</span>, <span class="st">"indigenous"</span>, <span class="st">"latino"</span>,<span class="st">"other"</span>, <span class="st">"white"</span>)</span>
@@ -654,14 +656,14 @@ Alton Russell
 <div class="cell-output cell-output-stdout">
 <pre><code>v_race
      black indigenous     latino      other      white 
-        15          9         18          7         51 </code></pre>
+        13          9         26         16         36 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href=""></a><span class="co"># Distribution of race in simulated population</span></span>
 <span id="cb10-2"><a href=""></a><span class="fu">table</span>(v_race)<span class="sc">/</span><span class="fu">length</span>(v_race)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>v_race
      black indigenous     latino      other      white 
-      0.15       0.09       0.18       0.07       0.51 </code></pre>
+      0.13       0.09       0.26       0.16       0.36 </code></pre>
 </div>
 </div>
 </section>
@@ -673,10 +675,10 @@ Alton Russell
 <span id="cb12-2"><a href=""></a>cost_emp_dist <span class="ot">&lt;-</span> <span class="fu">ecdf</span>(v_emp_cost_per_pt)</span>
 <span id="cb12-3"><a href=""></a><span class="fu">plot</span>(cost_emp_dist)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href=""></a><span class="co">#Can sample with replacement</span></span>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href=""></a><span class="co"># Can sample with replacement</span></span>
 <span id="cb13-2"><a href=""></a><span class="fu">sample</span>(v_emp_cost_per_pt, <span class="at">size=</span><span class="dv">10</span>, <span class="at">replace =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1]  560  240  434  560  503  257  434 1100 1100  123</code></pre>
+<pre><code> [1]  257  257  345  257 1100  434  260  123  260  257</code></pre>
 </div>
 </div>
 <img data-src="simulation_1_files/figure-revealjs/unnamed-chunk-6-1.png" width="960" class="r-stretch"></section>
@@ -709,7 +711,7 @@ rate  0.905046 1.000000</code></pre>
 <img data-src="simulation_1_files/figure-revealjs/unnamed-chunk-8-1.png" width="960" class="r-stretch"></section>
 <section id="fitting-distribution-to-quantiles" class="slide level2">
 <h2>Fitting distribution to quantiles</h2>
-<p>Can also fit distribution to summary statistics reported in literature such as quantiles</p>
+<p>Can also fit distribution to summary statistics reported in literature, such as quantiles</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href=""></a><span class="co">#GIVEN: Median = $400, IQR [$300, $600]</span></span>
 <span id="cb18-2"><a href=""></a>dist_cost_lnorm <span class="ot">&lt;-</span> <span class="fu">get.lnorm.par</span>(<span class="at">p=</span><span class="fu">c</span>(.<span class="dv">25</span>, .<span class="dv">5</span>, .<span class="dv">75</span>),</span>
@@ -748,17 +750,84 @@ rate  0.905046 1.000000</code></pre>
 <li><p>Others can run your model even if data cannot be shared</p></li>
 </ul>
 </section>
-<section id="uncertainty-in-population-parameters" class="slide level2">
-<h2>Uncertainty in population parameters</h2>
+<section id="how-many-patients-to-simulate" class="slide level2">
+<h2>How many patients to simulate?</h2>
 <ul>
-<li><p>Should simulate enough patients that error due to stochasticity is negligible</p></li>
-<li><p>Population estimates should not depend on which patients or random numbers happened to be picked</p></li>
-<li><p>To assess:</p>
-<ul>
-<li><p>Run same simulation 2X with different seed</p></li>
+<li><p>Population estimates of interest should not depend on stochasticity (which patient or random numbers happened to be generate)</p></li>
+<li><p>Should simulate enough patients (or repetitions) such that that error due to stochasticity is negligible</p></li>
+<li><p>Options</p>
+<ol type="1">
 <li><p>Calculate Monte Carlo Standard Error</p></li>
-</ul></li>
+<li><p>Run simulation multiple times with different seeds</p></li>
+<li><p>Bootstrap resampling</p></li>
+</ol></li>
 </ul>
+</section>
+<section id="running-model-multiple-times" class="slide level2">
+<h2>Running model multiple times</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.08</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.14</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.024</code></pre>
+</div>
+</div>
+</section>
+<section id="new-version-of-monte_carlo_pi" class="slide level2">
+<h2>New version of ‘monte_carlo_pi()’</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 4 4 4 0 4 4</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.02</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.14088</code></pre>
+</div>
+</div>
+</section>
+<section id="monte-carlo-standard-error" class="slide level2">
+<h2>Monte Carlo standard error</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.05442943</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.005194632</code></pre>
+</div>
+</div>
+</section>
+<section id="bootstrap-resampling" class="slide level2">
+<h2>Bootstrap resampling</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="simulation_1_files/figure-revealjs/unnamed-chunk-13-1.png" width="960"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code> 2.5% 97.5% 
+2.912 3.128 </code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="simulation_1_files/figure-revealjs/unnamed-chunk-13-2.png" width="960"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code> 2.5% 97.5% 
+3.040 3.244 </code></pre>
+</div>
+</div>
 </section>
 <section id="today-2" class="slide level2">
 <h2>Today</h2>
@@ -803,73 +872,72 @@ rate  0.905046 1.000000</code></pre>
 <h2>Baseline characteristics</h2>
 <p>Data table derived from Swedish and Danish blood donors with number of red blood cells (RBC), platelet (PLT) and plasma (FFP) units transfused, 5-year age group, and sex.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href=""></a>t_cohort <span class="ot">&lt;-</span> <span class="fu">read.csv2</span>(<span class="st">"transfusion_cohort.csv"</span>, <span class="at">sep=</span><span class="st">" "</span>)</span>
-<span id="cb19-2"><a href=""></a>n_cohort <span class="ot">&lt;-</span> <span class="fu">nrow</span>(t_cohort) <span class="co">#number of rows</span></span>
-<span id="cb19-3"><a href=""></a>n_cohort</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href=""></a>t_cohort <span class="ot">&lt;-</span> <span class="fu">read.csv2</span>(<span class="st">"transfusion_cohort.csv"</span>, <span class="at">sep=</span><span class="st">" "</span>)</span>
+<span id="cb29-2"><a href=""></a>n_cohort <span class="ot">&lt;-</span> <span class="fu">nrow</span>(t_cohort) <span class="co">#number of rows</span></span>
+<span id="cb29-3"><a href=""></a>n_cohort</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 80000</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href=""></a>idx_sample <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>n_cohort, <span class="dv">8</span>) <span class="co">#randomly sample 6 donors</span></span>
-<span id="cb21-2"><a href=""></a>t_simulants <span class="ot">&lt;-</span> t_cohort[idx_sample,]; t_simulants</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href=""></a>idx_sample <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>n_cohort, <span class="dv">8</span>) <span class="co">#randomly sample 8 donors</span></span>
+<span id="cb31-2"><a href=""></a>t_simulants <span class="ot">&lt;-</span> t_cohort[idx_sample,]; t_simulants</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      units_rbc units_plt units_ffp age_group is_female
-62937        13         0         0        55         0
-13645         2         0         0        80         0
-73337        23         2        12        70         1
-70768         2         0         0        70         0
-21109         5         0         6        75         1
-42282         7         0         4        75         0
-16474         2         0         0        75         1
-18174         2         0         0        35         1</code></pre>
+48099        12         0         0        40         1
+28238        13         0         4        30         0
+22530         2         0         0        90         1
+47363         7         0         0        70         1
+18438         0         1         0        70         0
+48952         1         0         0        85         0
+24227         2         0         0        75         1
+13944         6         0         6        80         0</code></pre>
 </div>
 </div>
 </section>
 <section id="calculating-probability-of-infection" class="slide level2">
 <h2>Calculating probability of infection</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href=""></a>prev <span class="ot">=</span> <span class="fl">0.08</span> <span class="co"># 8 in 100 donations infected </span></span>
-<span id="cb23-2"><a href=""></a></span>
-<span id="cb23-3"><a href=""></a>p_transmit_by_prod <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span>) <span class="co"># Transmissibility by product</span></span>
-<span id="cb23-4"><a href=""></a><span class="fu">names</span>(p_transmit_by_prod) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"RBC"</span>,<span class="st">"PLT"</span>,<span class="st">"FFP"</span>)</span>
-<span id="cb23-5"><a href=""></a>p_transmit_by_prod</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href=""></a>prev <span class="ot">=</span> <span class="fl">0.08</span> <span class="co"># 8 in 100 donations infected </span></span>
+<span id="cb33-2"><a href=""></a>p_transmit_by_prod <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span>) <span class="co"># Transmissibility by product</span></span>
+<span id="cb33-3"><a href=""></a><span class="fu">names</span>(p_transmit_by_prod) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"RBC"</span>,<span class="st">"PLT"</span>,<span class="st">"FFP"</span>)</span>
+<span id="cb33-4"><a href=""></a>p_transmit_by_prod</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>RBC PLT FFP 
 0.5 0.5 0.7 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href=""></a><span class="co">#function for individual risk of transmission</span></span>
-<span id="cb25-2"><a href=""></a>get_p_transmit <span class="ot">&lt;-</span> <span class="cf">function</span>(prev, p_transmit_by_prod, </span>
-<span id="cb25-3"><a href=""></a>                           units_rbc, units_plt, units_ffp){</span>
-<span id="cb25-4"><a href=""></a>  p_neg_unit <span class="ot">=</span> <span class="dv">1</span> <span class="sc">-</span> prev</span>
-<span id="cb25-5"><a href=""></a>  <span class="fu">return</span>(</span>
-<span id="cb25-6"><a href=""></a>    <span class="dv">1</span> <span class="sc">-</span> (</span>
-<span id="cb25-7"><a href=""></a>      (<span class="dv">1</span><span class="sc">-</span>p_transmit_by_prod[<span class="st">'RBC'</span>]<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>p_neg_unit<span class="sc">^</span>units_rbc))<span class="sc">*</span></span>
-<span id="cb25-8"><a href=""></a>        (<span class="dv">1</span><span class="sc">-</span>p_transmit_by_prod[<span class="st">'PLT'</span>]<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>p_neg_unit<span class="sc">^</span>units_plt))<span class="sc">*</span></span>
-<span id="cb25-9"><a href=""></a>        (<span class="dv">1</span><span class="sc">-</span>p_transmit_by_prod[<span class="st">'FFP'</span>]<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>p_neg_unit<span class="sc">^</span>units_ffp))</span>
-<span id="cb25-10"><a href=""></a>    ))}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href=""></a><span class="co">#function for individual risk of transmission</span></span>
+<span id="cb35-2"><a href=""></a>get_p_transmit <span class="ot">&lt;-</span> <span class="cf">function</span>(prev, p_transmit_by_prod, </span>
+<span id="cb35-3"><a href=""></a>                           units_rbc, units_plt, units_ffp){</span>
+<span id="cb35-4"><a href=""></a>  p_neg_unit <span class="ot">=</span> <span class="dv">1</span> <span class="sc">-</span> prev</span>
+<span id="cb35-5"><a href=""></a>  <span class="fu">return</span>(</span>
+<span id="cb35-6"><a href=""></a>    <span class="dv">1</span> <span class="sc">-</span> (</span>
+<span id="cb35-7"><a href=""></a>      (<span class="dv">1</span><span class="sc">-</span>p_transmit_by_prod[<span class="st">'RBC'</span>]<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>p_neg_unit<span class="sc">^</span>units_rbc))<span class="sc">*</span></span>
+<span id="cb35-8"><a href=""></a>        (<span class="dv">1</span><span class="sc">-</span>p_transmit_by_prod[<span class="st">'PLT'</span>]<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>p_neg_unit<span class="sc">^</span>units_plt))<span class="sc">*</span></span>
+<span id="cb35-9"><a href=""></a>        (<span class="dv">1</span><span class="sc">-</span>p_transmit_by_prod[<span class="st">'FFP'</span>]<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>p_neg_unit<span class="sc">^</span>units_ffp))</span>
+<span id="cb35-10"><a href=""></a>    ))}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="simulating-infection" class="slide level2">
 <h2>Simulating infection</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href=""></a><span class="co">#Calculate probability of transmission for each recipient</span></span>
-<span id="cb26-2"><a href=""></a>t_simulants <span class="ot">&lt;-</span> t_simulants <span class="sc">|&gt;</span></span>
-<span id="cb26-3"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">p_transmit =</span> <span class="fu">get_p_transmit</span>(prev, p_transmit_by_prod, </span>
-<span id="cb26-4"><a href=""></a>                                     units_rbc, units_plt, units_ffp))</span>
-<span id="cb26-5"><a href=""></a></span>
-<span id="cb26-6"><a href=""></a><span class="co">#Simulate whether infection occured</span></span>
-<span id="cb26-7"><a href=""></a>v_rand <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="at">n=</span><span class="fu">nrow</span>(t_simulants)) <span class="co">#vector of random numbers</span></span>
-<span id="cb26-8"><a href=""></a>t_simulants <span class="sc">|&gt;</span></span>
-<span id="cb26-9"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">infected =</span> v_rand <span class="sc">&lt;</span> p_transmit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href=""></a><span class="co">#Calculate probability of transmission for each recipient</span></span>
+<span id="cb36-2"><a href=""></a>t_simulants <span class="ot">&lt;-</span> t_simulants <span class="sc">|&gt;</span></span>
+<span id="cb36-3"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">p_transmit =</span> <span class="fu">get_p_transmit</span>(prev, p_transmit_by_prod, </span>
+<span id="cb36-4"><a href=""></a>                                     units_rbc, units_plt, units_ffp))</span>
+<span id="cb36-5"><a href=""></a></span>
+<span id="cb36-6"><a href=""></a><span class="co">#Simulate whether infection occured</span></span>
+<span id="cb36-7"><a href=""></a>v_rand <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="at">n=</span><span class="fu">nrow</span>(t_simulants)) <span class="co">#vector of random numbers</span></span>
+<span id="cb36-8"><a href=""></a>t_simulants <span class="sc">|&gt;</span></span>
+<span id="cb36-9"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">infected =</span> v_rand <span class="sc">&lt;</span> p_transmit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      units_rbc units_plt units_ffp age_group is_female p_transmit infected
-62937        13         0         0        55         0  0.3308735    FALSE
-13645         2         0         0        80         0  0.0768000     TRUE
-73337        23         2        12        70         1  0.7049166     TRUE
-70768         2         0         0        70         0  0.0768000    FALSE
-21109         5         0         6        75         1  0.3990404     TRUE
-42282         7         0         4        75         0  0.3757124    FALSE
-16474         2         0         0        75         1  0.0768000    FALSE
-18174         2         0         0        35         1  0.0768000    FALSE</code></pre>
+48099        12         0         0        40         1  0.3161668    FALSE
+28238        13         0         4        30         0  0.4637118     TRUE
+22530         2         0         0        90         1  0.0768000     TRUE
+47363         7         0         0        70         1  0.2210767    FALSE
+18438         0         1         0        70         0  0.0400000    FALSE
+48952         1         0         0        85         0  0.0400000    FALSE
+24227         2         0         0        75         1  0.0768000    FALSE
+13944         6         0         6        80         0  0.4181393     TRUE</code></pre>
 </div>
 </div>
 </section>
@@ -877,53 +945,6 @@ rate  0.905046 1.000000</code></pre>
 <h2>TT-Zika parameters depend on age, sex, component mix</h2>
 
 <img data-src="figs/simulated_decision_tree_zika.png" class="r-stretch"></section>
-<section id="today-3" class="slide level2">
-<h2>Today</h2>
-<ul>
-<li><p>Microsimulation basics</p></li>
-<li><p>Sampling values</p></li>
-<li><p>Simulating decision trees</p></li>
-<li><p><strong>Simulating state transition models</strong></p></li>
-</ul>
-</section>
-<section id="why-simulate-a-state-transition-model" class="slide level2">
-<h2>Why simulate a state transition model?</h2>
-<p>Enables flexibility without state state explosion</p>
-<p>Transitions, costs, health outcomes can depend on complex functions of</p>
-<ul>
-<li><p>Simulation time</p></li>
-<li><p>Time in health state</p></li>
-<li><p>Prior health states</p></li>
-<li><p>Baseline characteristics</p></li>
-</ul>
-</section>
-<section id="tracking-individuals" class="slide level2">
-<h2>Tracking individuals</h2>
-<p>For each variable, use <span class="math inline">\(n_i \times n_t\)</span> matrices, or <span class="math inline">\(n_i \times (n_t+1)\)</span>, where <span class="math inline">\(n_i\)</span> is the number of individuals and <span class="math inline">\(n_t\)</span> is the number of cycles.</p>
-<p><strong>Setup building on our CSTM notation:</strong></p>
-<ul>
-<li><p><span class="math inline">\(M_m[i,t]\)</span> matrix gives state of individual <span class="math inline">\(i\)</span> during cycle <span class="math inline">\(t\)</span></p></li>
-<li><p><span class="math inline">\(M_c[i,t]\)</span> matrix gives costs accrued by individual <span class="math inline">\(i\)</span> during cycle <span class="math inline">\(t\)</span></p></li>
-<li><p><span class="math inline">\(M_e[i,t]\)</span> matrix gives the health outcome accumulated by individual <span class="math inline">\(i\)</span> during cycle <span class="math inline">\(t\)</span></p></li>
-<li><p>Can add more</p></li>
-</ul>
-</section>
-<section id="sick-sicker-sim-krijkamp-et.-al.-2018" class="slide level2">
-<h2>Sick-sicker sim, Krijkamp et. al.&nbsp;2018</h2>
-
-<img data-src="figs/sim_CSTM_parameters.png" class="r-stretch"></section>
-<section id="sick-sicker-sim-krijkamp-et.-al.-2018-1" class="slide level2">
-<h2>Sick-sicker sim, Krijkamp et. al.&nbsp;2018</h2>
-
-<img data-src="figs/sim_CSTM_algorithm.png" class="r-stretch"></section>
-<section id="sick-sicker-sim-krijkamp-et.-al.-2018-2" class="slide level2">
-<h2>Sick-sicker sim, Krijkamp et. al.&nbsp;2018</h2>
-<p>Open up <code>sicksicker_microsim_B.R</code>. We will walk through it together</p>
-</section>
-<section id="simulate-enough-patients-that-simulation-error-is-negligible" class="slide level2">
-<h2>Simulate enough patients that simulation error is negligible</h2>
-
-<img data-src="figs/sim_CSTM_sim_error.png" class="r-stretch"></section>
 <section id="recap" class="slide level2">
 <h2>Recap</h2>
 <ul>

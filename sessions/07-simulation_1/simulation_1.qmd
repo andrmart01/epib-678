@@ -14,13 +14,16 @@ editor: visual
 library(fitdistrplus) #fit distributions to data
 library(rriskDistributions) #fit distributions given quantiles
 library(dplyr) #use rename, mutate
+library(ggplot2)
 ```
 
 ## Today
 
 -   **Microsimulation basics**
 
--   Sampling values
+-   Sampling
+
+-   Convergence
 
 -   Simulating decision trees
 
@@ -54,7 +57,7 @@ Can quickly become unwieldy:
 
 Repeated sampling of random numbers to estimate a quantity. Used in risk analysis, physics, integration, etc.
 
-::: columns
+::::: columns
 ::: {.column width="65%"}
 **General process**
 
@@ -72,11 +75,11 @@ Repeated sampling of random numbers to estimate a quantity. Used in risk analysi
 ::: {.column width="35%"}
 ![](figs/monte_carlo_gif_wiki.gif)
 :::
-:::
+:::::
 
 ## Monte Carlo to estimate $\pi$
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 ![](figs/pi_monte_carlo1_berkorbay.png)
 :::
@@ -84,7 +87,7 @@ Repeated sampling of random numbers to estimate a quantity. Used in risk analysi
 ::: {.column width="50%"}
 ![](figs/pi_monte_carlo2_berkorbay.png)
 :::
-:::
+:::::
 
 Source: [Berk Orbay](https://berkorbay.github.io/fe522/02_Monte_Carlo_Simulation.html)
 
@@ -92,7 +95,7 @@ Source: [Berk Orbay](https://berkorbay.github.io/fe522/02_Monte_Carlo_Simulation
 
 ```{r}
 #| echo: true
-monte_carlo = function(N) {
+monte_carlo_pi = function(N) {
   hits = 0
   for (i in 1:N) {
     u1 = runif(1)
@@ -104,7 +107,7 @@ monte_carlo = function(N) {
   return(4*hits / N)
 }
 N = 500000
-monte_carlo(N)
+monte_carlo_pi(N)
 ```
 
 ## Patient level Monte Carlo simulation
@@ -129,7 +132,7 @@ monte_carlo(N)
 
 -   Simulates individuals (usually patients)
 
--   Tracks characteristics and health outcomes
+-   Tracks characteristics, health states, outcomes
 
 -   [No interactions]{.underline} between individuals
 
@@ -142,7 +145,7 @@ Some use different terminology and consider agent base or discrete event models 
 
 ## "Memory" in a microsimulation
 
-Risks, costs, and health impacts can depend on any variable you track
+Risks, costs, and health outcomes may depend on any variable you choose to track
 
 -   Patient baseline characteristics
 
@@ -152,13 +155,13 @@ Risks, costs, and health impacts can depend on any variable you track
 
     -   Risk differs based on number of prior cancers, overdoses, relapses...
 
-Think conditional probabilities (given age, sex, history, etc.)
+Think [**conditional distributions**]{.underline} (given age, sex, history, etc.)
 
 ## Variation: microsim vs. cohort
 
 **Cohort model**
 
--   Within health state population is homogeneous
+-   Population is homogeneous within a health state
 
 -   Parameters reflect population averages
 
@@ -172,25 +175,25 @@ Microsims only capture full variability if parameterized to do so
 
 ## Downside: complexity and compute
 
--   Flexibility/functionality comes with complexity
+-   Flexibility & functionality comes with complexity
 
 -   Harder to program and parameterize
 
 -   Long runtime, particularly with rare events and without code optimization
 
-**Strategy:** get a minimally viable model working, add complexity where warranted
+[**Strategy:**]{.underline} get a minimally viable model working, add complexity where warranted
 
 ## Key microsimulation components
 
-**Vector of individual variables**
+[**Vector of individual variables**]{.underline}
 
--   Baseline characteristics (age, sex, race, initial cancer stage, CD4 count, etc.)
+-   Baseline characteristics (e.g., age, sex, race, initial cancer stage, CD4 count...)
 
--   History-tracking variables (costs, QALYs, infections, recurrences, transfusions, etc.)
+-   History-tracking variables (e.g., costs, QALYs, infections, recurrences, transfusions...)
 
-**Model parameters:** probabilities, distributions over outcomes
+[**Model parameters:**]{.underline} probabilities, distributions over outcomes
 
-**Model:** function that generates individuals and applies parameters to calculate outcomes
+[**Model:**]{.underline} function that generates individuals and applies parameters to calculate outcomes
 
 ## Today
 
@@ -214,7 +217,7 @@ Example:
 
 -   Will I get cancer? $\rightarrow$ stochasticity
 
-Microsimulations model [stochasticity]{.underline}. Parametric uncertainty assessed through sensitivity analysis (planned for session 11)
+Microsimulations simulate [stochasticity]{.underline}. Parametric uncertainty assessed through sensitivity analysis (planned for session 11)
 
 ## Bayesian analog
 
@@ -228,11 +231,11 @@ Posterior distribution describes **parameteric uncertainty**. Sampling distribut
 
 -   Sampling from dataset directly
 
-## Sampling binary outcome
+## Sampling a binary outcome
 
-Parameter: probability the outcome happens
+[**Parameter**]{.underline}: probability the outcome happens
 
-Simulate with binomial distribution:
+Option 1: binomial distribution
 
 ```{r}
 #| echo: true
@@ -242,7 +245,7 @@ v_isFemale <- rbinom(n=100, size=1, p=p_female)
 sum(v_isFemale)
 ```
 
-Simulate by sampling from uniform distribution
+Option 2: sampling from uniform distribution
 
 ```{r}
 #| echo: true
@@ -253,7 +256,7 @@ sum(v_isFemale)
 
 ## Sampling discrete multiclass outcome
 
-Input: probability for each outcome (or all but one outcome)
+[**Parameters**]{.underline}: probability for each outcome (or all but one outcome)
 
 ```{r}
 #| echo: true
@@ -279,7 +282,7 @@ v_emp_cost_per_pt <- c(240, 345, 191, 560, 434, 123, 640, 260, 257, 231, 1100, 5
 cost_emp_dist <- ecdf(v_emp_cost_per_pt)
 plot(cost_emp_dist)
 
-#Can sample with replacement
+# Can sample with replacement
 sample(v_emp_cost_per_pt, size=10, replace = T)
 ```
 
@@ -302,7 +305,7 @@ plot(dist_cost_gamma)
 
 ## Fitting distribution to quantiles
 
-Can also fit distribution to summary statistics reported in literature such as quantiles
+Can also fit distribution to summary statistics reported in literature, such as quantiles
 
 ```{r}
 #| echo: true
@@ -345,17 +348,75 @@ Reasons to fit distribution (even if you have data)
 
 -   Others can run your model even if data cannot be shared
 
-## Uncertainty in population parameters
+## How many patients to simulate?
 
--   Should simulate enough patients that error due to stochasticity is negligible
+-   Population estimates of interest should not depend on stochasticity (which patient or random numbers happened to be generate)
 
--   Population estimates should not depend on which patients or random numbers happened to be picked
+-   Should simulate enough patients (or repetitions) such that that error due to stochasticity is negligible
 
--   To assess:
+-   Options
 
-    -   Run same simulation 2X with different seed
+    1.  Calculate Monte Carlo Standard Error
 
-    -   Calculate Monte Carlo Standard Error
+    2.  Run simulation multiple times with different seeds
+
+    3.  Bootstrap resampling
+
+## Running model multiple times
+
+```{r}
+N=1000
+set.seed(100); a = monte_carlo_pi(N)
+set.seed(200); b = monte_carlo_pi(N)
+set.seed(300); c = monte_carlo_pi(N)
+
+mean(a)
+mean(b)
+mean(c)
+```
+
+## New version of 'monte_carlo_pi()'
+
+```{r}
+mcSim_pi_repetitions = function(N) {
+  4*(sqrt(runif(N)^2 + runif(N)^2) <=1)
+}
+mc_output_1000 = mcSim_pi_repetitions(1000)
+head(mc_output_1000)
+mean(mc_output_1000)
+
+mc_output_100000 = mcSim_pi_repetitions(100000)
+mean(mc_output_100000)
+```
+
+## Monte Carlo standard error
+
+```{r}
+# Monte Carlo standard error N = 1,000
+sqrt(var(mc_output_1000) /1000)
+
+# Monte Carlo standard error N = 100,000
+sqrt(var(mc_output_100000) /100000)
+
+
+```
+
+## Bootstrap resampling
+
+```{r}
+n_boot = 5000
+boot_output_1000 <- replicate(n_boot, 
+                         mean(sample(mc_output_1000, N, replace = T)))
+
+ggplot() + geom_density(aes(x = boot_output_1000))
+quantile(boot_output_1000, p = c(0.025, 0.975))
+
+boot_output_100000 <- replicate(n_boot, 
+                         mean(sample(mc_output_100000, N, replace = T)))
+
+ggplot() + geom_density(aes(x = boot_output_100000))
+quantile(boot_output_100000, p = c(0.025, 0.975))
+```
 
 ## Today
 
@@ -404,7 +465,7 @@ Data table derived from Swedish and Danish blood donors with number of red blood
 t_cohort <- read.csv2("transfusion_cohort.csv", sep=" ")
 n_cohort <- nrow(t_cohort) #number of rows
 n_cohort
-idx_sample <- sample(1:n_cohort, 8) #randomly sample 6 donors
+idx_sample <- sample(1:n_cohort, 8) #randomly sample 8 donors
 t_simulants <- t_cohort[idx_sample,]; t_simulants
 ```
 
@@ -413,7 +474,6 @@ t_simulants <- t_cohort[idx_sample,]; t_simulants
 ```{r}
 #| echo: true
 prev = 0.08 # 8 in 100 donations infected 
-
 p_transmit_by_prod <- c(0.5, 0.5, 0.7) # Transmissibility by product
 names(p_transmit_by_prod) <- c("RBC","PLT","FFP")
 p_transmit_by_prod
@@ -450,59 +510,7 @@ t_simulants |>
 
 ![](figs/simulated_decision_tree_zika.png)
 
-## Today
 
--   Microsimulation basics
-
--   Sampling values
-
--   Simulating decision trees
-
--   **Simulating state transition models**
-
-## Why simulate a state transition model?
-
-Enables flexibility without state state explosion
-
-Transitions, costs, health outcomes can depend on complex functions of
-
--   Simulation time
-
--   Time in health state
-
--   Prior health states
-
--   Baseline characteristics
-
-## Tracking individuals
-
-For each variable, use $n_i \times n_t$ matrices, or $n_i \times (n_t+1)$, where $n_i$ is the number of individuals and $n_t$ is the number of cycles.
-
-**Setup building on our CSTM notation:**
-
--   $M_m[i,t]$ matrix gives state of individual $i$ during cycle $t$
-
--   $M_c[i,t]$ matrix gives costs accrued by individual $i$ during cycle $t$
-
--   $M_e[i,t]$ matrix gives the health outcome accumulated by individual $i$ during cycle $t$
-
--   Can add more
-
-## Sick-sicker sim, Krijkamp et. al. 2018
-
-![](figs/sim_CSTM_parameters.png)
-
-## Sick-sicker sim, Krijkamp et. al. 2018
-
-![](figs/sim_CSTM_algorithm.png)
-
-## Sick-sicker sim, Krijkamp et. al. 2018
-
-Open up `sicksicker_microsim_B.R`. We will walk through it together
-
-## Simulate enough patients that simulation error is negligible
-
-![](figs/sim_CSTM_sim_error.png)
 
 ## Recap
 

@@ -7,6 +7,12 @@ format: revealjs
 editor: visual
 ---
 
+## to add/explore
+
+<https://hjalal.github.io/twig/>
+
+<https://hjalal.github.io/twig/>
+
 ## Today
 
 -   **Discrete-time cohort state-transition models**
@@ -52,7 +58,7 @@ theme_set(theme_bw()) #set ggplot theme
 
 ## Example: Transfusion-transmitted chronic conditions
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 ![](figs/ghana_markov_schematics.png)
 :::
@@ -62,7 +68,7 @@ TU=treatment uptake; SC=subclinical; AVT=antiviral therapy; TE=treatment effecti
 
 [Russell et. al. 2021](www.doi.org/0.1111/trf.16704)
 :::
-:::
+:::::
 
 ## **States**
 
@@ -86,7 +92,7 @@ TU=treatment uptake; SC=subclinical; AVT=antiviral therapy; TE=treatment effecti
 
 ## Transition matrix
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 $$
 P=\\
@@ -107,12 +113,12 @@ $$
 
 -   Columns correspond to "**to**" states
 :::
-:::
+:::::
 
 ## Transition matrix example
 
-::: columns
-::: {.column width="40%"}
+:::::: columns
+:::: {.column width="40%"}
 ```{r}
 #| echo: true
 #| eval: false
@@ -139,7 +145,7 @@ $$
 \end{array}
 $$
 :::
-:::
+::::
 
 ::: {.column width="60%"}
 ```{r}
@@ -155,11 +161,11 @@ plot(mat_dim)
 
 ```
 :::
-:::
+::::::
 
 ## Absorbing states
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
@@ -190,11 +196,11 @@ $$
 
 -   Transition matrix row has a 1 on diagonal entry, all other entries 0
 :::
-:::
+:::::
 
 ## Tunnel states
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
@@ -231,11 +237,11 @@ $$
 
 -   If costs, outcomes, or transitions differ for beginning or end of health condition, break into tunnel states
 :::
-:::
+:::::
 
 ## Example: Transfusion-transmitted chronic conditions
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 ![](ghana_markov_schematics.png)
 :::
@@ -245,7 +251,7 @@ TU=treatment uptake; SC=subclinical; AVT=antiviral therapy; TE=treatment effecti
 
 [Russell et. al. 2021](www.doi.org/0.1111/trf.16704)
 :::
-:::
+:::::
 
 ## Transition matrix for HIV model
 

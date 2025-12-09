@@ -9,176 +9,495 @@ editor: visual
 
 ## Today
 
--   **Discrete event simulation**
+-   **Efficient coding (general)**
+
+-   Efficiency techniques for simulation
 
 -   Agent based model
 
--   System dynamics
+## Today: Improving efficiency
 
--   Choosing a model structure
+-   **General coding practices**
 
-## Credit
+-   Simulation-specific methods
 
-Much of this section is based on:
+## 5 tips for efficient R programming
 
-[*Discrete Event Simulation for Health Technology Assessment (2016) by Caro et. al.*](https://www.routledge.com/Discrete-Event-Simulation-for-Health-Technology-Assessment/Caro-Moller-Karnon-Stahl-Ishak/p/book/9780367737689)
+From [Efficient R Programming by Gillespie and Lovelace](https://csgillespie.github.io/efficientR/)
 
-## Discrete event simulation strengths
+1.  Never grow vectors.
 
--   Model heterogeneous population\*
+2.  Vectorize whenever possible.
 
--   Time-varying parameters\*
+3.  Use factors when appropriate.
 
-\*same as microsim
+4.  Cache variables to reduce unnecessary computation.
 
--   Represent disease as continuous process
+5.  'Byte compile' for an easy performance boost.
 
--   Model [**capacity-constrained**]{.underline} resources
+## Pre-allocate vectors, matrices, arrays
 
--   Entity types interact (patient, provider, tumor, etc.)^+^
-
-^+^In a limited way
-
-## Key components
-
--   **Events:** instantaneous change to entity or system
-
--   **Entities:** person or thing that experiences events
-
-    -   patients, providers, ambulance, etc.
-
--   **Attributes:** information specific to entity
-
-    -   Age, health state, 'in service'
-
--   **Resources:** provide service and have fixed capacity
-
-    -   Providers, exam room, operating room, ventillator, etc.
-
--   **Queues:** lists of entities waiting for resource
-
-## DES in health vs. elsewhere
-
--   DES common for manufacturing, logistics, traffic engineering
-
--   Focus usually on **system-level outcomes**
-
-    -   Production volume, wastage, resource utilization, processing time
-
--   Health applications focus more on **entities'** state and pathway (patients)
-
-    -   Often track more entity-level attributes
-
-## Examples of events
-
-![](figs/des_event_examples.png)
-
-## Event graph
-
-![](figs/DES-event-graph.png)
-
-Arrows show sequence of events.
-
-## Discrete events but continuous time
-
--   Events are instantaneous
-
--   Time between events usually sampled from distribution
-
--   State of system updated each time an event occurs
-
--   Unlike discrete time models with a constant cycle length, the "step size" varies depending on the time between events
-
-    -   "Next-event-time-advance"
-
-## Attributes
-
--   Some assigned at baseline and not changed (e.g., sex), others updated by events (e.g., cumulative costs, blood pressure)
-
--   Probability & timing of events can depend on attributes
-
-![](figs/entity-attribute-example.png)
-
-## Examples of attributes
-
-![](figs/attribute-examples.png)
-
-## Example of next-event-time-advance
-
-![](figs/des_advance_1.png)
-
-## Example of next-event-time-advance
-
-![](figs/des_advance_2.png)
-
-## Example of next-event-time-advance
-
-![](figs/des_advance_3.png)
-
-## Example of next-event-time-advance
-
-![](figs/des_advance_4.png)
-
-## Example of next-event-time-advance
-
-![](figs/des_advance_5.png)
-
-## Example of next-event-time-advance
-
-![](figs/des_advance_6.png)
-
-## Example: time to competing events
+Make a proper-sized object (all NAs or 0s) to store output before looping
 
 ```{r}
 #| echo: true
 
-# Events can have different distributions
-time_to_checkup = rep(1, 15) # Always 1 year apart
-time_to_polyp = rexp(n=15, rate = 1.5) # Sampled from distribution
-# The clock goes until the next one occurs
-time = pmin(time_to_checkup, time_to_polyp)
-event=ifelse(time_to_checkup<time_to_polyp, "checkup","polyp developed")
-cat(paste0("i: ", 1:15, "   event: ", event, "   time: ", time, "\n"))
+#No pre-allocation; growing a vector
+system.time({
+  v <- c()
+  for (i in 1:100000) {v[i] <- i;}
+})
+
+# With  pre-allocation
+system.time({
+  v2 <- c(NA)
+  length(v2) <- 100000
+  for (i in 1:100000) {v2[i] <- i;}
+})
 ```
 
-## Global variables
+## Monte Carlo to estimate $\pi$
 
--   Track the state of the [**system**]{.underline}
+::::: columns
+::: {.column width="50%"}
+![](figs/pi_monte_carlo1_berkorbay.png)
+:::
 
--   Memory-efficient (vs. individual attributes)
+::: {.column width="50%"}
+![](figs/pi_monte_carlo2_berkorbay.png)
+:::
+:::::
 
--   Some applications track only global variables
+Source: [Berk Orbay](https://berkorbay.github.io/fe522/02_Monte_Carlo_Simulation.html)
 
-![](figs/attribute-vs-global-variable.png)
+## Unvectorized example
 
-## Global variable examples
+```{r}
+#| echo: true
+monte_carlo = function(N) {
+  hits = 0
+  for (i in seq_len(N)) {
+    u1 = runif(1)
+    u2 = runif(1)
+    if (sqrt(u1^2 + u2^2) <=1 ){
+      hits = hits + 1
+    }
+  }
+  return(4*hits / N)
+}
+N = 500000
+system.time(int_est <- monte_carlo(N))
+int_est
+```
 
-![](figs/global_variable_examples.png)
+## Vectorized example
 
-## Time
+```{r}
+#| echo: true
+monte_carlo_vec = function(N) {
+  4*sum(sqrt(runif(N)^2 + runif(N)^2) <=1) / N
+}
+system.time(int_est <- monte_carlo_vec(N))
+int_est
+```
 
--   Pre-specify total simulation time, run until reach
+-   Using sum over a comparison operator with \<, \>, \<=, or \>- more efficient than for loop and if statement
 
--   Entities enter (are created) and exit at various times
+-   `runif`, `^`, `+` each called just 2 times on a vector, not 2N times on a single number
 
--   Capacity constrained resources are "seized" and "released" by entities
+-   \~80X faster!
 
-    -   Entities must queue if all resources are seized
-    -   This is the interaction between entities!
+## Apply() family of functions
 
-## Resource capacity and availability
+Use when performing same operation on:
 
-![](figs/capacity_illustration.png)
+-   all entry in vector
 
-## Resources for DES
+-   all rows or all columns of matrix (or array)
 
--   [Simmer R package](https://r-simmer.org/) \[[2021 workshop Koen Degeling](https://r-hta.org/events/workshop/2021/degeling.pdf)\], \[[2019 presentation Biller et. al](http://www.trutschnig.net/Slides_simmer_Biller_Koehnke_Mayr.pdf).\]
+-   all elements in list
 
--   [Microsimulation package](https://cran.r-project.org/web/packages/microsimulation/index.html) \[[2021 workshop Mark Clements](https://r-hta.org/events/workshop/2021/clements.pdf)\]
+-   Multiple columns of dataframe
 
--   [r-hta.org tutorial using descem, Alvarez and Ribero](https://r-hta.org/tutorial/descem/)
+## Apply() visualized
 
-Dedicated software: Arena, Simul8
+![](figs/apply_visualized_datacamp.png)
+
+Source: [Datacamp](https://www.datacamp.com/tutorial/r-tutorial-apply-family)
+
+## Other apply-like functions
+
+-   lapply()
+
+-   larray()
+
+-   tapply()
+
+-   convenience functions sweep() and aggregate().
+
+## Caching variables
+
+If you will re-use the same value over and over, save to a variable instead of re-calculating each time.
+
+```{r}
+#| echo: true
+
+x = matrix(runif(n=90^2), nrow = 90)
+
+system.time(
+  apply(x, 2, function(i) mean(i) / sd(x))
+)
+
+system.time({
+  sd_x = sd(x)
+  apply(x, 2, function(i) mean(i) / sd_x)
+})
+
+```
+
+\~4x faster!
+
+## Use R's byte compiler
+
+Don't need to understand [technical details](https://homepage.cs.uiowa.edu/~luke/R/compiler/compiler.pdf) to use. Makes code faster, particularly with loops
+
+```{r}
+#| echo: true
+# uncompiled function
+mean_r = function(x) {
+  m = 0
+  n = length(x)
+  for (i in seq_len(n)) {m = m + x[i] / n}
+  m
+}
+system.time(mean_r(x))
+
+library("compiler") #comes with R
+cmp_mean_r = cmpfun(mean_r) #byte compiled version
+system.time(cmp_mean_r(x))
+```
+
+## Use factors when appropriate
+
+Character-type data can be stored as strings or factors. If you have many examples from a **limited set of values**, factor is more memory efficient.
+
+```{r}
+#| echo: true
+month_names <- c("Jan", "Feb","Mar","Apr", "May", "June")
+months_string <- sample(month_names, size = 5000, replace = T)
+object.size(months_string)
+months_fac <- factor(months_string, levels = month_names)
+object.size(months_fac)
+```
+
+## Don't optimize everything!
+
+> "Programmers waste enormous amounts of time thinking about, or worrying about, the speed of **noncritical parts of their programs**, and these attempts at efficiency actually have a strong negative impact when debugging and maintenance are considered."
+>
+> --- Donald Knuth.
+
+-   Readability \> efficiency 90% of the time
+
+-   Decide what to make efficient with **profiling**
+
+## Profiling code with Profvis
+
+<http://rstudio.github.io/profvis/index.html>
+
+Must be run in RStudio
+
+```{r}
+#| echo: true
+#| eval: false
+library(profvis)
+library("compiler") #comes with R
+
+profvis({
+monte_carlo = function(N) {
+  hits = 0
+  for (i in seq_len(N)) {
+    u1 = runif(1)
+    u2 = runif(1)
+    if (sqrt(u1^2 + u2^2) <=1 ){
+      hits = hits + 1
+    }
+  }
+  return(4*hits / N)
+}
+
+monte_carlo_vec = function(N) {
+  4*sum(sqrt(runif(N)^2 + runif(N)^2) <=1) / N
+}
+
+N = 500000
+A <- monte_carlo(N)
+B <- monte_carlo_vec(N)
+
+}) #end profvis
+```
+
+## RCCP for C++ code
+
+If a specific part of your code is especially slow, can re-write in C++ (more info in [Advanced R by Hadley Wickham](http://adv-r.had.co.nz/Rcpp.html))
+
+```{r}
+#| echo: true
+#add numbers together
+cppFunction('int add(int x, int y, int z) {
+  int sum = x + y + z;
+  return sum;
+}')
+add
+add(1, 2, 3)
+```
+
+## Today: Improving efficiency
+
+-   General coding practices
+
+-   **Simulation-specific methods**
+
+## Review: Tracking individuals in microsims
+
+For each variable, use $n_i \times n_t$ (or $n_i \times (n_t+1)$) matrix where $n_i$ is the number of individuals and $n_t$ is the number of cycles.
+
+-   $M_m[i,t]$ matrix gives state of individual $i$ after cycle $t$
+
+-   $M_c[i,t]$ matrix gives costs accrued by individual $i$ during cycle $t$
+
+-   $M_e[i,t]$ matrix gives the health accrued accumulated by individual $i$ during cycle $t$
+
+## Vectorization in microsimulation
+
+-   Preallocate all matrices/arrays
+
+-   Generate baseline characteristics for everyone at once
+
+    -   Sampling rows from data table at once
+
+    -   Generate random variables en mass with `runif(N)` not `runif(1)` (or `rgamma`, `rbeta`, etc.)
+
+## Vectorization in microsimulation
+
+-   Where possible, avoid loops and use **linear algebra** to compute calculations for the whole cohort at once
+
+    -   Multiplying, adding, subtracting, exponentiating matrices and vectors
+
+-   In discrete time model, transition all individuals through each cycle simultaneously
+
+    -   Draw random variables for whole cohort as a vector
+    -   See [Appendix D of Krijkamp et. al. tutorial](https://github.com/DARTH-git/Microsimulation-tutorial/blob/master/Appendix%20D_online_supp.R)
+
+## How many individuals to simulate?
+
+-   As $N_i \rightarrow \infty$, variance in population-level estimates $\rightarrow 0$.
+
+-   **Goal:** enough individuals that variance between strategies attributable to Monte Carlo variability is trivial
+
+-   Depends on the model + use case
+
+Two ways to assess:
+
+1.  Check that Monte Carlo Standard Error small enough: `sd(cost_stratA - cost_stratB)/sqrt(n.i)`
+
+2.  Generate 3x $N_i$ individuals, divide into thirds, look at percent difference in outcomes
+
+## Variance reduction techniques
+
+Different from efficient coding:
+
+-   **Efficient coding** to simulate N individuals faster
+
+-   **Variance reduction** to reduce N (simulate fewer individuals)
+
+Gains from simulating 10% fewer individuals $\approx$ simulating each individual 10% faster
+
+## Simulate same cohort in all strategies
+
+-   Generate cohort baseline characteristics [**once**]{.underline}, then simulate those individuals under each alternative strategy
+
+-   Otherwise, variance in population characteristics partly responsible for variance in outcomes between strategies
+
+![](figs/sim_one_cohort_all_strategies.png)
+
+## Antithetic variates
+
+[**Suppose**]{.underline}: want to estimate $\mu=E[X]$ using two samples drawn from $X: X_1 \text{ and } X_2$. Estimate would be:
+
+$$
+\hat{\mu}=(E[X_1]+E[X_2])/2
+$$
+
+From the definition of variance:
+
+$$
+Var[\hat{\mu}] = \frac{Var[X_1] + Var[X_2] + 2Cov[X_1,X_2]}{4}
+$$
+
+***Observe***: smaller $Cov[X_1,X_2]$, means smaller $Var[\hat{\mu}]$.
+
+## Antithetic variates
+
+Generate two **negatively-correlated sets** of random variables: U, original set, and V, antithetic set.
+
+-   If U\~Unif(0,1), V = 1 - U
+
+-   If U\~Norm(0,1), V = - U
+
+-   For other distributions, can use the **inversion method** to generate antithetic variates (if inverse of CDF exists)
+
+## Inversion transform: CDF in reverse
+
+![](figs/norm_cdf_heds.png)
+
+$$
+F_X(x) = P(X \leq x) = p \qquad \qquad F^{-1}_X(p) = x
+$$
+
+Source: [Hedley (heds.nz)](https://heds.nz/posts/inverse-transform/)
+
+## Inverse transform method in R
+
+pnorm (or pgamma, plnorm, etc) takes $x$ and gives you $p$
+
+qnorm (or qgamma, qlnorm, etc) takes $p$ and gives you $x$
+
+```{r}
+#| echo: true
+n=10000
+x_rgamma <- rgamma(n, shape = 5)
+x_inverse <- qgamma(runif(n), shape = 5)
+
+df <- data.frame(method =rep(c("rgamma", "inverse"), each=n),
+           value = c(x_rgamma, x_inverse))
+ggplot(df, aes(x=value, fill = method))+geom_density(alpha = 0.5)
+
+```
+
+## Ex: Without antithetic variates
+
+Simulating heads or tails for a biased coin flip, calculating standard error
+
+```{r}
+#| echo: true
+n<-5000 #number of instances
+
+#Naive calculation
+h_or_t_naive <- runif(n) < 0.3
+mu=mean(h_or_t_naive)
+SE=1.96*sd(h_or_t_naive)/sqrt(n)
+
+print(c(Mean=mu,SE=SE,Lower=mu-SE,Upper=mu+SE))
+```
+
+## Ex: With antithetic variates
+
+```{r}
+#| echo: true
+
+#Coin flip with antithetic variates
+unif_vec<-runif(n/2)
+
+#Normal process
+x_1<- unif_vec < 0.3
+
+#Antithetic process
+x_2<- (1-unif_vec) < 0.3
+
+h_or_t_av <- (x_1 + x_2)/2
+mu=mean(h_or_t_av)
+SE=1.96*sd(h_or_t_av)/sqrt(n/2)
+print(c(Mean=mu,SE=SE,Lower=mu-SE,Upper=mu+SE))
+```
+
+Standard error reduced by \~25%
+
+## Common random numbers
+
+-   When modeling \>1 policy, using the same random variables in the same place within model improves estimation of the ***incremental*** outcomes (costs, QALYs).
+
+-   Random variables must have the same purpose in both systems (synchronized)
+
+-   Reduces variance in the difference between two random variables by maximizing the covariance:
+
+$$
+Var[X_2 - X_1] = Var[X_1] + Var[X_2] - 2Cov[X_1,X_2] 
+$$
+
+## Ex: without common random numbers
+
+```{r}
+#| echo: true
+# Choosing stock options to buy based on expected payoff
+#Same EC function that returns payoff vector
+payoff_EC<-function(S_0=100,K=100,vol=0.25,T_years=1,r=0.02,z_val){
+    return(pmax(S_0*exp((r-0.5*vol^2)*T_years + vol*z_val*sqrt(T))-K,0)*exp(-r*T_years))
+}
+
+n<-10^4 #Number of instances
+
+payoff_1<-payoff_EC(r=0.01,z_val=rnorm(n))
+payoff_2<-payoff_EC(r=0.06,z_val=rnorm(n))
+diff_vec<-payoff_1 - payoff_2
+mu_diff<-mean(diff_vec)
+SE=1.96*sd(diff_vec)/sqrt(n)
+print(c(Diff=mu_diff,SE=SE,Lower=mu_diff-SE,Upper=mu_diff+SE))
+```
+
+Source: [Berk Orbay](https://berkorbay.github.io/fe522/02_Monte_Carlo_Simulation.html)
+
+## Ex: with common random numbers
+
+```{r}
+#| echo: true
+
+#CRN Method
+z_val<-rnorm(n)
+payoff_1<-payoff_EC(r=0.01,z_val=z_val)
+payoff_2<-payoff_EC(r=0.06,z_val=z_val)
+diff_vec<-payoff_1 - payoff_2
+mu_diff<-mean(diff_vec)
+SE=1.96*sd(diff_vec)/sqrt(n)
+print(c(Diff=mu_diff,SE=SE,Lower=mu_diff-SE,Upper=mu_diff+SE))
+```
+
+Standard error reduced by \~90%
+
+<br>
+
+Source: [Berk Orbay](https://berkorbay.github.io/fe522/02_Monte_Carlo_Simulation.html)
+
+## Challenge of rare events
+
+![](figs/trad_monte_carlo.png)
+
+## Conditional Monte Carlo
+
+![](figs/conditional_monte_carlo.png)
+
+## Should I use variance reduction?
+
+Ease of implementation and benefits differ and can depend on context
+
+**Start with easy ones.** Often:
+
+-   Simulate same cohort in all strategies, common random numbers
+
+**Consider others** if needed
+
+-   Antithetic variates, conditional Monte Carlo (if rare events are an issue)
+
+## Recap
+
+-   Improve microsim efficiency by reducing duration of runs (efficient code) or how many runs are needed (variance reduction)
+
+-   Your time value \>\>\>\> computer time value!
+
+-   Get a working model before optimizing efficiency! Then, if needed:
+
+    -   use `profvis()` to profile code & find efficiency improvement opportunities
+
+    -   Consider variance reduction techniques
 
 ## Today
 
@@ -357,81 +676,7 @@ Fixed cycle lengths usually easier to program
 
 -   [EpiModel R package](https://doi.org/10.18637/jss.v084.i08) (has compartmental and network models)
 
-## Today
 
--   Discrete event simulation
-
--   Agent based model
-
--   **System dynamics**
-
--   Choosing a model structure
-
-## Credit
-
-Much of this section based on
-
--   [System Dynamics Modeling with R](https://link-springer-com.proxy3.library.mcgill.ca/book/10.1007/978-3-319-34043-2) (2016) by Jim Duggan
-
-## System dynamics philosophy
-
-Actions can have consequences through complex, non-linear feedback loops
-
-![](figs/SD-domino-guy.png)
-
-## Stocks and flows
-
--   Stocks = compartment/state; Flows = transitions
-
--   Analogy: faucet, bathtub, drain
-
-![](figs/SD_disease_stock_flow.png)
-
-## More stocks and flows
-
-![](figs/SD-stock-flows-more.png)
-
-## Feedback loops
-
-> A closed chain of causal connections from a stock, through a set of decisions or rules or physical laws or actions that are dependent on the level of the stock, and back again through a flow to change the stock -Meadows (2008)
-
-What separate SD models from traditional differential equations models
-
-2 types:
-
--   **Balancing:** negtaive feedback, "goal-seeking"
-
--   **Reinforcing:** positive feedback, "run-away"
-
-## Heating a room: balancing loop (negative feedback)
-
-![](figs/SD_feedback_room_heat.png)
-
-## Capital investment: reinforcing loop (positive feedback)
-
-![](figs/SD_feedback_capital_growth.png)
-
-## Ex: Opioid misuse and use disorder
-
-![](figs/SD-opioid-schematic.svg)
-
-## Feedback loops in opioid example
-
-![](figs/SD-opioid-feedbacks.png)
-
-[Stringfellow et. al. 2022](https://pubmed.ncbi.nlm.nih.gov/35749492/)
-
-[Lim et. al. 2022](www.doi.org/10.1073/pnas.2115714119)
-
-## Resources for SD modeling
-
--   [Tracy et. al. 2018. "ABM in Public Health" Annual Review of Public Health](https://doi.org/10.1146/annurev-publhealth-040617-014317)
-
--   [SD in R intro](https://rpubs.com/rsmard05/sysDynR), Cpt. Rick Mard
-
--   [System Dynamics Modeling with R](https://link-springer-com.proxy3.library.mcgill.ca/book/10.1007/978-3-319-34043-2) by Jim Duggan
-
--   [Vensim software](https://vensim.com/free-download/)
 
 ## Today
 

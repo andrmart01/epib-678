@@ -15,489 +15,225 @@ library(ggplot2)
 library(Rcpp)
 ```
 
-## Today: Improving efficiency
 
--   **General coding practices**
+## Today
 
--   Simulation-specific methods
+-   **Simulating state transition models**
 
-## 5 tips for efficient R programming
+## Why simulate a state transition model?
 
-From [Efficient R Programming by Gillespie and Lovelace](https://csgillespie.github.io/efficientR/)
+Enables flexibility without state state explosion
 
-1.  Never grow vectors.
+Transitions, costs, health outcomes can depend on complex functions of
 
-2.  Vectorize whenever possible.
+-   Simulation time
 
-3.  Use factors when appropriate.
+-   Time in health state
 
-4.  Cache variables to reduce unnecessary computation.
+-   Prior health states
 
-5.  'Byte compile' for an easy performance boost.
+-   Baseline characteristics
 
-## Pre-allocate vectors, matrices, arrays
+## Tracking individuals
 
-Make a proper-sized object (all NAs or 0s) to store output before looping
+For each variable, use $n_i \times n_t$ matrices, or $n_i \times (n_t+1)$, where $n_i$ is the number of individuals and $n_t$ is the number of cycles.
 
-```{r}
-#| echo: true
+**Setup building on our CSTM notation:**
 
-#No pre-allocation; growing a vector
-system.time({
-  v <- c()
-  for (i in 1:100000) {v[i] <- i;}
-})
-
-# With  pre-allocation
-system.time({
-  v2 <- c(NA)
-  length(v2) <- 100000
-  for (i in 1:100000) {v2[i] <- i;}
-})
-```
-
-## Monte Carlo to estimate $\pi$
-
-::: columns
-::: {.column width="50%"}
-![](figs/pi_monte_carlo1_berkorbay.png)
-:::
-
-::: {.column width="50%"}
-![](figs/pi_monte_carlo2_berkorbay.png)
-:::
-:::
-
-Source: [Berk Orbay](https://berkorbay.github.io/fe522/02_Monte_Carlo_Simulation.html)
-
-## Unvectorized example
-
-```{r}
-#| echo: true
-monte_carlo = function(N) {
-  hits = 0
-  for (i in seq_len(N)) {
-    u1 = runif(1)
-    u2 = runif(1)
-    if (sqrt(u1^2 + u2^2) <=1 ){
-      hits = hits + 1
-    }
-  }
-  return(4*hits / N)
-}
-N = 500000
-system.time(int_est <- monte_carlo(N))
-int_est
-```
-
-## Vectorized example
-
-```{r}
-#| echo: true
-monte_carlo_vec = function(N) {
-  4*sum(sqrt(runif(N)^2 + runif(N)^2) <=1) / N
-}
-system.time(int_est <- monte_carlo_vec(N))
-int_est
-```
-
--   Using sum over a comparison operator with \<, \>, \<=, or \>- more efficient than for loop and if statement
-
--   `runif`, `^`, `+` each called just 2 times on a vector, not 2N times on a single number
-
--   \~80X faster!
-
-## Apply() family of functions
-
-Use when performing same operation on:
-
--   all entry in vector
-
--   all rows or all columns of matrix (or array)
-
--   all elements in list
-
--   Multiple columns of dataframe
-
-## Apply() visualized
-
-![](figs/apply_visualized_datacamp.png)
-
-Source: [Datacamp](https://www.datacamp.com/tutorial/r-tutorial-apply-family)
-
-## Other apply-like functions
-
--   lapply()
-
--   larray()
-
--   tapply()
-
--   convenience functions sweep() and aggregate().
-
-## Caching variables
-
-If you will re-use the same value over and over, save to a variable instead of re-calculating each time.
-
-```{r}
-#| echo: true
-
-x = matrix(runif(n=90^2), nrow = 90)
-
-system.time(
-  apply(x, 2, function(i) mean(i) / sd(x))
-)
-
-system.time({
-  sd_x = sd(x)
-  apply(x, 2, function(i) mean(i) / sd_x)
-})
-
-```
-
-\~4x faster!
-
-## Use R's byte compiler
-
-Don't need to understand [technical details](https://homepage.cs.uiowa.edu/~luke/R/compiler/compiler.pdf) to use. Makes code faster, particularly with loops
-
-```{r}
-#| echo: true
-# uncompiled function
-mean_r = function(x) {
-  m = 0
-  n = length(x)
-  for (i in seq_len(n)) {m = m + x[i] / n}
-  m
-}
-system.time(mean_r(x))
-
-library("compiler") #comes with R
-cmp_mean_r = cmpfun(mean_r) #byte compiled version
-system.time(cmp_mean_r(x))
-```
-
-## Use factors when appropriate
-
-Character-type data can be stored as strings or factors. If you have many examples from a **limited set of values**, factor is more memory efficient.
-
-```{r}
-#| echo: true
-month_names <- c("Jan", "Feb","Mar","Apr", "May", "June")
-months_string <- sample(month_names, size = 5000, replace = T)
-object.size(months_string)
-months_fac <- factor(months_string, levels = month_names)
-object.size(months_fac)
-```
-
-## Don't optimize everything!
-
-> "Programmers waste enormous amounts of time thinking about, or worrying about, the speed of **noncritical parts of their programs**, and these attempts at efficiency actually have a strong negative impact when debugging and maintenance are considered."
->
-> --- Donald Knuth.
-
--   Readability \> efficiency 90% of the time
-
--   Decide what to make efficient with **profiling**
-
-## Profiling code with Profvis
-
-<http://rstudio.github.io/profvis/index.html>
-
-Must be run in RStudio
-
-```{r}
-#| echo: true
-#| eval: false
-library(profvis)
-library("compiler") #comes with R
-
-profvis({
-monte_carlo = function(N) {
-  hits = 0
-  for (i in seq_len(N)) {
-    u1 = runif(1)
-    u2 = runif(1)
-    if (sqrt(u1^2 + u2^2) <=1 ){
-      hits = hits + 1
-    }
-  }
-  return(4*hits / N)
-}
-
-monte_carlo_vec = function(N) {
-  4*sum(sqrt(runif(N)^2 + runif(N)^2) <=1) / N
-}
-
-N = 500000
-A <- monte_carlo(N)
-B <- monte_carlo_vec(N)
-
-}) #end profvis
-```
-
-## RCCP for C++ code
-
-If a specific part of your code is especially slow, can re-write in C++ (more info in [Advanced R by Hadley Wickham](http://adv-r.had.co.nz/Rcpp.html))
-
-```{r}
-#| echo: true
-#add numbers together
-cppFunction('int add(int x, int y, int z) {
-  int sum = x + y + z;
-  return sum;
-}')
-add
-add(1, 2, 3)
-```
-
-## Today: Improving efficiency
-
--   General coding practices
-
--   **Simulation-specific methods**
-
-## Review: Tracking individuals in microsims
-
-For each variable, use $n_i \times n_t$ (or $n_i \times (n_t+1)$) matrix where $n_i$ is the number of individuals and $n_t$ is the number of cycles.
-
--   $M_m[i,t]$ matrix gives state of individual $i$ after cycle $t$
+-   $M_m[i,t]$ matrix gives state of individual $i$ during cycle $t$
 
 -   $M_c[i,t]$ matrix gives costs accrued by individual $i$ during cycle $t$
 
--   $M_e[i,t]$ matrix gives the health accrued accumulated by individual $i$ during cycle $t$
+-   $M_e[i,t]$ matrix gives the health outcome accumulated by individual $i$ during cycle $t$
 
-## Vectorization in microsimulation
+-   Can add more
 
--   Preallocate all matrices/arrays
+## Sick-sicker sim, Krijkamp et. al. 2018
 
--   Generate baseline characteristics for everyone at once
+![](figs/sim_CSTM_parameters.png)
 
-    -   Sampling rows from data table at once
+## Sick-sicker sim, Krijkamp et. al. 2018
 
-    -   Generate random variables en mass with `runif(N)` not `runif(1)` (or `rgamma`, `rbeta`, etc.)
+![](figs/sim_CSTM_algorithm.png)
 
-## Vectorization in microsimulation
+## Sick-sicker sim, Krijkamp et. al. 2018
 
--   Where possible, avoid loops and use **linear algebra** to compute calculations for the whole cohort at once
+Open up `sicksicker_microsim_B.R`. We will walk through it together
 
-    -   Multiplying, adding, subtracting, exponentiating matrices and vectors
+## Simulate enough patients that simulation error is negligible
 
--   In discrete time model, transition all individuals through each cycle simultaneously
+![](figs/sim_CSTM_sim_error.png)
 
-    -   Draw random variables for whole cohort as a vector
-    -   See [Appendix D of Krijkamp et. al. tutorial](https://github.com/DARTH-git/Microsimulation-tutorial/blob/master/Appendix%20D_online_supp.R)
 
-## How many individuals to simulate?
+## Credit
 
--   As $N_i \rightarrow \infty$, variance in population-level estimates $\rightarrow 0$.
+Much of this section is based on:
 
--   **Goal:** enough individuals that variance between strategies attributable to Monte Carlo variability is trivial
+[*Discrete Event Simulation for Health Technology Assessment (2016) by Caro et. al.*](https://www.routledge.com/Discrete-Event-Simulation-for-Health-Technology-Assessment/Caro-Moller-Karnon-Stahl-Ishak/p/book/9780367737689)
 
--   Depends on the model + use case
+## Discrete event simulation strengths
 
-Two ways to assess:
+-   Model heterogeneous population\*
 
-1.  Check that Monte Carlo Standard Error small enough: `sd(cost_stratA - cost_stratB)/sqrt(n.i)`
+-   Time-varying parameters\*
 
-2.  Generate 3x $N_i$ individuals, divide into thirds, look at percent difference in outcomes
+\*same as microsim
 
-## Variance reduction techniques
+-   Represent disease as continuous process
 
-Different from efficient coding:
+-   Model [**capacity-constrained**]{.underline} resources
 
--   **Efficient coding** to simulate N individuals faster
+-   Entity types interact (patient, provider, tumor, etc.)^+^
 
--   **Variance reduction** to reduce N (simulate fewer individuals)
+^+^In a limited way
 
-Gains from simulating 10% fewer individuals $\approx$ simulating each individual 10% faster
+## Key components
 
-## Simulate same cohort in all strategies
+-   **Events:** instantaneous change to entity or system
 
--   Generate cohort baseline characteristics [**once**]{.underline}, then simulate those individuals under each alternative strategy
+-   **Entities:** person or thing that experiences events
 
--   Otherwise, variance in population characteristics partly responsible for variance in outcomes between strategies
+    -   patients, providers, ambulance, etc.
 
-![](figs/sim_one_cohort_all_strategies.png)
+-   **Attributes:** information specific to entity
 
-## Antithetic variates
+    -   Age, health state, 'in service'
 
-[**Suppose**]{.underline}: want to estimate $\mu=E[X]$ using two samples drawn from $X: X_1 \text{ and } X_2$. Estimate would be:
+-   **Resources:** provide service and have fixed capacity
 
-$$
-\hat{\mu}=(E[X_1]+E[X_2])/2
-$$
+    -   Providers, exam room, operating room, ventillator, etc.
 
-From the definition of variance:
+-   **Queues:** lists of entities waiting for resource
 
-$$
-Var[\hat{\mu}] = \frac{Var[X_1] + Var[X_2] + 2Cov[X_1,X_2]}{4}
-$$
+## DES in health vs. elsewhere
 
-***Observe***: smaller $Cov[X_1,X_2]$, means smaller $Var[\hat{\mu}]$.
+-   DES common for manufacturing, logistics, traffic engineering
 
-## Antithetic variates
+-   Focus usually on **system-level outcomes**
 
-Generate two **negatively-correlated sets** of random variables: U, original set, and V, antithetic set.
+    -   Production volume, wastage, resource utilization, processing time
 
--   If U\~Unif(0,1), V = 1 - U
+-   Health applications focus more on **entities'** state and pathway (patients)
 
--   If U\~Norm(0,1), V = - U
+    -   Often track more entity-level attributes
 
--   For other distributions, can use the **inversion method** to generate antithetic variates (if inverse of CDF exists)
+## Examples of events
 
-## Inversion transform: CDF in reverse
+![](figs/des_event_examples.png)
 
-![](figs/norm_cdf_heds.png)
+## Event graph
 
-$$
-F_X(x) = P(X \leq x) = p \qquad \qquad F^{-1}_X(p) = x
-$$
+![](figs/DES-event-graph.png)
 
-Source: [Hedley (heds.nz)](https://heds.nz/posts/inverse-transform/)
+Arrows show sequence of events.
 
-## Inverse transform method in R
+## Discrete events but continuous time
 
-pnorm (or pgamma, plnorm, etc) takes $x$ and gives you $p$
+-   Events are instantaneous
 
-qnorm (or qgamma, qlnorm, etc) takes $p$ and gives you $x$
+-   Time between events usually sampled from distribution
 
-```{r}
-#| echo: true
-n=10000
-x_rgamma <- rgamma(n, shape = 5)
-x_inverse <- qgamma(runif(n), shape = 5)
+-   State of system updated each time an event occurs
 
-df <- data.frame(method =rep(c("rgamma", "inverse"), each=n),
-           value = c(x_rgamma, x_inverse))
-ggplot(df, aes(x=value, fill = method))+geom_density(alpha = 0.5)
+-   Unlike discrete time models with a constant cycle length, the "step size" varies depending on the time between events
 
-```
+    -   "Next-event-time-advance"
 
-## Ex: Without antithetic variates
+## Attributes
 
-Simulating heads or tails for a biased coin flip, calculating standard error
+-   Some assigned at baseline and not changed (e.g., sex), others updated by events (e.g., cumulative costs, blood pressure)
 
-```{r}
-#| echo: true
-n<-5000 #number of instances
+-   Probability & timing of events can depend on attributes
 
-#Naive calculation
-h_or_t_naive <- runif(n) < 0.3
-mu=mean(h_or_t_naive)
-SE=1.96*sd(h_or_t_naive)/sqrt(n)
+![](figs/entity-attribute-example.png)
 
-print(c(Mean=mu,SE=SE,Lower=mu-SE,Upper=mu+SE))
-```
+## Examples of attributes
 
-## Ex: With antithetic variates
+![](figs/attribute-examples.png)
 
-```{r}
-#| echo: true
+## Example of next-event-time-advance
 
-#Coin flip with antithetic variates
-unif_vec<-runif(n/2)
+![](figs/des_advance_1.png)
 
-#Normal process
-x_1<- unif_vec < 0.3
+## Example of next-event-time-advance
 
-#Antithetic process
-x_2<- (1-unif_vec) < 0.3
+![](figs/des_advance_2.png)
 
-h_or_t_av <- (x_1 + x_2)/2
-mu=mean(h_or_t_av)
-SE=1.96*sd(h_or_t_av)/sqrt(n/2)
-print(c(Mean=mu,SE=SE,Lower=mu-SE,Upper=mu+SE))
-```
+## Example of next-event-time-advance
 
-Standard error reduced by \~25%
+![](figs/des_advance_3.png)
 
-## Common random numbers
+## Example of next-event-time-advance
 
--   When modeling \>1 policy, using the same random variables in the same place within model improves estimation of the ***incremental*** outcomes (costs, QALYs).
+![](figs/des_advance_4.png)
 
--   Random variables must have the same purpose in both systems (synchronized)
+## Example of next-event-time-advance
 
--   Reduces variance in the difference between two random variables by maximizing the covariance:
+![](figs/des_advance_5.png)
 
-$$
-Var[X_2 - X_1] = Var[X_1] + Var[X_2] - 2Cov[X_1,X_2] 
-$$
+## Example of next-event-time-advance
 
-## Ex: without common random numbers
+![](figs/des_advance_6.png)
 
-```{r}
-#| echo: true
-# Choosing stock options to buy based on expected payoff
-#Same EC function that returns payoff vector
-payoff_EC<-function(S_0=100,K=100,vol=0.25,T_years=1,r=0.02,z_val){
-    return(pmax(S_0*exp((r-0.5*vol^2)*T_years + vol*z_val*sqrt(T))-K,0)*exp(-r*T_years))
-}
-
-n<-10^4 #Number of instances
-
-payoff_1<-payoff_EC(r=0.01,z_val=rnorm(n))
-payoff_2<-payoff_EC(r=0.06,z_val=rnorm(n))
-diff_vec<-payoff_1 - payoff_2
-mu_diff<-mean(diff_vec)
-SE=1.96*sd(diff_vec)/sqrt(n)
-print(c(Diff=mu_diff,SE=SE,Lower=mu_diff-SE,Upper=mu_diff+SE))
-```
-
-Source: [Berk Orbay](https://berkorbay.github.io/fe522/02_Monte_Carlo_Simulation.html)
-
-## Ex: with common random numbers
+## Example: time to competing events
 
 ```{r}
 #| echo: true
 
-#CRN Method
-z_val<-rnorm(n)
-payoff_1<-payoff_EC(r=0.01,z_val=z_val)
-payoff_2<-payoff_EC(r=0.06,z_val=z_val)
-diff_vec<-payoff_1 - payoff_2
-mu_diff<-mean(diff_vec)
-SE=1.96*sd(diff_vec)/sqrt(n)
-print(c(Diff=mu_diff,SE=SE,Lower=mu_diff-SE,Upper=mu_diff+SE))
+# Events can have different distributions
+time_to_checkup = rep(1, 15) # Always 1 year apart
+time_to_polyp = rexp(n=15, rate = 1.5) # Sampled from distribution
+# The clock goes until the next one occurs
+time = pmin(time_to_checkup, time_to_polyp)
+event=ifelse(time_to_checkup<time_to_polyp, "checkup","polyp developed")
+cat(paste0("i: ", 1:15, "   event: ", event, "   time: ", time, "\n"))
 ```
 
-Standard error reduced by \~90%
+## Global variables
 
-<br>
+-   Track the state of the [**system**]{.underline}
 
-Source: [Berk Orbay](https://berkorbay.github.io/fe522/02_Monte_Carlo_Simulation.html)
+-   Memory-efficient (vs. individual attributes)
 
-## Challenge of rare events
+-   Some applications track only global variables
 
-![](figs/trad_monte_carlo.png)
+![](figs/attribute-vs-global-variable.png)
 
-## Conditional Monte Carlo
+## Global variable examples
 
-![](figs/conditional_monte_carlo.png)
+![](figs/global_variable_examples.png)
 
-## Should I use variance reduction?
+## Time
 
-Ease of implementation and benefits differ and can depend on context
+-   Pre-specify total simulation time, run until reach
 
-**Start with easy ones.** Often:
+-   Entities enter (are created) and exit at various times
 
--   Simulate same cohort in all strategies, common random numbers
+-   Capacity constrained resources are "seized" and "released" by entities
 
-**Consider others** if needed
+    -   Entities must queue if all resources are seized
+    -   This is the interaction between entities!
 
--   Antithetic variates, conditional Monte Carlo (if rare events are an issue)
+## Resource capacity and availability
 
-## Recap
+![](figs/capacity_illustration.png)
 
--   Improve microsim efficiency by reducing duration of runs (efficient code) or how many runs are needed (variance reduction)
+## Resources for DES
 
--   Your time value \>\>\>\> computer time value!
+-   [Simmer R package](https://r-simmer.org/) \[[2021 workshop Koen Degeling](https://r-hta.org/events/workshop/2021/degeling.pdf)\], \[[2019 presentation Biller et. al](http://www.trutschnig.net/Slides_simmer_Biller_Koehnke_Mayr.pdf).\]
 
--   Get a working model before optimizing efficiency! Then, if needed:
+-   [Microsimulation package](https://cran.r-project.org/web/packages/microsimulation/index.html) \[[2021 workshop Mark Clements](https://r-hta.org/events/workshop/2021/clements.pdf)\]
 
-    -   use `profvis()` to profile code & find efficiency improvement opportunities
+-   [r-hta.org tutorial using descem, Alvarez and Ribero](https://r-hta.org/tutorial/descem/)
 
-    -   Consider variance reduction techniques
+Dedicated software: Arena, Simul8
+
+
+
+
+
+
+
 
 ## Logistics
 

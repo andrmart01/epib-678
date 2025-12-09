@@ -7,6 +7,10 @@ format: revealjs
 editor: visual
 ---
 
+## To update
+
+<https://hjalal.github.io/twig/articles/decision_tree.html>
+
 ## Today
 
 ```{r}
@@ -183,7 +187,7 @@ table(disease, test_pos)|> addmargins()
 
 ## Prevalence, sensitivity, specificity
 
-::: columns
+::::: columns
 ::: {.column width="65%"}
 ```{r}
 #| echo: false
@@ -208,7 +212,7 @@ $$
 P(A \mid B)=\frac{P(AB)}{P(B)}
 $$
 :::
-:::
+:::::
 
 ## Prevalence, sensitivity, specificity
 
@@ -296,7 +300,7 @@ Long run average value from repeated observations
 
 <br>
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 **Discrete** variable $x$ with $I$ possible values $x_i$
 
@@ -314,7 +318,7 @@ $$
 E[x] = \int_{-\infty}^{\infty} x f(x)dx
 $$
 :::
-:::
+:::::
 
 ## Belief about a probability
 
@@ -336,7 +340,7 @@ $$
 
 ## Beta distribution properties
 
-::: columns
+::::: columns
 ::: {.column width="45%"}
 -   Range $[0,1]$
 
@@ -350,7 +354,7 @@ $$
 ::: {.column width="55%"}
 ![https://en.wikipedia.org/wiki/Beta_distribution](figs/PDF_of_the_Beta_distribution.gif){fig-align="center" width="400"}
 :::
-:::
+:::::
 
 ## Beta distribution and binomial experiments
 
@@ -422,7 +426,7 @@ plot(p, dbeta(p, 1230, 10000 - 1230), type='l')
 
 ## Beta updating animation^1^
 
-::: columns
+:::::: columns
 ::: {.column width="25%"}
 ![](figs/priors.webp){fig-align="left"}
 
@@ -456,7 +460,7 @@ Beta(150, 68)
 
 Beta(220, 138)
 :::
-:::
+::::::
 
 ^1^ https://www.r-bloggers.com/2020/04/an-animated-example-of-bayesian-updating/
 
@@ -478,7 +482,7 @@ Beta(220, 138)
 
 ## Decision tree symbols
 
-::: columns
+::::: columns
 ::: {.column width="40%"}
 ![](figs/decision_tree_nodes.svg)
 :::
@@ -488,11 +492,11 @@ Beta(220, 138)
 
 -   Random events are chances (reactions)
 :::
-:::
+:::::
 
 ## Parameters and tree structure
 
-::: columns
+::::: columns
 ::: {.column width="60%"}
 **Alternatives**
 
@@ -508,7 +512,7 @@ Beta(220, 138)
 ::: {.column width="40%"}
 ![](figs/decision_tree_nodes.svg)
 :::
-:::
+:::::
 
 ## Parameters and tree structure
 
@@ -524,7 +528,7 @@ Beta(220, 138)
 
 ## Parameters conditional on path
 
-::: columns
+::::: columns
 ::: {.column width="60%"}
 ![](figs/tree_example.svg)
 :::
@@ -536,7 +540,7 @@ Beta(220, 138)
 
 -   Payoffs at terminal nodes are path-specific
 :::
-:::
+:::::
 
 ## Preventing stent for vascular disease[^1]
 
@@ -723,7 +727,7 @@ ICER_exer_vs_diet #GBP per QALY
 
 ## Rollback with sequential decisions
 
-::: columns
+::::: columns
 ::: {.column width="65%"}
 ![](figs/sequential_tree.jpg){width="600"}
 
@@ -739,7 +743,7 @@ For 'downstream' decision nodes:
 
 -   Continue to root decision node
 :::
-:::
+:::::
 
 ## Strengths of decision trees
 
