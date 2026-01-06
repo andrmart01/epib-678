@@ -2,20 +2,10 @@
 title: "Economic evaluation"
 subtitle: "EPIB  676 session 2, McGill University"
 author: "Alton Russell"
-date: "3 Sept 2024"
+date: "8 Jan 2026"
 format: revealjs
 editor: visual
 ---
-
-## Quick intros
-
--   Name
-
--   Degree program
-
--   Research or career interests
-
--   Why this class?
 
 ## Today
 
@@ -71,7 +61,7 @@ To estimate trade-offs in outcomes and inform (guide) decision making
 
 ## Modeled outcomes and frameworks
 
-::: columns
+::::: columns
 ::: {.column width="60%"}
 *Health states only*
 :::
@@ -79,11 +69,11 @@ To estimate trade-offs in outcomes and inform (guide) decision making
 ::: {.column width="40%"}
 ![](images/toy_model_0-01.png)
 :::
-:::
+:::::
 
 ## Modeled outcomes and frameworks
 
-::: columns
+::::: columns
 ::: {.column width="60%"}
 *Health states only*
 
@@ -95,11 +85,11 @@ To estimate trade-offs in outcomes and inform (guide) decision making
 ::: {.column width="40%"}
 ![](images/toy_model_0.png)
 :::
-:::
+:::::
 
 ## Modeled outcomes and frameworks
 
-::: columns
+::::: columns
 ::: {.column width="60%"}
 *Health states only*
 
@@ -111,11 +101,11 @@ To estimate trade-offs in outcomes and inform (guide) decision making
 ::: {.column width="40%"}
 ![](images/toy_model_1.png)
 :::
-:::
+:::::
 
 ## Modeled outcomes and frameworks
 
-::: columns
+::::: columns
 ::: {.column width="60%"}
 *Health states only*
 
@@ -131,11 +121,11 @@ To estimate trade-offs in outcomes and inform (guide) decision making
 ::: {.column width="40%"}
 ![](images/toy_model_1.png)
 :::
-:::
+:::::
 
 ## Modeled outcomes and frameworks
 
-::: columns
+::::: columns
 ::: {.column width="60%"}
 *Health states and cost*
 :::
@@ -143,11 +133,11 @@ To estimate trade-offs in outcomes and inform (guide) decision making
 ::: {.column width="40%"}
 ![](images/toy_model_2.png)
 :::
-:::
+:::::
 
 ## Modeled outcomes and frameworks
 
-::: columns
+::::: columns
 ::: {.column width="60%"}
 *Health states and cost*
 
@@ -160,11 +150,11 @@ To estimate trade-offs in outcomes and inform (guide) decision making
 ::: {.column width="40%"}
 ![](images/toy_model_2.png)
 :::
-:::
+:::::
 
 ## Modeled outcomes and frameworks
 
-::: columns
+::::: columns
 ::: {.column width="60%"}
 *Health states, costs, health-state utilities*
 :::
@@ -172,11 +162,11 @@ To estimate trade-offs in outcomes and inform (guide) decision making
 ::: {.column width="40%"}
 ![](images/toy_model_3.png)
 :::
-:::
+:::::
 
 ## Modeled outcomes and frameworks
 
-::: columns
+::::: columns
 ::: {.column width="60%"}
 *Health states, costs, health-state utilities*
 
@@ -187,7 +177,7 @@ To estimate trade-offs in outcomes and inform (guide) decision making
 ::: {.column width="40%"}
 ![](images/toy_model_3.png)
 :::
-:::
+:::::
 
 ## Choosing decision analytic framework
 
@@ -241,7 +231,7 @@ Typically
 
 ## Example health measures
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 Life years gained
 
@@ -269,7 +259,7 @@ Survey-based score (e.g., overall health, anxiety)
 
 ...
 :::
-:::
+:::::
 
 ## Choice of health measure
 
@@ -548,7 +538,7 @@ $$
 
 ## Cost-effectiveness plane (pairwise comparisons)
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 ```{r fig.width=5, fig.height=5}
 library(ggplot2)
@@ -573,11 +563,11 @@ ggplot(aes(x=effect, y=cost), data=data.frame(cost=c(-1,0,.2,1),effect=c(-1,0,.3
 -   Slope of line from origin → ICER
 -   Cost-effectiveness of alternative (vs. status quo) depends which quadrant alternative falls into
 :::
-:::
+:::::
 
 ## Q2 and Q4
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 ```{r fig.width=5, fig.height=5}
 theme_set(theme_bw())
@@ -605,13 +595,13 @@ ggplot(aes(x=effect, y=cost), data=data.frame(cost=c(-1,0,1),effect=c(-1,0,1)))+
 
     -   Cheaper, gives better health outcome
 :::
-:::
+:::::
 
 Dominated interventions can never be cost-effective!
 
 ## Q1 and Q3
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 ```{r fig.width=5, fig.height=5}
 theme_set(theme_bw())
@@ -643,7 +633,7 @@ Depends what we're willing to pay (WTP threshold)
 
     -   Politically difficult!
 :::
-:::
+:::::
 
 ## Avoid confusion when reporting ICERS
 
@@ -673,7 +663,7 @@ Each strategy's ICER is relative to **next-least-effective, non-dominated** inte
 
 -   **Check:** Order by increasing effectiveness. Any alt. with higher cost than next alt. is dominated
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 ```{r fig.width=5, fig.height=3}
 df=data.frame(
@@ -692,7 +682,7 @@ ggplot(aes(x=effect, y=cost), data=df)+
 df
 ```
 :::
-:::
+:::::
 
 ## Strong dominance
 
@@ -700,7 +690,7 @@ df
 
 -   **Check:** Order by increasing effectiveness. Any alt. with higher cost than next alt. is dominated
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 ```{r fig.width=5, fig.height=3}
 df=data.frame(
@@ -723,7 +713,7 @@ df
 
 **D dominated by E!**
 :::
-:::
+:::::
 
 ## Extended (weak) dominance
 
@@ -731,7 +721,7 @@ df
 
 -   **Check:** Calculate ICERS between undominated alts. Any alt. whose ICER exceeds next alt. is dominated
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 ```{r fig.width=5, fig.height=3}
 ggplot(aes(x=effect, y=cost), data=df)+
@@ -746,7 +736,7 @@ cbind(df,
       "ICER" = c(NA, 420, 44.4, "Dominated",406)) 
 ```
 :::
-:::
+:::::
 
 ## Extended (weak) dominance
 
@@ -754,7 +744,7 @@ cbind(df,
 
 -   **Check:** Calculate ICERS between undominated alts. Any alt. whose ICER exceeds next alt. is dominated
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 ```{r fig.width=5, fig.height=3}
 ggplot(aes(x=effect, y=cost), data=df)+
@@ -773,11 +763,11 @@ cbind(df,
 
 Remove B and re-calculate ICERs
 :::
-:::
+:::::
 
 ## Efficiency frontier plot
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 ```{r fig.width=5, fig.height=3}
 ggplot(aes(x=effect, y=cost), data=df)+
@@ -793,7 +783,7 @@ cbind(df,
       "ICER" = c(NA, "Weak dom", 179, "Strong dom",406)) 
 ```
 :::
-:::
+:::::
 
 Undominated alternatives form the **efficiency frontier**
 
@@ -817,7 +807,7 @@ Undominated alternatives form the **efficiency frontier**
 
 ## Willingness to pay (WTP)
 
-::: columns
+::::: columns
 ::: {.column width="25%"}
 ```{r fig.width = 2.5, fig.height = 2.5}
 
@@ -863,7 +853,7 @@ ggplot(aes(x=effect, y=cost), data=data.frame(cost=c(-2,0,2),effect=c(-1,0,1)))+
 
 -   WTP higher in some contexts (orphan drugs, blood safety)
 :::
-:::
+:::::
 
 ## Net monetary benefit
 

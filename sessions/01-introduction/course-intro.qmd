@@ -2,7 +2,7 @@
 title: "Course introduction"
 subtitle: "EPIB  678 session 1, McGill University"
 author: "Alton Russell"
-date: "29 Aug 2024"
+date: "6 Jan 2026"
 format: revealjs
 editor: visual
 ---
@@ -11,7 +11,7 @@ editor: visual
 
 -   Born in North Carolina
 -   Studied Engineering at NC State (BSc) and Stanford (MSc, PhD)
--   [Data-driven decision modeling lab (D3Mod)](http://mchi.mcgill.ca/decision-modeling-lab/)
+-   [Data-driven decision modeling lab (D3Mod)](https://mchi.mcgill.ca/#/labs/d3mod)
 -   Also teach PPHS 528 Economic evaluation of health programs
 
 ## Quick intros
@@ -47,7 +47,7 @@ editor: visual
 
 ## Opportunity cost
 
-The value of the next-best thing I could have done with these inputs (often, money)
+The value of the next-best thing I could have done with these inputs (often, money or time)
 
 -   A dollar spent on PrEP for people who inject drugs cannot be spent on photon radiation for children with cancer
 
@@ -78,11 +78,11 @@ The value of the next-best thing I could have done with these inputs (often, mon
 
 ## How do we decide what to do?
 
-*Decision criteria*
+*Decision criteria for health intervention portfolios*
 
 ## How do we decide what to do?
 
-*Decision criteria*
+*Decision criteria for health intervention portfolios*
 
 -   Effectiveness
 -   Equity or fairness
@@ -145,7 +145,7 @@ The value of the next-best thing I could have done with these inputs (often, mon
 
 ## Decision-analytic model
 
--   Function mapping inputs (data, parameters) into estimated outcomes for two or more alternatives
+-   Function mapping inputs (data, parameters) into estimated outcomes for ≥2 options
 -   Propagate uncertainty
     -   Uncertain inputs → uncertain outputs
 
@@ -174,7 +174,7 @@ The value of the next-best thing I could have done with these inputs (often, mon
 
 ## Learning objectives
 
-After EPIB 678, students will be able to:
+By the end of the course, students should be able to:
 
 -   Develop decision analytic models to inform health policy and clinical decisions
 -   Understand and critically appraise model-based decision analyses
@@ -244,19 +244,19 @@ Many decision-analytic models used for economic evaluation
 
 ## Two overlapping phases
 
-![](figs/epib676_fall2024_schedule_overview.png)
+![](figs/epib678_schedule_overview.png)
 
 ## Syllabus (with schedule) on Github
 
 Quarto → PDF
 
-[https://github.com/altonrus/epib-678/blob/main/syllabus/epid-678_syllabus.pdf](https://github.com/altonrus/epib-676/blob/main/syllabus/epid-676_syllabus.pdf){.uri}
+<https://github.com/altonrus/epib-678/blob/main/syllabus/epid-678_syllabus.pdf>
 
 <br>
 
 Quarto → HTML
 
-[https://htmlpreview.github.io/?https://github.com/altonrus/epib-678/blob/main/syllabus/epid-678_syllabus.html](https://htmlpreview.github.io/?https://github.com/altonrus/epib-676/blob/main/syllabus/epid-676_syllabus.html){.uri}
+<https://htmlpreview.github.io/?https://github.com/altonrus/epib-678/blob/main/syllabus/epid-678_syllabus.html>
 
 ## Agenda for today
 
@@ -282,8 +282,8 @@ Quarto → HTML
 
 ## Why I like R
 
--   Free and open source, designed for data science
 -   Code-based (easier to interrogate + version control)
+-   Free, open source, designed for data science
 -   Ecosystem of packages, tutorials, vignettes (less mature for others languages)
 -   Friendly community of useRs
 -   Systems for creating reproducible research reports
@@ -291,11 +291,12 @@ Quarto → HTML
 
 ## Resources for decision-analytic modeling in R
 
--   Jalal et. al. 2017 ['An overview of R in health decision scientists'](https://doi.org/10.1177/0272989X16686559)
+-   Jalal et. al. 2017 ['Overview of R in health decision sciences'](https://doi.org/10.1177/0272989X16686559)
 -   Decision Analysis in R for Technologies in Health (DARTH)
     -   [Website](https://darthworkgroup.com/), [Github](https://github.com/DARTH-git)
--   R for Health Technology Assessment
-    -   [Website](https://r-hta.org/)
+-   Bayesian cost-effectiveness analysis (BCEA)
+    -   [R package](https://n8thangreen.github.io/BCEA/), [Books](https://gianluca.statistica.it/books/bmhe/)
+-   R for Health Technology Assessment: [Website](https://r-hta.org/)
 -   Nathan Green's [List of Health Economics R Packages](https://github.com/n8thangreen/health_economics_R_packages)
 -   'rcea' package and tutorial [website](https://hesim-dev.github.io/rcea/)
 
@@ -323,7 +324,7 @@ Can
 
 -   'Pull' most recent epid-678 repo from github
 
--   [**Rename**]{.underline} assignment .qmd file (e.g. add your initials) before editing to avoid merge conflicts in future pulls
+-   [**Rename assignment .qmd file before editing**]{.underline} (e.g. add your initials) to avoid merge conflicts in future pulls
 
 Or
 
@@ -350,9 +351,9 @@ Or
 -   Funding agencies (e.g., CIHR)
 -   ...
 
-Depends on context; often **multiple**
+Depends on context; often **multiple audiences**
 
-## Perspective motivated by audience
+## Audience informs perspective/scope
 
 -   Payers mostly care about their costs + beneficiary outcomes
 
@@ -374,7 +375,7 @@ Depends on context; often **multiple**
 
 > Using CEA to inform allocation of health resources accepts the existence of a limit on health spending; when the **societal perspective** is adopted, the analysis acknowledges the value of competing uses for society's resources
 
-**But**, data on non-health benefits/costs are often lacking
+**But**, data on non-health benefits/costs may be lacking
 
 ## Why choose just one?
 
@@ -410,6 +411,7 @@ Often included as a supplemental table
 
 ## Logistics
 
--   Assignment 0 due 11:59pm on Wed, Sep 4
+-   Assignment 0 due 11:59pm next Wed, Jan 14
 -   Complete reading before next class
--   Office hours 1:30-2:30pm in Room #1103 Tuesdays and Thursdays
+-   Office hour TBD
+    -   [Complete this when2meet before Thursday's class](https://www.when2meet.com/?34169669-ufYb2)
