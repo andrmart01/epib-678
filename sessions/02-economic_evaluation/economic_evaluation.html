@@ -11,7 +11,7 @@
   <meta name="generator" content="quarto-1.5.47">
 
   <meta name="author" content="Alton Russell">
-  <meta name="dcterms.date" content="2024-09-03">
+  <meta name="dcterms.date" content="2026-01-08">
   <title>Economic evaluation</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -403,16 +403,7 @@ Alton Russell
 </div>
 </div>
 
-  <p class="date">2024-09-03</p>
-</section>
-<section id="quick-intros" class="slide level2">
-<h2>Quick intros</h2>
-<ul>
-<li><p>Name</p></li>
-<li><p>Degree program</p></li>
-<li><p>Research or career interests</p></li>
-<li><p>Why this class?</p></li>
-</ul>
+  <p class="date">2026-01-08</p>
 </section>
 <section id="today" class="slide level2">
 <h2>Today</h2>
@@ -421,6 +412,7 @@ Alton Russell
 <li><p>Quantifying health</p></li>
 <li><p>Quantifying costs</p></li>
 <li><p>Incremental analysis (cost-effectiveness)</p></li>
+<li><p>Perspective and audiences</p></li>
 </ul>
 </section>
 <section id="purpose-of-decision-analysis" class="slide level2">
@@ -614,6 +606,7 @@ Alton Russell
 <li><p><strong>Quantifying health</strong></p></li>
 <li><p>Quantifying costs</p></li>
 <li><p>Incremental analysis (cost-effectiveness)</p></li>
+<li><p>Perspective and audiences</p></li>
 </ul>
 </section>
 <section id="example-health-measures" class="slide level2">
@@ -728,6 +721,7 @@ QALE = \sum_{t=0}^T u_tLY_t \frac{1}{(1+r)^t}
 <li><p>Quantifying health</p></li>
 <li><p><strong>Quantifying costs</strong></p></li>
 <li><p>Incremental analysis (cost-effectiveness)</p></li>
+<li><p>Perspective and audiences</p></li>
 </ul>
 </section>
 <section id="cost-parameters" class="slide level2">
@@ -736,19 +730,17 @@ QALE = \sum_{t=0}^T u_tLY_t \frac{1}{(1+r)^t}
 <li><p>Lower bound of 0</p></li>
 <li><p>Potentially no upper limit</p></li>
 <li><p>Often vary considerably across patients</p></li>
-<li><p><strong>Patient-level</strong> costs often right-skewed (a few high-cost patients)</p>
-<ul>
-<li>Uncertainty in population parameters, e.g.&nbsp;<strong>average cost</strong>, may still be skewed, but less so</li>
-</ul></li>
+<li><p><strong>Patient-level</strong> costs often right-skewed (a few high-cost patients)</p></li>
+<li><p>Uncertainty distribution for average cost may be right-skewed too (but less so)</p></li>
 </ul>
 </section>
-<section id="health-resources-and-costs" class="slide level2">
-<h2>Health resources and costs?</h2>
+<section id="health-resources-and-costs-data-sources" class="slide level2">
+<h2>Health resources and costs data sources</h2>
 <ul>
-<li><p><strong>Public information:</strong> drug formularies with prices sometimes public; hospitalization costs published by Canadian Institute for Health Information or CIHI (not Quebec)</p></li>
-<li><p>Other publications (may need inflation or currency adjustment)</p></li>
-<li><p><strong>Administrative data:</strong> encounters (clinic, emergency room, hospital), procedures, length of stay. Follow patients across care settings</p></li>
-<li><p><strong>Clinical data:</strong> labs, drugs, blood units transfused. Usually for one care setting.</p></li>
+<li><p><u><strong>Public information:</strong></u> provincial drug formularies; hospitalization costs published by Canadian Institute for Health Information (CIHI)</p></li>
+<li><p><u><strong>Other publications</strong></u> may need inflation or currency adjustment</p></li>
+<li><p><u><strong>Administrative data:</strong></u> encounters (clinic, emergency room, hospital) &amp; procedures. Follow patients across care settings</p></li>
+<li><p><u><strong>Clinical data:</strong></u> labs, drugs, transfusions. Usually for one care setting.</p></li>
 </ul>
 </section>
 <section id="discounting-costs" class="slide level2">
@@ -763,8 +755,8 @@ QALE = \sum_{t=0}^T u_tLY_t \frac{1}{(1+r)^t}
 <section id="currency-exchange" class="slide level2">
 <h2>Currency exchange</h2>
 <ul>
-<li><p>Use of purchasing power parity (estimated cost of a basket of goods) recommended over exchange rate</p></li>
-<li><p>Available from OECD data: <a href="https://data.oecd.org/conversion/purchasing-power-parities-ppp.htm" class="uri">https://data.oecd.org/conversion/purchasing-power-parities-ppp.htm</a></p></li>
+<li><p>Purchasing power parity (estimated cost of a basket of goods) recommended over exchange rate</p></li>
+<li><p>Available in the <a href="https://www.imf.org/en/Publications/SPROLLs/world-economic-outlook-databases#sort=%40imfdate%20descending">IMF World Economic Outlook Databases</a></p></li>
 <li><p>Measured as national currency per USD</p></li>
 <li><p>For non-USD currency, convert to USD and then to CAD:</p>
 <ul>
@@ -776,9 +768,9 @@ QALE = \sum_{t=0}^T u_tLY_t \frac{1}{(1+r)^t}
 <section id="adjust-for-inflation" class="slide level2">
 <h2>Adjust for inflation</h2>
 <ul>
-<li><p>Use of average all-item consumer price index (CPI) recommended</p></li>
+<li><p>Average all-item consumer price index (CPI) recommended</p></li>
 <li><p>[Year Y cost] = [Year X cost] x [Year Y CPI] / [Year X CPI]</p></li>
-<li><p>Available from StatsCanada: <a href="https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=1810000501" class="uri">https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=1810000501</a></p></li>
+<li><p>Available <a href="https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=1810000501">from the Statistics Canada website</a></p></li>
 </ul>
 </section>
 <section id="currency-inflation" class="slide level2">
@@ -851,7 +843,7 @@ QALE = \sum_{t=0}^T u_tLY_t \frac{1}{(1+r)^t}
 <section id="productivity-costs" class="slide level2">
 <h2>Productivity costs</h2>
 <ul>
-<li><p>Often the largest non-health cost in societal perspective</p></li>
+<li><p>Usually the largest non-health cost in societal perspective</p></li>
 <li><p>Unpaid labor (housekeeping, child-rearing) can be costed as “opportunity cost”</p>
 <ul>
 <li>Use median wage for all individuals regardless of employment</li>
@@ -863,7 +855,7 @@ QALE = \sum_{t=0}^T u_tLY_t \frac{1}{(1+r)^t}
 <h2>Unrelated medical costs in life-years gained</h2>
 <ul>
 <li><p>Interventions that extend life result in healthcare costs unrelated to the condition</p></li>
-<li><p>There are strong arguments that they should be included</p>
+<li><p>There are arguments to include in cost-effectiveness analyses</p>
 <ul>
 <li><p><a href="https://doi.org/10.2165/00019053-200826100-00003">Rappange et. al.&nbsp;2008</a></p></li>
 <li><p><a href="https://doi.org/10.1007/s10198-018-0976-0">van Baal et. al.&nbsp;2018</a></p></li>
@@ -878,6 +870,7 @@ QALE = \sum_{t=0}^T u_tLY_t \frac{1}{(1+r)^t}
 <li><p>Quantifying health</p></li>
 <li><p>Quantifying costs</p></li>
 <li><p><strong>Incremental analysis (cost-effectiveness)</strong></p></li>
+<li><p>Perspective and audiences</p></li>
 </ul>
 </section>
 <section id="incremental-cost-effectiveness-ratio" class="slide level2">
@@ -1216,24 +1209,39 @@ NMB_a = \bar{e}_a\times WTP - \bar{c}_a
 </ul></li>
 </ul>
 </section>
+<section id="today-4" class="slide level2">
+<h2>Today</h2>
+<ul>
+<li><p>Decision analytic frameworks</p></li>
+<li><p>Quantifying health</p></li>
+<li><p>Quantifying costs</p></li>
+<li><p>Incremental analysis (cost-effectiveness)</p></li>
+<li><p><strong>Perspective and audiences</strong></p></li>
+</ul>
+</section>
+<section id="perspectives-and-audiences" class="slide level2">
+<h2>Perspectives and audiences</h2>
+<p><a href="https://htmlpreview.github.io/?https://github.com/altonrus/epib-678/blob/main/sessions/01-introduction/course-intro.html#/who-is-the-audience-of-a-decision-analysis">Link to session 1 slides on perspectives and audiences</a></p>
+</section>
 <section id="recap" class="slide level2">
 <h2>Recap</h2>
 <ul>
 <li><p>Decision analysis focuses on <strong><em>incremental</em></strong> impact of interventions</p></li>
 <li><p>Decision analyses that include costs are economic evaluations</p></li>
 <li><p>Cost-effectiveness determined with incremental analysis (using ICERs and willingness-to-pay threshold)</p></li>
+<li><p>Target audience informs analytic framing and perspective</p></li>
 </ul>
 </section>
 <section id="logistics" class="slide level2">
 <h2>Logistics</h2>
 <ul>
-<li>Assignment 0 due 11:59pm on Wed, Sep 4 (tomorrow)</li>
-<li>Complete readings before Thursday’s class</li>
-<li>Assignment 1 (cost-effectiveness and decision trees) available.
+<li>Assignment 0 due 11:59pm next Wed, Jan 14</li>
+<li>Complete readings before Tuesday’s class</li>
+<li>Assignment 1 (cost-effectiveness and decision trees) available tomorrow.
 <ul>
-<li>Due Friday, September 12</li>
+<li>Due Friday, January 23 on MyCourses → Assignments</li>
 </ul></li>
-<li>Office hours 1:30-2:30pm in Room #1103 Tuesdays and Thursdays</li>
+<li>Office hours: Mondays 2:30pm to 3:30pm in conference room 1128</li>
 </ul>
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">

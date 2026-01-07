@@ -17,6 +17,8 @@ editor: visual
 
 -   Incremental analysis (cost-effectiveness)
 
+-   Perspective and audiences
+
 ## Purpose of decision analysis
 
 Systematically integrate key elements of decision
@@ -227,6 +229,8 @@ Typically
 
 -   Incremental analysis (cost-effectiveness)
 
+-   Perspective and audiences
+
 ## Example health measures
 
 ## Example health measures
@@ -356,6 +360,8 @@ If no published estimate available:
 
 -   Incremental analysis (cost-effectiveness)
 
+-   Perspective and audiences
+
 ## Cost parameters
 
 -   Lower bound of 0
@@ -366,17 +372,17 @@ If no published estimate available:
 
 -   **Patient-level** costs often right-skewed (a few high-cost patients)
 
-    -   Uncertainty in population parameters, e.g. **average cost**, may still be skewed, but less so
+-   Uncertainty distribution for average cost may be right-skewed too (but less so)
 
-## Health resources and costs?
+## Health resources and costs data sources
 
--   **Public information:** drug formularies with prices sometimes public; hospitalization costs published by Canadian Institute for Health Information or CIHI (not Quebec)
+-   [**Public information:**]{.underline} provincial drug formularies; hospitalization costs published by Canadian Institute for Health Information (CIHI)
 
--   Other publications (may need inflation or currency adjustment)
+-   [**Other publications**]{.underline} may need inflation or currency adjustment
 
--   **Administrative data:** encounters (clinic, emergency room, hospital), procedures, length of stay. Follow patients across care settings
+-   [**Administrative data:**]{.underline} encounters (clinic, emergency room, hospital) & procedures. Follow patients across care settings
 
--   **Clinical data:** labs, drugs, blood units transfused. Usually for one care setting.
+-   [**Clinical data:**]{.underline} labs, drugs, transfusions. Usually for one care setting.
 
 ## Discounting costs
 
@@ -390,9 +396,9 @@ If no published estimate available:
 
 ## Currency exchange
 
--   Use of purchasing power parity (estimated cost of a basket of goods) recommended over exchange rate
+-   Purchasing power parity (estimated cost of a basket of goods) recommended over exchange rate
 
--   Available from OECD data: <https://data.oecd.org/conversion/purchasing-power-parities-ppp.htm>
+-   Available in the [IMF World Economic Outlook Databases](https://www.imf.org/en/Publications/SPROLLs/world-economic-outlook-databases#sort=%40imfdate%20descending)
 
 -   Measured as national currency per USD
 
@@ -404,11 +410,11 @@ If no published estimate available:
 
 ## Adjust for inflation
 
--   Use of average all-item consumer price index (CPI) recommended
+-   Average all-item consumer price index (CPI) recommended
 
 -   \[Year Y cost\] = \[Year X cost\] x \[Year Y CPI\] / \[Year X CPI\]
 
--   Available from StatsCanada: <https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=1810000501>
+-   Available [from the Statistics Canada website](https://www150.statcan.gc.ca/t1/tbl1/en/cv.action?pid=1810000501)
 
 ## Currency + inflation
 
@@ -490,7 +496,7 @@ cost_2021CAD
 
 ## Productivity costs
 
--   Often the largest non-health cost in societal perspective
+-   Usually the largest non-health cost in societal perspective
 
 -   Unpaid labor (housekeeping, child-rearing) can be costed as "opportunity cost"
 
@@ -502,7 +508,7 @@ cost_2021CAD
 
 -   Interventions that extend life result in healthcare costs unrelated to the condition
 
--   There are strong arguments that they should be included
+-   There are arguments to include in cost-effectiveness analyses
 
     -   [Rappange et. al. 2008](https://doi.org/10.2165/00019053-200826100-00003)
 
@@ -519,6 +525,8 @@ cost_2021CAD
 -   Quantifying costs
 
 -   **Incremental analysis (cost-effectiveness)**
+
+-   Perspective and audiences
 
 ## Incremental cost-effectiveness ratio
 
@@ -883,6 +891,22 @@ $$
 
     -   Cost offsets after release benefit other payers
 
+## Today
+
+-   Decision analytic frameworks
+
+-   Quantifying health
+
+-   Quantifying costs
+
+-   Incremental analysis (cost-effectiveness)
+
+-   **Perspective and audiences**
+
+## Perspectives and audiences
+
+[Link to session 1 slides on perspectives and audiences](https://htmlpreview.github.io/?https://github.com/altonrus/epib-678/blob/main/sessions/01-introduction/course-intro.html#/who-is-the-audience-of-a-decision-analysis)
+
 ## Recap
 
 -   Decision analysis focuses on ***incremental*** impact of interventions
@@ -891,10 +915,12 @@ $$
 
 -   Cost-effectiveness determined with incremental analysis (using ICERs and willingness-to-pay threshold)
 
+-   Target audience informs analytic framing and perspective
+
 ## Logistics
 
--   Assignment 0 due 11:59pm on Wed, Sep 4 (tomorrow)
--   Complete readings before Thursday's class
--   Assignment 1 (cost-effectiveness and decision trees) available.
-    -   Due Friday, September 12
--   Office hours 1:30-2:30pm in Room #1103 Tuesdays and Thursdays
+-   Assignment 0 due 11:59pm next Wed, Jan 14
+-   Complete readings before Tuesday's class
+-   Assignment 1 (cost-effectiveness and decision trees) available tomorrow.
+    -   Due Friday, January 23 on MyCourses → Assignments
+-   Office hours: Mondays 2:30pm to 3:30pm in conference room 1128
