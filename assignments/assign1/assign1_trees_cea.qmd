@@ -15,10 +15,6 @@ editor: visual
 # Load packages
 #.  Use install.packages("XXXX") if you don't have any of these installed
 library(rdecision) #decision trees
-
-#MUST INSTALL FROM GITHUB BY RUNNING THE FOLLOWING
-#install_github("DARTH-git/OpenTree", force = TRUE)
-
 library(flextable) #Formatting tables to display (https://davidgohel.github.io/flextable/reference/index.html)
 library(ggplot2) #Plotting
 library(readxl) #for read_excel()
@@ -33,7 +29,7 @@ We'll use the [rdecision package](https://cran.r-project.org/web/packages/rdecis
 
 ## 1a Expected value calculations
 
-This first code chunk is just an example; you don't need to edit it. Here, using the rdecision package, I have created a decision tree, visualized it, and "rolled it back" to calculate the expected cost and QALYs associated with the two alternatives. Review it carefully, because in 1b, you'll do similar calculations for a different decision tree.
+This first code chunk is just an example; you don't need to edit it. Here, using the rdecision package, I have created a decision tree, visualized it, and "rolled it back" to calculate the expected cost and QALYs associated with the two alternatives. Review it carefully, because in 1b, you'll do similar calculations for a slightly more complex decision tree.
 
 ```{r}
 # Decision problem: Should we use diet or exercise to reduce chance of 
@@ -61,7 +57,7 @@ leaf_node_diet_stent <- LeafNode$new("Stent", utility = params$u_stent)
 leaf_node_exercise_no_stent <- LeafNode$new("No stent")
 leaf_node_exercise_stent <- LeafNode$new("Stent", utility = params$u_stent)
 
-#Create 'actions' or choices, paths from your decision node(s)
+#Create 'actions' (choices) that branch from the decision node
 action_diet <- Action$new(
   decision_node, chance_node_diet, cost = params$c_diet, label = "Diet"
 )
@@ -69,7 +65,7 @@ action_exercise <- Action$new(
   decision_node, chance_node_exercise, cost = params$c_exercise, label = "Exercise"
 )
 
-#Create 'reactions' or chances, paths from your chance node(s)
+#Create 'reactions' (chances) that branch from your chance nodes
 reaction_diet_success <- Reaction$new(
   chance_node_diet, leaf_node_diet_no_stent, 
   p = 1-params$p_stent_diet, cost = 0.0, label = "Did not need stent")
@@ -109,7 +105,7 @@ DT1_evaluation <- DT1$evaluate() #calculate it
 DT1_evaluation |> flextable()
 ```
 
-In the code chunk below, using the variables defined in the last code chunk (e.g., `params$p_stent_diet`), calculate the expected utility and the expected cost of the diet arm [**without**]{.underline} using the `rdecision` package (e.g., by summing/multiplying).
+In the code chunk below, using the variables defined in the last code chunk (e.g., `params$p_stent_diet`), calculate the expected utility and the expected cost of the diet arm [**without**]{.underline} using the `rdecision` package (i.e., by summing & multiplying).
 
 ```{r}
 expected_cost_diet <- NA
@@ -140,7 +136,7 @@ t_params |>
   autofit() #automatically set column widths to reasonable values
 ```
 
-In the code chunk below, build the model using the rdecision package with the 'base_case' value for each parameter (we won't be using the 'lower_bound' or 'upper_bound' columns for anything in this problem set).
+In the code chunk below, build the model using the rdecision package with the 'base_case' value for each parameter (we won't be using the 'lower_bound' or 'upper_bound' columns in this assignment).
 
 Your model should start with a decision mode with three options:
 
@@ -150,7 +146,7 @@ Your model should start with a decision mode with three options:
 
 -   **ST only**: use a standard clip for first line therapy and, if a rebleed occurs, for second line therapy.
 
-All three arms from this decision node ("actions" in the rdecision package) lead into a chance node corresponding to the outcomes of the first line EGD. From the initial chance node, there are two possibilities:
+All three branches from this decision node ("actions" in the rdecision package) lead into a chance node corresponding to the outcomes of the first line EGD. From this initial chance node, there are two possibilities:
 
 -   **Success:** no re-bleeding occurs after the first line procedure (ends in a leaf node \[also called terminal node\]).
 
@@ -164,11 +160,11 @@ After second-line therapy, you have another chance node with two possibilities:
 
 **Costs:** You will accumulate costs along the action and reaction paths:
 
--   In the actions from this initial decision node, patients incur the cost for the physician fee to do the EGD (`c_EGD_MD`) and the cost of whichever clip was used (`c_STclip` or `c_OTSclip`)
+-   In the actions from this initial decision node, patients incur the cost for the physician fee to do the EGD (`c_EGD_MD`) and the cost of whichever clip was used first under that policy (`c_STclip` or `c_OTSclip`)
 
 -   If the first line EGD was successful, we add in the cost of a hospitalization with no major complications or comorbidities (`c_hosp_noCC`).
 
--   If the first line EGD was unsuccessful and we need second-line therapy, we add in the costs of a second EGD: another physician fee (`c_EGD_MD`) plus cost of whichever clip was used (`c_STclip` or `c_OTSclip`)
+-   If the first line EGD was unsuccessful then we must perform a second-line EGD, incurring the cost of a second clip (`c_STclip` or `c_OTSclip`, depending on the strategy) and the physician fee for the second procedure (`c_EGD_MD`).
 
 -   If the second line EGD was successful, we add in the cost of a hospitalization with minor complications and comorbidities (`c_hosp_CC`)
 
@@ -242,7 +238,7 @@ The differences in QALYs experienced in a one-year period is hard to see. We can
 # DT2_evaluation |> flextable()
 ```
 
-Using a willingness to pay threshold of \$50,000 per QALY (\$137 per QALD), indicate whether each intervention is dominated with strong dominance, Dominated by extended dominant, not preferred, or preferred (exactly one intervention should be preferred). Indicate the ICER for any non-dominated intervention(s) in \$/QALY gained or \$/QALD gained.
+Using a willingness to pay threshold of \$50,000 per QALY (\$137 per QALD), indicate whether each intervention is dominated with strong dominance, Dominated by extended dominance, not preferred, or preferred (exactly one intervention should be preferred). Indicate the ICER for any non-dominated intervention(s) in \$/QALY gained or \$/QALD gained.
 
 > ST only:
 >
@@ -307,11 +303,11 @@ t_ICERS <- data.frame(
 #Sort t_ICERS ascending by QALYs (from low to high)
 t_ICERS <- t_ICERS #EDIT THIS
 
-#We need to reset the row index names
+# Reset the row index names
 row.names(t_ICERS) <- NULL
 
 ### REMOVE INTERVENTIONS DOMINATED BY STRONG DOMINANCE
-# We have to loop through rows to identify dominated strategies. If we find 
+# Loop through rows to identify dominated strategies. If we find 
 #.  any, we need to look through them again in case there are more, so we 
 #.  use a while loop.
 
@@ -330,10 +326,10 @@ while(continue){
   # compare it to previous non-dominated row to see if it is dominated
   for (i in 2:n_nondom){
     row_this <- idx_nondom_rows[i] #index of the current row
-    row_last <- idx_nondom_rows[i-1] #index of last undominated row
+    row_prev <- idx_nondom_rows[i-1] #index of last undominated row
     
-    if (F){ #Replace 'F' with the test to determine if row_this is dominated
-      #Strategy in row t_ICERS[row_last, ] is strong dominated
+    if (F){ #Replace 'F' with the test to determine if row_this is strong dominated
+      #Strategy in row t_ICERS[row_prev, ] is strong dominated
       # set Dominated value to "Strong"
       NA
       # set ICER value to NA
@@ -346,8 +342,8 @@ while(continue){
 }
 
 ### REMOVE INTERVENTIONS DOMINATED BY EXTENDED DOMINANCE
-# We have to loop through rows to identify extended dominated strategies. 
-#.  If we find any, we need to loop through again in case there are more.
+# Loop through rows to identify extended dominated strategies. 
+#.  If we find any, loop through again in case there are more.
 #.  We will use a while loop.
 
 continue = T
@@ -365,7 +361,7 @@ while(continue){
   # compare it to previous non-dominated row to see if it is extended dominated
   for (i in 2:n_nondom){
     row_this <- idx_nondom_rows[i] #index of the current row
-    row_last <- idx_nondom_rows[i-1] #index of last undominated row
+    row_prev <- idx_nondom_rows[i-1] #index of last undominated row
 
     #Calculate ICER for row_this compared to last non-dominated row
     # Put it in t_ICERS[row_this,"ICER"]
@@ -373,7 +369,7 @@ while(continue){
     #YOUR CODE HERE
       
     if(F){ #Replace 'F' with the test to determine if row_this is dominated
-      #Strategy in row t_ICERS[row_last, ] is extended dominated
+      #Strategy in row t_ICERS[row_prev, ] is extended dominated
       # set Dominated value to "Extended"
       NA
       
@@ -421,7 +417,7 @@ generate_ICER_table <- function(strategy_name, cost, QALYs){
 
 **Other perspectives:** using the function above, complete the incremental analysis from three cost perspectives:
 
--   **Insurer:** same as above
+-   **Insurer:** as above
 -   **Healthcare costs** includes insurer and patient out-of-pocket costs
 -   **Societal:** healthcare costs plus productivity loss
 
@@ -491,7 +487,7 @@ Comparing the net monetary benefit plot to your incremental analysis from the so
 
 -   There is no willingness-to-pay level at which a dominated intervention maximizes WTP (this is one definition of dominated)
 
-On the NMB plot, what is the significance or meaning of the willingness-to-pay level at which the non-dominated intervention X crosses non-dominated intervention Y to become the NMB-maximizing intervention? (Hint: can compare the NMB plot to your incremental analysis table.
+On the NMB plot, what is the significance or meaning of the willingness-to-pay level at which the lines of two non-dominated interventions cross? (Hint: can compare the NMB plot to your incremental analysis table.
 
 > Your answer here.
 

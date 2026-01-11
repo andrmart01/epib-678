@@ -11,7 +11,7 @@
   <meta name="generator" content="quarto-1.5.47">
 
   <meta name="author" content="Alton Russell">
-  <meta name="dcterms.date" content="2024-09-05">
+  <meta name="dcterms.date" content="2026-01-13">
   <title>Probability, decision trees</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -403,7 +403,11 @@ Alton Russell
 </div>
 </div>
 
-  <p class="date">2024-09-05</p>
+  <p class="date">2026-01-13</p>
+</section>
+<section id="to-update" class="slide level2">
+<h2>To update</h2>
+<p><a href="https://hjalal.github.io/twig/articles/decision_tree.html" class="uri">https://hjalal.github.io/twig/articles/decision_tree.html</a></p>
 </section>
 <section id="today" class="slide level2">
 <h2>Today</h2>
@@ -637,7 +641,7 @@ disease     0     1   Sum
 </section>
 <section id="bayesian-updating" class="slide level2">
 <h2>Bayesian updating</h2>
-<p>What distribution describes my uncertainty in parameter <span class="math inline">\(\theta\)</span>, after observing new data <span class="math inline">\(x\)</span>, if my uncertainty before observing <span class="math inline">\(x\)</span> was described by <span class="math inline">\(P(\theta)\)</span>?</p>
+<p><strong>Goal:</strong> distribution describing my uncertainty in parameter <span class="math inline">\(\theta\)</span>, after observing new data <span class="math inline">\(x\)</span>, if my uncertainty before observing <span class="math inline">\(x\)</span> was described by <span class="math inline">\(P(\theta)\)</span></p>
 <p><span class="math display">\[
 P( \theta \mid x) = \frac{P(x \mid \theta)  P(\theta)}{P(x)}, \text{  }
 \text{Posterior} = \frac{\text{Likelihood} \times Prior}{Evidence}
@@ -764,13 +768,13 @@ p \sim Beta(\alpha = 1230, \beta = 8770) \quad E[p] = 0.1230
 <li><p>As we collect data:</p>
 <ul>
 <li><p><span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> grow</p></li>
-<li><p>Our certainty increases</p></li>
+<li><p>Uncertainty decreases</p></li>
 <li><p>The distribution gets more concentrated</p></li>
 </ul></li>
 </ul>
 </section>
-<section id="beta-updating-animation1" class="slide level2">
-<h2>Beta updating animation<sup>1</sup></h2>
+<section id="beta-updating-animation" class="slide level2">
+<h2>Beta updating animation</h2>
 <div class="columns">
 <div class="column" style="width:25%;">
 <div class="quarto-figure quarto-figure-left">
@@ -798,7 +802,7 @@ p \sim Beta(\alpha = 1230, \beta = 8770) \quad E[p] = 0.1230
 <p>Beta(150, 68)</p>
 <p>Beta(220, 138)</p>
 </div></div>
-<p><sup>1</sup> https://www.r-bloggers.com/2020/04/an-animated-example-of-bayesian-updating/</p>
+<p><a href="https://www.r-bloggers.com/2020/04/an-animated-example-of-bayesian-updating/">www.r-bloggers.com/2020/04/an-animated-example-of-bayesian-updating/</a></p>
 </section>
 <section id="today-1" class="slide level2">
 <h2>Today</h2>
@@ -810,8 +814,8 @@ p \sim Beta(\alpha = 1230, \beta = 8770) \quad E[p] = 0.1230
 <section id="decision-tree-convention" class="slide level2">
 <h2>Decision tree convention</h2>
 <ul>
-<li><p>Nodes connected by branches</p></li>
-<li><p>“Grows” from left to right</p></li>
+<li><p><strong>Nodes</strong> connected by <strong>branches</strong></p></li>
+<li><p>“Grow” from left to right</p></li>
 <li><p>Starts with <strong>root node</strong> (usually a decision) ends in <strong>leaf nodes</strong> (also called <strong>terminal nodes</strong>)</p></li>
 <li><p>“Payoffs” received at terminal nodes (sometimes, payoffs received along the way)</p></li>
 </ul>
@@ -872,7 +876,7 @@ p \sim Beta(\alpha = 1230, \beta = 8770) \quad E[p] = 0.1230
 <section id="stent-prevention-tree" class="slide level2">
 <h2>Stent prevention tree</h2>
 
-<img data-src="prob_decision_tree_files/figure-revealjs/unnamed-chunk-11-1.png" width="960" class="r-stretch"></section>
+<img data-src="prob_decision_tree_files/figure-revealjs/unnamed-chunk-10-1.png" width="960" class="r-stretch"></section>
 <section id="stent-prevention-data" class="slide level2">
 <h2>Stent prevention data</h2>
 <p>The healthcare provider cost of the stent is <strong>5000 GBP</strong>; the cost of providing lifestyle advice, an appointment with a dietician, is <strong>50 GBP</strong> and the cost of the exercise programme, is <strong>750 GBP</strong>.</p>
@@ -920,7 +924,7 @@ E[x] = \sum_{i=1}^I x_iP(x_i)
 <section id="stent-prevention-tree-1" class="slide level2">
 <h2>Stent prevention tree</h2>
 
-<img data-src="prob_decision_tree_files/figure-revealjs/unnamed-chunk-13-1.png" width="960" class="r-stretch"></section>
+<img data-src="prob_decision_tree_files/figure-revealjs/unnamed-chunk-12-1.png" width="960" class="r-stretch"></section>
 <section id="roll-back-stent-tree-manual-calculations" class="slide level2">
 <h2>Roll back stent tree (manual calculations)</h2>
 <div class="cell">
@@ -1020,13 +1024,10 @@ E[x] = \sum_{i=1}^I x_iP(x_i)
 <section id="logistics" class="slide level2">
 <h2>Logistics</h2>
 <ul>
-<li><p>Complete readings before Thursday’s class</p></li>
-<li><p>Assignment 0 deadline extended to tomorrow</p></li>
-<li><p>Assignment 1 due next Friday, September 13</p>
-<ul>
-<li>Decision trees and cost-effectiveness analysis</li>
-</ul></li>
-<li><p>Office hours 1:30-2:30pm in Room #1103 Tuesdays and Thursdays</p></li>
+<li>Complete readings before Tuesday’s class</li>
+<li>Assignment 0 due 11:59pm next Wed, Jan 14</li>
+<li>Assignment 1 due Friday, January 23 on MyCourses → Assignments</li>
+<li>Office hours: Mondays 2:30pm to 3:30pm in conference room 1128</li>
 </ul>
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">

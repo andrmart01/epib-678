@@ -145,14 +145,8 @@ Students who enroll in the class after the first lecture should:
 
 ## Course schedule
 
-::: callout-note
-## Guest lectures shown here are from Fall 2025
-
-The schedule will be updated to reflect the Winter 2026 guest lectures, and some topics may be re-ordered.
-:::
-
 +---------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **Date**      | **Topics, Readings/tasks to be completed before class**s                                                                                                                                                                                                                                |
+| **Date**      | **Topics, Readings/tasks to be completed before class**                                                                                                                                                                                                                                 |
 +===============+=========================================================================================================================================================================================================================================================================================+
 | **6 Jan Tu**  | **1. Course introduction**                                                                                                                                                                                                                                                              |
 |               |                                                                                                                                                                                                                                                                                         |

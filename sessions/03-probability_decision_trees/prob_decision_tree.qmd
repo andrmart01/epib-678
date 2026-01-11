@@ -2,7 +2,7 @@
 title: "Probability, decision trees"
 subtitle: "EPIB  676 session 3, McGill University"
 author: "Alton Russell"
-date: "5 September 2024"
+date: "13 January 2026"
 format: revealjs
 editor: visual
 ---
@@ -273,7 +273,7 @@ PPV = $P(disease+ \mid test+)$ = `r sum(disease*test_pos)/sum(test_pos)` `sum(di
 
 ## Bayesian updating
 
-What distribution describes my uncertainty in parameter $\theta$, after observing new data $x$, if my uncertainty before observing $x$ was described by $P(\theta)$?
+**Goal:** distribution describing my uncertainty in parameter $\theta$, after observing new data $x$, if my uncertainty before observing $x$ was described by $P(\theta)$
 
 $$
 P( \theta \mid x) = \frac{P(x \mid \theta)  P(\theta)}{P(x)}, \text{  }
@@ -420,11 +420,11 @@ plot(p, dbeta(p, 1230, 10000 - 1230), type='l')
 
     -   $\alpha$ and $\beta$ grow
 
-    -   Our certainty increases
+    -   Uncertainty decreases
 
     -   The distribution gets more concentrated
 
-## Beta updating animation^1^
+## Beta updating animation
 
 :::::: columns
 ::: {.column width="25%"}
@@ -462,7 +462,7 @@ Beta(220, 138)
 :::
 ::::::
 
-^1^ https://www.r-bloggers.com/2020/04/an-animated-example-of-bayesian-updating/
+[www.r-bloggers.com/2020/04/an-animated-example-of-bayesian-updating/](https://www.r-bloggers.com/2020/04/an-animated-example-of-bayesian-updating/)
 
 ## Today
 
@@ -472,9 +472,9 @@ Beta(220, 138)
 
 ## Decision tree convention
 
--   Nodes connected by branches
+-   **Nodes** connected by **branches**
 
--   "Grows" from left to right
+-   "Grow" from left to right
 
 -   Starts with **root node** (usually a decision) ends in **leaf nodes** (also called **terminal nodes**)
 
@@ -553,10 +553,6 @@ Beta(220, 138)
 **Outcome**: cost, QALYs lost related to receiving a stent (+ program cost)
 
 **Time horizon:** one year
-
-```{r}
-
-```
 
 ## Stent prevention tree
 
@@ -779,12 +775,7 @@ For 'downstream' decision nodes:
 
 ## Logistics
 
--   Complete readings before Thursday's class
-
--   Assignment 0 deadline extended to tomorrow
-
--   Assignment 1 due next Friday, September 13
-
-    -   Decision trees and cost-effectiveness analysis
-
--   Office hours 1:30-2:30pm in Room #1103 Tuesdays and Thursdays
+-   Complete readings before Tuesday's class
+-   Assignment 0 due 11:59pm next Wed, Jan 14
+-   Assignment 1 due Friday, January 23 on MyCourses → Assignments
+-   Office hours: Mondays 2:30pm to 3:30pm in conference room 1128
