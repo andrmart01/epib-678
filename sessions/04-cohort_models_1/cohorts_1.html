@@ -11,7 +11,7 @@
   <meta name="generator" content="quarto-1.5.47">
 
   <meta name="author" content="Alton Russell">
-  <meta name="dcterms.date" content="2024-09-10">
+  <meta name="dcterms.date" content="2026-01-15">
   <title>Cohort models 1</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -403,7 +403,7 @@ Alton Russell
 </div>
 </div>
 
-  <p class="date">2024-09-10</p>
+  <p class="date">2026-01-15</p>
 </section>
 <section id="today" class="slide level2">
 <h2>Today</h2>
@@ -432,7 +432,7 @@ Alton Russell
 <ul>
 <li><p>Dynamic mathematical model</p></li>
 <li><p>Hypothetical cohort of individuals move between states over time.</p></li>
-<li><p>Classical example is the Markov model, where transition probabilities</p>
+<li><p>Classical example is the <strong>Markov model</strong>, where transition probabilities:</p>
 <ul>
 <li><p>Are constant</p></li>
 <li><p>Depend only on your current state</p></li>
@@ -445,6 +445,7 @@ Alton Russell
 <li><p>Decision problem has a dynamic component</p></li>
 <li><p>Disease process varies over time</p></li>
 <li><p>Can represent process with relatively few ‘states’</p></li>
+<li><p>No interaction between individuals (e.g., infection)</p></li>
 </ul>
 </section>
 <section id="example-transfusion-transmitted-chronic-conditions" class="slide level2">
@@ -467,7 +468,7 @@ Alton Russell
 <li><p>Individuals in the same state treated <strong>identically</strong></p>
 <ul>
 <li><p>same costs, health outcomes</p></li>
-<li><p>same probability of transitioning out (no matter how long they’ve been there)</p></li>
+<li><p>same probability of transitioning out</p></li>
 </ul></li>
 </ul>
 </section>
@@ -596,8 +597,7 @@ p_{s_3 \rightarrow s_1} &amp; p_{s_3 \rightarrow s_2} &amp; p_{s_3 \rightarrow s
 <ul>
 <li><p>Temporary state, 1 cycle only</p></li>
 <li><p>No self-loop (0 on diagonal)</p></li>
-<li><p>A ‘workaround’ for the Markov property.</p></li>
-<li><p>If costs, outcomes, or transitions differ for beginning or end of health condition, break into tunnel states</p></li>
+<li><p>A Markov property ‘workaround’: If costs, outcomes, or transitions differ based on time in health state, break out 1+ tunnel states</p></li>
 </ul>
 </div></div>
 </section>
@@ -605,7 +605,7 @@ p_{s_3 \rightarrow s_1} &amp; p_{s_3 \rightarrow s_2} &amp; p_{s_3 \rightarrow s
 <h2>Example: Transfusion-transmitted chronic conditions</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
-<p><img data-src="ghana_markov_schematics.png"></p>
+<p><img data-src="figs/ghana_markov_schematics.png"></p>
 </div><div class="column" style="width:50%;">
 <p>TU=treatment uptake; SC=subclinical; AVT=antiviral therapy; TE=treatment effectiveness; TF=treatment failure; CC=compensated cirrhosis; DCC=decompensated cirrhosis.</p>
 <p><a href="www.doi.org/0.1111/trf.16704">Russell et. al.&nbsp;2021</a></p>
@@ -889,7 +889,7 @@ m^{t-1}_A(p_{A \rightarrow B})+ m^{t-1}_B(p_{B \rightarrow B})\\
 &amp; m_{3} = m_{2} P = (m_0 P^2)P = m_0 P^3\\
 \end{aligned}
 \]</span></p>
-<p>Therefore (the full matrix solution):</p>
+<p>Therefore (full Markov model matrix solution):</p>
 <p><span class="math display">\[
 m_t = m_0 P^t
 \]</span></p>
@@ -1254,21 +1254,19 @@ q_H+q_{D \rightarrow H} &amp; q_M+q_{D \rightarrow M} &amp; q_S+q_{D \rightarrow
 <section id="ex-discounting" class="slide level2">
 <h2>Ex: discounting</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href=""></a>disc_rate <span class="ot">=</span> <span class="fl">0.03</span>; cycle_length <span class="ot">=</span> <span class="dv">1</span>; n_cycles <span class="ot">=</span> <span class="dv">10</span></span>
-<span id="cb51-2"><a href=""></a>disc_mults <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>((<span class="dv">1</span><span class="sc">+</span>(disc_rate<span class="sc">*</span>cycle_length))<span class="sc">^</span>(<span class="dv">1</span><span class="sc">:</span>n_cycles))</span>
-<span id="cb51-3"><a href=""></a><span class="fu">rowSums</span>(m_cost_by_cyclestate[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,]) <span class="co">#undiscounted cost by year</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href=""></a><span class="co"># WITHOUT DICOUNTING</span></span>
+<span id="cb51-2"><a href=""></a>disc_rate <span class="ot">=</span> <span class="fl">0.03</span>; cycle_length <span class="ot">=</span> <span class="dv">1</span>; n_cycles <span class="ot">=</span> <span class="dv">10</span></span>
+<span id="cb51-3"><a href=""></a>disc_mults <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>((<span class="dv">1</span><span class="sc">+</span>(disc_rate<span class="sc">*</span>cycle_length))<span class="sc">^</span>(<span class="dv">1</span><span class="sc">:</span>n_cycles))</span>
+<span id="cb51-4"><a href=""></a><span class="fu">rowSums</span>(m_cost_by_cyclestate[<span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>,]) <span class="co">#undiscounted cost by year</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       t1        t2        t3        t4        t5        t6        t7        t8 
-351200.00 423090.80 394563.96 313938.99 229256.66 156650.39 100429.68  60423.58 
-       t9       t10 
- 34116.84  18077.95 </code></pre>
+<pre><code>      t1       t2       t3       t4       t5       t6       t7 
+351200.0 423090.8 394564.0 313939.0 229256.7 156650.4 100429.7 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href=""></a><span class="fu">rowSums</span>(m_cost_by_cyclestate[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,])<span class="sc">*</span>disc_mults <span class="co">#Discounted costs by year</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href=""></a><span class="co"># WITH DICOUNTING</span></span>
+<span id="cb53-2"><a href=""></a><span class="fu">rowSums</span>(m_cost_by_cyclestate[<span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>,])<span class="sc">*</span>disc_mults <span class="co">#Discounted costs by year</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       t1        t2        t3        t4        t5        t6        t7        t8 
-340970.87 398803.66 361081.92 278930.73 197758.81 131192.23  81658.52  47698.94 
-       t9       t10 
- 26147.72  13451.69 </code></pre>
+<pre><code> [1] 340970.87 398803.66 361081.92 278930.73 197758.81 131192.23  81658.52
+ [8] 277240.52 324263.87 293592.64</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href=""></a><span class="fu">sum</span>(<span class="fu">rowSums</span>(m_cost_by_cyclestate[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,])<span class="sc">*</span>disc_mults) <span class="co">#Net present costs starting in cycle 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1319,12 +1317,14 @@ q_H+q_{D \rightarrow H} &amp; q_M+q_{D \rightarrow M} &amp; q_S+q_{D \rightarrow
 <section id="logistics" class="slide level2">
 <h2>Logistics</h2>
 <ul>
-<li>Assignment 1 (cost-effectiveness, decision trees) due Friday 9/13</li>
-<li>Assignment 2 available; due Wednesday 9/25
+<li>Complete readings before Tuesday’s class</li>
+<li><strong>Assignment 1</strong> due Friday, January 23 on MyCourses → Assignments</li>
+<li><strong>Assignment 2</strong> Cohort state transition models available
 <ul>
-<li>Past students found it to be most challenging</li>
+<li>Due Friday, January 30</li>
+<li><strong>More time consuming than usual</strong></li>
 </ul></li>
-<li>Office hours 1:30 - 2:20pm, room #1103</li>
+<li>Office hours: Mondays 2:30pm to 3:30pm in conference room 1128</li>
 </ul>
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">

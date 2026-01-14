@@ -2,16 +2,10 @@
 title: "Cohort models 1"
 subtitle: "EPIB  676 session 4, McGill University"
 author: "Alton Russell"
-date: "10 Sep 2024"
+date: "15 Jan 2026"
 format: revealjs
 editor: visual
 ---
-
-## to add/explore
-
-<https://hjalal.github.io/twig/>
-
-<https://hjalal.github.io/twig/>
 
 ## Today
 
@@ -42,7 +36,7 @@ theme_set(theme_bw()) #set ggplot theme
 
 -   Hypothetical cohort of individuals move between states over time.
 
--   Classical example is the Markov model, where transition probabilities
+-   Classical example is the **Markov model**, where transition probabilities:
 
     -   Are constant
 
@@ -55,6 +49,8 @@ theme_set(theme_bw()) #set ggplot theme
 -   Disease process varies over time
 
 -   Can represent process with relatively few 'states'
+
+-   No interaction between individuals (e.g., infection)
 
 ## Example: Transfusion-transmitted chronic conditions
 
@@ -80,7 +76,7 @@ TU=treatment uptake; SC=subclinical; AVT=antiviral therapy; TE=treatment effecti
 
     -   same costs, health outcomes
 
-    -   same probability of transitioning out (no matter how long they've been there)
+    -   same probability of transitioning out
 
 ## Transitions, cycles, time horizon
 
@@ -233,9 +229,7 @@ $$
 
 -   No self-loop (0 on diagonal)
 
--   A 'workaround' for the Markov property.
-
--   If costs, outcomes, or transitions differ for beginning or end of health condition, break into tunnel states
+-   A Markov property 'workaround': If costs, outcomes, or transitions differ based on time in health state, break out 1+ tunnel states
 :::
 :::::
 
@@ -243,7 +237,7 @@ $$
 
 ::::: columns
 ::: {.column width="50%"}
-![](ghana_markov_schematics.png)
+![](figs/ghana_markov_schematics.png)
 :::
 
 ::: {.column width="50%"}
@@ -510,7 +504,7 @@ $$
 \end{aligned}
 $$
 
-Therefore (the full matrix solution):
+Therefore (full Markov model matrix solution):
 
 $$
 m_t = m_0 P^t
@@ -757,10 +751,12 @@ sum(v_costs_per_cycle*disc_mults)
 
 ```{r}
 #| echo: true
+# WITHOUT DICOUNTING
 disc_rate = 0.03; cycle_length = 1; n_cycles = 10
 disc_mults <- 1/((1+(disc_rate*cycle_length))^(1:n_cycles))
-rowSums(m_cost_by_cyclestate[1:10,]) #undiscounted cost by year
-rowSums(m_cost_by_cyclestate[1:10,])*disc_mults #Discounted costs by year
+rowSums(m_cost_by_cyclestate[1:7,]) #undiscounted cost by year
+# WITH DICOUNTING
+rowSums(m_cost_by_cyclestate[1:7,])*disc_mults #Discounted costs by year
 sum(rowSums(m_cost_by_cyclestate[1:10,])*disc_mults) #Net present costs starting in cycle 1
 ```
 
@@ -805,7 +801,9 @@ Important to get right, easy to get wrong. My convention:
 
 ## Logistics
 
--   Assignment 1 (cost-effectiveness, decision trees) due Friday 9/13
--   Assignment 2 available; due Wednesday 9/25
-    -   Past students found it to be most challenging
--   Office hours 1:30 - 2:20pm, room #1103
+-   Complete readings before Tuesday's class
+-   **Assignment 1** due Friday, January 23 on MyCourses → Assignments
+-   **Assignment 2** Cohort state transition models available
+    -   Due Friday, January 30
+    -   **More time consuming than usual**
+-   Office hours: Mondays 2:30pm to 3:30pm in conference room 1128

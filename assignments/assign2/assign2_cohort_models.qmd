@@ -22,7 +22,7 @@ library(dplyr) #for filter()
 library(tibble) #for working with tibbles (optional)
 ```
 
-In this assignment, we will construct functions for evaluating a generic discrete time cohort state transition model. These functions can work for any application, as long as the inputs are provided in a specific format. This will help you understand modular coding, where repeated operations are broken into small functions, and some functions are called within other functions. We will then use the functions you've created to run cohort state transition models. Lets get started!
+In this assignment, we will construct functions for evaluating a generic discrete time cohort state transition model. These functions can work for any application, as long as the inputs are provided in a specific format. This will help you understand modular coding (when repeated operations are broken into small functions, and some functions are called within other functions). We will then use the functions you've created to run cohort state transition models. Lets get started!
 
 ## 1. Functions for cohort state transition model
 
@@ -32,15 +32,15 @@ Some notes on this function:
 
 -   If there are only state rewards (no transition rewards) for cost and/or QALYs, the `sim_cstm` function expects a vector `v_cost_states` or `v_qaly_states` as an input.
 
--   If there are transition rewards, then a matrix `m_cost_transitions` or `m_qaly_transitions` should be provided instead of `v_cost_states` or `v_qaly_states`. The matrix should contain state rewards and transition rewards. **See session 5 slides on Transition Rewards.**
+-   If there are transition rewards, then a matrix `m_cost_transitions` or `m_qaly_transitions` should be provided [**instead of**]{.underline} `v_cost_states` or `v_qaly_states`. The matrix should contain state rewards and transition rewards. **See session 4 slides on Transition Rewards.**
 
--   A reward matrix with cycle tree correction will be generated from within this function. Therefore, the reward vectors or matrices provided as inputs should not have any corrections.
+-   A reward matrix with cycle tree correction will be generated from within this function. Therefore, the reward vectors or matrices provided as inputs should be without any cycle tree correction.
 
 -   If transitions between states do not depend on the cycle number (a truly Markov model), a transition matrix called `m_P` should be supplied (rows = "from" state, columns = "to" states.
 
--   If transitions can differ depending on the cycle number (semi-Markov model with time-varying transitions), `arr_P` should be provided instead of `m_P`. The third dimension corresponds to the the cycle number.
+-   If transitions can differ depending on the cycle number (semi-Markov model with time-varying transitions), `arr_P` should be provided instead of `m_P`. The three dimensions of `arr_P` correspond to the "from" state, the "to" state, and the cycle number.
 
--   In the function arguments, the `NA`'s you see are supposed to be there (don't edit them). This is assigning NA as a default value so that the function will still run even if you don't assign anything to the optional arguments.
+-   In the function arguments, the `NA`'s you see are supposed to be there (don't edit them). This is assigning NA as a default value so that the function will still run even if you don't assign anything to optional arguments.
 
 Using these functions in Sections 2 and 3 might help you debug them. Feel free to read through the whole assignment and then work on it out of order. It may be helpful to start working on the first code block in part 2 (formatting model inputs) before completing these functions.
 
@@ -263,9 +263,9 @@ cycleTree_from_mat <- function(m_reward_transitions){
 
 Those are all the functions you need for section 2 and the first few code chunks in section 3. Feel free to skip over the next part until after completing those.
 
-The last major function we'll write is designed to create a 3D transition array transition array that can be used as an input to `sim_cstm` in cases where transitions are the same over time except for other cause mortality. The function generates this transition array `arr_P` using a lookup table with age-specific other-cause mortality `t_OCM` (usually based on a country's life table) and a transition matrix `m_P` that does not account for other cause mortality. To generate the slice of `arr+P` corresponding to each cycle, the transitions between states in `m_P` are down-weighted to account for other-cause mortality, and then background other-cause mortality is added to all states (see session 5 slides for an example).
+The last major function we'll write is designed to create a 3D transition array transition array that can be used as an input to `sim_cstm` in cases where transitions are the same over time except for other cause mortality. The function generates this transition array `arr_P` using a lookup table with age-specific other-cause mortality `t_OCM` (usually based on a country's life table) and a transition matrix `m_P` that does not account for other cause mortality. To generate the slice of `arr_P` corresponding to each cycle, the transitions between states in `m_P` are down-weighted to account for other-cause mortality, and then other-cause mortality is added back in to all states (see session 5 slides for an example).
 
-The function is designed to take in the ***annual*** probability of death from a life table, but the cycle length of our model may be different from one year. For this, we'll need a helper function `prob_to_prob` that can convert a probability for one cycle length (like an annual probability of death) into another cycle length (e.g., 0.25 years).
+The function is designed to take in the ***annual*** probability of death from a life table, but the cycle length of our model may be different from one year. For those cases, we'll need a helper function `prob_to_prob` that can convert a probability for one cycle length (like an annual probability of death) into another cycle length (e.g., 0.25 years).
 
 ```{r}
 gen_arr_P_with_OCM <- function(m_P, #transition matrix without other cause mortality
@@ -407,7 +407,7 @@ matrix(v_m_0, nrow=1) %*% (m_P %^% 20)
 
 #CHECK: does this match what's in cstm_output$m_M[21,]?
 
-#Finally, develop a cohort trace plot. 
+#Finally, create a cohort trace plot. 
 
 #. first step is converting m_M from wide to long format
 #. Can uncomment this code once cstm_output$m_M looks correct
@@ -415,11 +415,11 @@ matrix(v_m_0, nrow=1) %*% (m_P %^% 20)
 #   add_column(cycle_num = 0:n_cycles) |>
 #   gather(key = state, value = count, 1:4)
 
-# second step is to make plot with ggplot (or other methd if preferred)
+# second step is to make plot with ggplot (or other method if preferred)
 #. X axis should have the cycle number
 #. Y axis should be the percent of the cohort in each state
 #. Each state should have a line and points in a different color 
-ggplot()
+ggplot() #edit this
 ```
 
 Lastly, let's add a transition toll of \$3,000 whenever someone dies in this model. In this code chunk, create the matrix `m_cost_transition` that includes this transition cost, then rerun `sim_cstm` providing `m_cost_transition` as an argument instead of `v_cost_state`.

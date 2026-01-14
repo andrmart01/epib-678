@@ -7,15 +7,37 @@ format: revealjs
 editor: visual
 ---
 
-## To update
+## Printing lecture slides to PDF
 
-<https://hjalal.github.io/twig/articles/decision_tree.html>
+1.  Toggle into Print View using the `E` key (or using the [Navigation Menu](https://quarto.org/docs/presentations/revealjs/presenting.html#navigation-menu))
+
+2.  Open the in-browser print dialog `COMMAND+P`.
+
+3.  Change the **Destination** to **Save as PDF**.
+
+4.  Change the **Layout** to **Landscape**.
+
+5.  Change the **Margins** to **None**.
+
+6.  Enable the **Background graphics** option.
+
+7.  Click **Save** 🎉
 
 ## Today
 
 ```{r}
 library(flextable)
 ```
+
+-   [Wrapping up incremental analysis](https://htmlpreview.github.io/?https://github.com/altonrus/epib-678/blob/main/sessions/02-economic_evaluation/economic_evaluation.html#/evaluating-2-alternatives)
+
+-   Key probability concepts
+
+-   Decision trees
+
+Source: [quarto guides on Revealjs](https://quarto.org/docs/presentations/revealjs/presenting.html#print-to-pdf)
+
+## Today
 
 -   **Key probability concepts**
 
