@@ -11,7 +11,7 @@
   <meta name="generator" content="quarto-1.5.47">
 
   <meta name="author" content="Alton Russell">
-  <meta name="dcterms.date" content="2024-09-12">
+  <meta name="dcterms.date" content="2026-01-20">
   <title>Cohort models 2</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -403,12 +403,12 @@ Alton Russell
 </div>
 </div>
 
-  <p class="date">2024-09-12</p>
+  <p class="date">2026-01-20</p>
 </section>
 <section id="packages" class="slide level2">
 <h2>Packages</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="fu">library</span>(heemod) <span class="co">#health economic markov models</span></span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="co">#library(heemod) #health economic markov models</span></span>
 <span id="cb1-2"><a href=""></a><span class="fu">library</span>(tidyr) <span class="co">#for spread function for wide-to-long table formating</span></span>
 <span id="cb1-3"><a href=""></a><span class="fu">library</span>(ggplot2) <span class="co">#plotting</span></span>
 <span id="cb1-4"><a href=""></a><span class="fu">library</span>(expm) <span class="co">#raise matrices to exponents with %^%</span></span>
@@ -437,9 +437,9 @@ p_{D \rightarrow H} &amp; p_{D \rightarrow M} &amp; p_{D \rightarrow S} &amp; p_
 </section>
 <section id="recall-run-a-discrete-time-cstm" class="slide level2">
 <h2>Recall: Run a discrete time CSTM</h2>
-<p>Matrix <span class="math inline">\(M\)</span> stores cohort dist’n after each cycle</p>
+<p>Matrix <span class="math inline">\(M\)</span> stores cohort distribution after each cycle</p>
 <ul>
-<li><p><span class="math inline">\(n_s\)</span> columns and <span class="math inline">\(T+1\)</span> rows</p></li>
+<li><p><span class="math inline">\(n_s\)</span> columns and <span class="math inline">\(T+1\)</span> rows (starts at <span class="math inline">\(t=0\)</span>)</p></li>
 <li><p>Row <span class="math inline">\(t\)</span> contains <span class="math inline">\(m_t\)</span>, the cohort’s dist’n after cycle <span class="math inline">\(t\)</span></p></li>
 </ul>
 <p>To calculate rewards (costs or QALYs)</p>
@@ -454,15 +454,15 @@ p_{D \rightarrow H} &amp; p_{D \rightarrow M} &amp; p_{D \rightarrow S} &amp; p_
 <ul>
 <li><p><strong>Time-varying transitions</strong></p></li>
 <li><p>Time-varying rewards</p></li>
-<li><p>Correcting discrete time error</p></li>
 <li><p>Capturing epidemiological outcomes</p></li>
-<li><p>Differential equation models</p></li>
+<li><p>Discrete time errors</p></li>
+<li><p>Project &amp; open-source model presentation</p></li>
 </ul>
 </section>
-<section id="limit-of-pure-markov-model" class="slide level2">
-<h2>Limit of (pure) Markov model</h2>
+<section id="limits-of-pure-markov-model" class="slide level2">
+<h2>Limits of (pure) Markov model</h2>
 <ul>
-<li><p>Transition probabilities often depend on</p>
+<li><p>Transition probabilities might depend on</p>
 <ul>
 <li><p><strong>simulation time:</strong> how long the model has been running</p></li>
 <li><p><strong>state residence time:</strong> how long someone has been in a state</p></li>
@@ -499,7 +499,7 @@ p_{D \rightarrow H} &amp; p_{D \rightarrow M} &amp; p_{D \rightarrow S} &amp; p_
 <ul>
 <li>E.G., other cause death</li>
 </ul></li>
-<li><p>A “stack” of transition matrices, one for each cycle</p></li>
+<li><p>A “<strong>stack”</strong> of transition matrices, one for each cycle</p></li>
 <li><p><span class="math inline">\(P[i,j,t]\)</span>: transition prob. from state <span class="math inline">\(i\)</span> to state <span class="math inline">\(j\)</span> in cycle <span class="math inline">\(t\)</span></p>
 <ul>
 <li><p>Dim 1: “From” health state <span class="math inline">\(1, ..., i, ... I\)</span></p></li>
@@ -564,14 +564,16 @@ P_{i \rightarrow D}^{adjusted} = P_{i \rightarrow D}^{orig} (1 - P_{OCM})+P_{OCM
 <span id="cb3-13"><a href=""></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">21</span>){</span>
 <span id="cb3-14"><a href=""></a>  M[i,] <span class="ot">&lt;-</span> m_0 <span class="sc">%*%</span> (mat_P <span class="sc">%^%</span> (i<span class="dv">-1</span>))</span>
 <span id="cb3-15"><a href=""></a>}</span>
-<span id="cb3-16"><a href=""></a>t_trace <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(M) <span class="co">#convert from matrix</span></span>
-<span id="cb3-17"><a href=""></a>t_trace<span class="sc">$</span>Cycle_num <span class="ot">&lt;-</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">20</span> <span class="co">#add col for cycle number</span></span>
-<span id="cb3-18"><a href=""></a>t_trace <span class="ot">&lt;-</span> t_trace <span class="sc">|&gt;</span> <span class="co">#Long to wide</span></span>
-<span id="cb3-19"><a href=""></a>  <span class="fu">gather</span>(<span class="at">key=</span>State, <span class="at">value=</span>Count, H<span class="sc">:</span>D) <span class="co">#wide to long format</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-16"><a href=""></a></span>
+<span id="cb3-17"><a href=""></a><span class="co"># Make cohort trace plot</span></span>
+<span id="cb3-18"><a href=""></a>t_trace <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(M) <span class="co">#convert from matrix</span></span>
+<span id="cb3-19"><a href=""></a>t_trace<span class="sc">$</span>Cycle_num <span class="ot">&lt;-</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">20</span> <span class="co">#add col for cycle number</span></span>
+<span id="cb3-20"><a href=""></a>t_trace <span class="ot">&lt;-</span> t_trace <span class="sc">|&gt;</span> <span class="co">#Long to wide</span></span>
+<span id="cb3-21"><a href=""></a>  <span class="fu">gather</span>(<span class="at">key=</span>State, <span class="at">value=</span>Count, H<span class="sc">:</span>D) <span class="co">#wide to long format</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="ex-transition-array-with-ocm" class="slide level2">
-<h2>Ex: transition array with OCM</h2>
+<section id="ex-3d-transition-array-with-ocm" class="slide level2">
+<h2>Ex: 3D transition array with OCM</h2>
 <p>Cycle length is 1 year, cohort is age 50 at time 0.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a><span class="co"># Pre-allocate 3D transition array</span></span>
@@ -585,7 +587,7 @@ P_{i \rightarrow D}^{adjusted} = P_{i \rightarrow D}^{orig} (1 - P_{OCM})+P_{OCM
 <span id="cb4-9"><a href=""></a>  age <span class="ot">=</span> <span class="dv">50</span><span class="sc">+</span>cycle<span class="dv">-1</span></span>
 <span id="cb4-10"><a href=""></a>  <span class="co">#.  get prob. other cause mortality from table</span></span>
 <span id="cb4-11"><a href=""></a>  p_OCM <span class="ot">&lt;-</span> t_other_cause_death[t_other_cause_death<span class="sc">$</span>Age<span class="sc">==</span>age,<span class="st">"prob_death"</span>]</span>
-<span id="cb4-12"><a href=""></a>  <span class="co">#.  Adjust all probs DOWN to "make room" for OCM</span></span>
+<span id="cb4-12"><a href=""></a>  <span class="co">#.  Adjust all probs DOWN by 1 - p_OCM to "make room" for OCM</span></span>
 <span id="cb4-13"><a href=""></a>  mat_P_this_year <span class="ot">=</span> mat_P<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>p_OCM)</span>
 <span id="cb4-14"><a href=""></a>  <span class="co">#.  Adjust prob. transitioning to death UP to account for OCM</span></span>
 <span id="cb4-15"><a href=""></a>  mat_P_this_year[,<span class="st">"D"</span>]<span class="ot">&lt;-</span>mat_P_this_year[,<span class="st">"D"</span>]<span class="sc">+</span>p_OCM</span>
@@ -851,9 +853,9 @@ t20  385.5725 103.0306 121.7557 1389.64121</code></pre>
 <ul>
 <li><p>Time-varying transitions</p></li>
 <li><p><strong>Time-varying rewards</strong></p></li>
-<li><p>Correcting discrete time error</p></li>
 <li><p>Capturing epidemiological outcomes</p></li>
-<li><p>Differential equation models</p></li>
+<li><p>Discrete time errors</p></li>
+<li><p>Project &amp; open-source model presentation</p></li>
 </ul>
 </section>
 <section id="recall-reward-matrices" class="slide level2">
@@ -892,7 +894,7 @@ q_H+q_{D \rightarrow H} &amp; q_M+q_{D \rightarrow M} &amp; q_S+q_{D \rightarrow
 </section>
 <section id="alternative-2d-matrix-in-loop" class="slide level2">
 <h2>Alternative: 2D matrix in-loop</h2>
-<p>If you don’t like 3D arrays, instead generate cycle-specific 2D matrices within your for loop</p>
+<p>If you don’t like 3D arrays, you can generate cycle-specific 2D matrices within the for loop that loops over cycles.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href=""></a><span class="co">#Pseudocode, won't run without modifications</span></span>
 <span id="cb11-2"><a href=""></a>mat_M <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">ncol=</span><span class="dv">4</span>, <span class="at">nrow =</span> n_cycles<span class="sc">+</span><span class="dv">1</span>,</span>
@@ -915,91 +917,11 @@ q_H+q_{D \rightarrow H} &amp; q_M+q_{D \rightarrow M} &amp; q_S+q_{D \rightarrow
 <section id="today-2" class="slide level2">
 <h2>Today</h2>
 <ul>
-<li><p>Time-varying transitions and reward<strong>s</strong></p></li>
+<li><p>Time-varying transitions</p></li>
 <li><p>Time-varying rewards</p></li>
-<li><p><strong>Correcting discrete time error</strong></p></li>
-<li><p>Capturing epidemiological outcomes</p></li>
-<li><p>Differential equation models</p></li>
-</ul>
-</section>
-<section id="discrete-time-error" class="slide level2">
-<h2>Discrete time error</h2>
-<ul>
-<li><p>In uncorrected models, transitions occur at cycle <u><strong>end</strong></u></p></li>
-<li><p>In real life, transitions occur in continuous time</p></li>
-<li><p>Transition probs. are cumulative probability of transitioning <u><strong>during</strong></u> a cycle</p></li>
-</ul>
-</section>
-<section id="discrete-time-error-1" class="slide level2">
-<h2>Discrete time error</h2>
-<p><a href="www.doi.org/10.1177/0272989X13501558"><img data-src="figs/discretation_error_updown.jpeg"></a></p>
-<p><a href="https://www.doi.org/10.1177/0272989X13501558">Naimark et. al.&nbsp;2013</a></p>
-</section>
-<section id="fix-1-shorter-cycle-lengths" class="slide level2">
-<h2>Fix 1: Shorter cycle lengths</h2>
-<p>As cycle length <span class="math inline">\(\rightarrow\)</span> 0, discretization error <span class="math inline">\(\rightarrow\)</span> 0.</p>
-<p><strong>But</strong>, more cycles means more compute needed, and may lead to less interpretable probabilities</p>
-<p>Modelers usually use another fix</p>
-</section>
-<section id="solutions-to-discrete-time-error" class="slide level2">
-<h2>Solutions to discrete time error</h2>
-<p><a href="https://doi.org/10.1101/2020.07.27.20162651"><img data-src="figs/discretization_corrections.jpg" width="730"></a></p>
-<p><a href="https://doi.org/10.1101/2020.07.27.20162651">Srivastava et. al.&nbsp;2020</a></p>
-</section>
-<section id="simpsons-method" class="slide level2">
-<h2>Simpson’s method</h2>
-<p>Numerical process to approximate integrating a curve</p>
-<p><strong>Simpson’s 1/3rd method</strong> (quadratic approximation; requires even number of cycles):</p>
-<ul>
-<li><p>Multiply reward by 1/3 for first and last cycle</p></li>
-<li><p>In between, multiply by 4/3 for odd cycles and 2/3 for even</p></li>
-</ul>
-<p><strong>Simpson’s 3/8 method</strong> (cubic approximation; requires that number of cycles are multiple of 3):</p>
-<ul>
-<li><p>Multiply reward by 3/8 in first and last cycle</p></li>
-<li><p>In between, multiply by 6/8 if mult. of 3 and 9/8 otherwise</p></li>
-</ul>
-</section>
-<section id="cycle-tree-approach" class="slide level2">
-<h2>Cycle tree approach</h2>
-<ul>
-<li><p><strong>Intuition:</strong> If individuals make transitions halfway through a cycle on average, they should incur half the cost (QALY) associated with their “from” state and half the cost (QALY) of their “to” state</p></li>
-<li><p>Can be implemented similarly to transition rewards in a reward matrix</p></li>
-</ul>
-<p><span class="math inline">\(\hat{C}_t =m_{t-1} (P \bigodot C)\)</span> or <span class="math inline">\(\hat{Q}_t =m_{t-1} (P \bigodot Q)\)</span> with C and Q as given on next slide</p>
-</section>
-<section id="cycle-tree-transition-reward-matrices" class="slide level2">
-<h2>Cycle tree transition reward matrices</h2>
-<p><span class="math display">\[
-\textbf{C}=
-\begin{bmatrix}
-c_H &amp; .5c_H+.5c_M &amp; .5c_H+.5c_S &amp; .5c_H+.5c_D\\
-.5c_M+.5c_H &amp; c_M &amp; .5c_M+.5c_S &amp; .5c_M+.5c_D\\
-.5c_S+.5c_H &amp; .5c_S+.5c_M &amp; c_S &amp; .5c_S+.5c_D\\
-.5c_D+.5c_H &amp; .5c_D+.5c_M &amp; .5c_D+.5c_S &amp; c_D
-\end{bmatrix},\\
-\textbf{Q} =
-\begin{bmatrix}
-q_H &amp; .5q_H+.5q_M &amp; .5q_H+.5q_S &amp; .5q_H+.5q_D\\
-.5q_M+.5q_H &amp; q_M &amp; .5q_M+.5q_S &amp; .5q_M+.5q_D\\
-.5q_S+.5q_H &amp; .5q_S+.5q_M &amp; q_S &amp; .5q_S+.5q_D\\
-.5q_D+.5q_H &amp; .5q_D+.5q_M &amp; .5q_D+.5q_S &amp; q_D
-\end{bmatrix}
-\]</span></p>
-</section>
-<section id="comparison-of-discrete-time-correction-methods" class="slide level2">
-<h2>Comparison of discrete time correction methods</h2>
-<p>Simpson rule and cycle tree method both good. I find cycle tree method intuitive (and it doesn’t matter if total number of cycles are a multiple of 2 or 3)</p>
-
-<img data-src="figs/discrete_time_corrections_compare.jpeg" class="r-stretch quarto-figure-center"><p class="caption"><a href="https://doi.org/10.1177/0272989X13501558">Naimark et. al.&nbsp;2013</a></p></section>
-<section id="today-3" class="slide level2">
-<h2>Today</h2>
-<ul>
-<li><p><strong>Time-varying transitions</strong></p></li>
-<li><p>Time-varying rewards</p></li>
-<li><p>Correcting discrete time error</p></li>
 <li><p><strong>Capturing epidemiological outcomes</strong></p></li>
-<li><p>Differential equation models</p></li>
+<li><p>Discrete time errors</p></li>
+<li><p>Project &amp; open-source model presentation</p></li>
 </ul>
 </section>
 <section id="why-capture-epidemiologic-outcomes" class="slide level2">
@@ -1044,14 +966,372 @@ LE = \Sigma_{t=0}^\infty S(t)
 <section id="incidence" class="slide level2">
 <h2>Incidence</h2>
 <ul>
-<li><p>Proportion of population entering health state at <span class="math inline">\(t\)</span></p></li>
+<li><p>Proportion of population that enters health state during <span class="math inline">\(t\)</span></p></li>
 <li><p>For a state <span class="math inline">\(j\)</span>:</p>
 <ul>
-<li><p><span class="math inline">\(m_{t-1} P[:,j]\)</span> is the number entering or staying in state <span class="math inline">\(j\)</span> in cycle <span class="math inline">\(t\)</span></p></li>
-<li><p><span class="math inline">\(m_{t-1}^j P[j,j]\)</span> is the number staying in state <span class="math inline">\(j\)</span> in cycle <span class="math inline">\(t\)</span></p></li>
-<li><p><span class="math inline">\(m_{t-1} P[:,j] - m_{t-1}^j P[j,j]\)</span> is the number entering state <span class="math inline">\(j\)</span> in cycle <span class="math inline">\(t\)</span></p></li>
+<li><p><span class="math inline">\(m_{t-1} P[:,j]\)</span> is the number that <strong>entered or stayed</strong> in state <span class="math inline">\(j\)</span> in cycle <span class="math inline">\(t\)</span></p></li>
+<li><p><span class="math inline">\(m_{t-1}^j P[j,j]\)</span> is the number <strong>that stayed</strong> in state <span class="math inline">\(j\)</span> in cycle <span class="math inline">\(t\)</span></p></li>
+<li><p><span class="math inline">\(m_{t-1} P[:,j] - m_{t-1}^j P[j,j]\)</span> is the number <strong>that entered</strong> state <span class="math inline">\(j\)</span> in cycle <span class="math inline">\(t\)</span></p></li>
 </ul></li>
-<li><p>Divide by number alive at time <span class="math inline">\(t\)</span> to make it a proportion</p></li>
+<li><p>Divide by number alive at time <span class="math inline">\(t-1\)</span> to make it a proportion</p></li>
+</ul>
+</section>
+<section id="today-3" class="slide level2">
+<h2>Today</h2>
+<ul>
+<li><p>Time-varying transitions and reward<strong>s</strong></p></li>
+<li><p>Time-varying rewards</p></li>
+<li><p>Capturing epidemiological outcomes</p></li>
+<li><p><strong>Discrete time errors</strong></p></li>
+<li><p>Project &amp; open-source model presentation</p></li>
+</ul>
+</section>
+<section id="two-types-of-discrete-time-errors" class="slide level2">
+<h2>Two types of discrete time errors</h2>
+<p>Using a discrete time approximation for a continuous process can introduce two types</p>
+<p><strong>Integration error:</strong> error due to only allowing transitions at the end of discrete cycles</p>
+<ul>
+<li>Corrections usually applied</li>
+</ul>
+<p><strong>Embedding error:</strong> misalignment between per-cycle transition probabilities and the underlying continuous process<sup>1</sup></p>
+<ul>
+<li>Not well-recognized; seldom corrected</li>
+</ul>
+<aside><ol class="aside-footnotes"><li id="fn1"><p>Source: <a href="https://doi.org/10.1177/0272989X21995805">Graves et. al.&nbsp;2021 MDM</a></p></li></ol></aside></section>
+<section id="discrete-time-integration-error" class="slide level2">
+<h2>Discrete time integration error</h2>
+<ul>
+<li><p>In uncorrected models, transitions occur at cycle <u><strong>end</strong></u></p></li>
+<li><p>In real life, transitions occur in continuous time</p></li>
+<li><p>Transition probs. are cumulative probability of transitioning <u><strong>during</strong></u> a cycle</p></li>
+</ul>
+</section>
+<section id="discrete-time-integration-error-1" class="slide level2">
+<h2>Discrete time integration error</h2>
+<p><a href="www.doi.org/10.1177/0272989X13501558"><img data-src="figs/discretation_error_updown.jpeg"></a></p>
+<p><a href="https://www.doi.org/10.1177/0272989X13501558">Naimark et. al.&nbsp;2013</a></p>
+</section>
+<section id="fix-1-shorter-cycle-lengths" class="slide level2">
+<h2>Fix 1: Shorter cycle lengths</h2>
+<p>As cycle length <span class="math inline">\(\rightarrow\)</span> 0, discretization error <span class="math inline">\(\rightarrow\)</span> 0.</p>
+<p><strong>But</strong>, more cycles means more compute needed, and may lead to less interpretable probabilities</p>
+<p>Modelers usually use another fix</p>
+</section>
+<section id="solutions-to-discrete-time-error" class="slide level2">
+<h2>Solutions to discrete time error</h2>
+<p><a href="https://doi.org/10.1101/2020.07.27.20162651"><img data-src="figs/discretization_corrections.jpg" width="730"></a></p>
+<p><a href="https://doi.org/10.1101/2020.07.27.20162651">Srivastava et. al.&nbsp;2020</a></p>
+</section>
+<section id="simpsons-method" class="slide level2">
+<h2>Simpson’s method</h2>
+<p>Numerical process to approximate integrating a curve</p>
+<p><strong>Simpson’s 1/3rd method</strong> (quadratic approximation; requires even number of cycles):</p>
+<ul>
+<li><p>Multiply reward by 1/3 for first and last cycle</p></li>
+<li><p>In between, multiply by 4/3 for odd cycles and 2/3 for even</p></li>
+</ul>
+<p><strong>Simpson’s 3/8 method</strong> (cubic approximation; requires that number of cycles are multiple of 3):</p>
+<ul>
+<li><p>Multiply reward by 3/8 in first and last cycle</p></li>
+<li><p>In between, multiply by 6/8 if mult. of 3 and 9/8 otherwise</p></li>
+</ul>
+</section>
+<section id="cycle-tree-approach" class="slide level2">
+<h2>Cycle tree approach</h2>
+<ul>
+<li><p><strong>Intuition:</strong> If individuals make transitions halfway through a cycle on average, they should incur half the cost (QALY) associated with their “from” state and half the cost (QALY) of their “to” state</p></li>
+<li><p>Implementation similar to transition rewards using a reward matrix</p></li>
+</ul>
+<p><span class="math inline">\(\hat{C}_t =m_{t-1} (P \bigodot C)\)</span> or <span class="math inline">\(\hat{Q}_t =m_{t-1} (P \bigodot Q)\)</span> with C and Q as given on next slide</p>
+</section>
+<section id="cycle-tree-transition-reward-matrices" class="slide level2">
+<h2>Cycle tree transition reward matrices</h2>
+<p><span class="math display">\[
+\textbf{C}=
+\begin{bmatrix}
+c_H &amp; .5c_H+.5c_M &amp; .5c_H+.5c_S &amp; .5c_H+.5c_D\\
+.5c_M+.5c_H &amp; c_M &amp; .5c_M+.5c_S &amp; .5c_M+.5c_D\\
+.5c_S+.5c_H &amp; .5c_S+.5c_M &amp; c_S &amp; .5c_S+.5c_D\\
+.5c_D+.5c_H &amp; .5c_D+.5c_M &amp; .5c_D+.5c_S &amp; c_D
+\end{bmatrix},\\
+\textbf{Q} =
+\begin{bmatrix}
+q_H &amp; .5q_H+.5q_M &amp; .5q_H+.5q_S &amp; .5q_H+.5q_D\\
+.5q_M+.5q_H &amp; q_M &amp; .5q_M+.5q_S &amp; .5q_M+.5q_D\\
+.5q_S+.5q_H &amp; .5q_S+.5q_M &amp; q_S &amp; .5q_S+.5q_D\\
+.5q_D+.5q_H &amp; .5q_D+.5q_M &amp; .5q_D+.5q_S &amp; q_D
+\end{bmatrix}
+\]</span></p>
+</section>
+<section id="comparing-integration-error-corrections" class="slide level2">
+<h2>Comparing integration error corrections</h2>
+<p>Simpson rule and cycle tree method perform similarly. I find cycle tree method intuitive (and it doesn’t matter if total number of cycles are a multiple of 2 or 3)</p>
+
+<img data-src="figs/discrete_time_corrections_compare_ARedits.png" class="r-stretch quarto-figure-center"><p class="caption"><a href="https://doi.org/10.1177/0272989X13501558">Naimark et. al.&nbsp;2013</a></p></section>
+<section id="embedding-error" class="slide level2">
+<h2>Embedding error</h2>
+<ul>
+<li><p>Misalignment between transition probabilities and underlying continuous-time process</p></li>
+<li><p>Occurs when:</p>
+<ul>
+<li><p>literature-based parameters are transformed and embedded using common rate-to-prob formala <span class="math inline">\(P = 1 - e^{-rt}\)</span></p></li>
+<li><p>Competing events (transitions to &gt;1 state possible)</p></li>
+</ul></li>
+</ul>
+</section>
+<section id="solving-embedding-error" class="slide level2">
+<h2>Solving embedding error</h2>
+<p>Vast majority of analyses do not address. But you can:</p>
+<ul>
+<li>Use continuous time rate matrix <span class="math inline">\(Q\)</span> to represent transition rates</li>
+<li>Convert to discrete time transition matrix <span class="math inline">\(P\)</span> using matrix exponential: <span class="math inline">\(P = e^{Qt}\)</span></li>
+</ul>
+</section>
+<section id="revisiting-rate-to-prob-formula" class="slide level2">
+<h2>Revisiting rate-to-prob formula</h2>
+<p><span class="math display">\[
+p(t) = 1 - e^{-rt} \quad r = -\frac{1}{t}log(1-p)
+\]</span></p>
+<p>Exactly correct <u><strong>iff</strong></u>:</p>
+<ul>
+<li><p>Transitions are independent with constant average rate</p>
+<ul>
+<li>Poisson point process, exponentially distributed events</li>
+</ul></li>
+<li><p>No competing events</p>
+<ul>
+<li>Only 1 possible transition from each state</li>
+</ul></li>
+</ul>
+</section>
+<section id="continuous-time-rate-matrix-q" class="slide level2">
+<h2>Continuous time rate matrix Q</h2>
+<ul>
+<li>Off-diagonal entries are transition rates <span class="math inline">\(r_{i \rightarrow j}\)</span></li>
+<li>Diagonal entries are negative sum of rates out of state <span class="math inline">\(i\)</span></li>
+<li>Rows sum to 0</li>
+</ul>
+<p><span class="math inline">\(3x3\)</span> example:</p>
+<p><span class="math display">\[
+Q =
+\begin{bmatrix}
+-(r_{1 \rightarrow 2}+r_{1 \rightarrow 3}) &amp; r_{1 \rightarrow 2} &amp; r_{1 \rightarrow 3}\\
+r_{2 \rightarrow 1} &amp; -(r_{2 \rightarrow 1}+r_{2 \rightarrow 3}) &amp; r_{2 \rightarrow 3}\\
+r_{3 \rightarrow 1} &amp; r_{3 \rightarrow 2} &amp; -(r_{3 \rightarrow 1}+r_{3 \rightarrow 2})
+\end{bmatrix}
+\]</span></p>
+</section>
+<section id="rate-matrix-example" class="slide level2">
+<h2>Rate matrix example</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href=""></a>rate_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb12-2"><a href=""></a>  <span class="at">data =</span> <span class="fu">c</span>(</span>
+<span id="cb12-3"><a href=""></a>    <span class="sc">-</span>(<span class="dv">2</span><span class="sc">+</span><span class="dv">1</span>), <span class="dv">2</span>, <span class="dv">1</span>,</span>
+<span id="cb12-4"><a href=""></a>    <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>,</span>
+<span id="cb12-5"><a href=""></a>    <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>), <span class="at">byrow =</span> T, <span class="at">nrow =</span> <span class="dv">3</span>,</span>
+<span id="cb12-6"><a href=""></a>  <span class="at">dimnames =</span> <span class="fu">list</span>(</span>
+<span id="cb12-7"><a href=""></a>    <span class="at">from =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>),</span>
+<span id="cb12-8"><a href=""></a>    <span class="at">to =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>))</span>
+<span id="cb12-9"><a href=""></a>)</span>
+<span id="cb12-10"><a href=""></a>rate_matrix</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    to
+from  A B C
+   A -3 2 1
+   B  0 0 0
+   C  0 0 0</code></pre>
+</div>
+</div>
+<p>Note: absorbing states have 0 rates out, so row of 0s</p>
+</section>
+<section id="rate-matrix-transition-matrix" class="slide level2">
+<h2>Rate matrix → transition matrix</h2>
+<p><span class="math display">\[
+T_{prob} = e^{Qt}
+\]</span></p>
+<p><span class="math inline">\(Q\)</span> is the continuous rate matrix; <span class="math inline">\(t\)</span> is the discrete cycle length</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href=""></a><span class="fu">expm</span>(rate_matrix<span class="sc">*</span><span class="dv">1</span>) <span class="co"># 1 year transition matrix</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           A         B         C
+A 0.04978707 0.6334753 0.3167376
+B 0.00000000 1.0000000 0.0000000
+C 0.00000000 0.0000000 1.0000000</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href=""></a><span class="fu">expm</span>(rate_matrix<span class="sc">*</span><span class="fl">0.25</span>) <span class="co"># 0.25 year transition matrix</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          A         B         C
+A 0.4723666 0.3517556 0.1758778
+B 0.0000000 1.0000000 0.0000000
+C 0.0000000 0.0000000 1.0000000</code></pre>
+</div>
+</div>
+<p>Note: calculate matrix exponential using <span class="math inline">\(expm::expm()\)</span></p>
+</section>
+<section id="simulating-single-event" class="slide level2">
+<h2>Simulating single event</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href=""></a><span class="co"># sample time-to-transition,  200,000 individual, </span></span>
+<span id="cb18-2"><a href=""></a>time_to_B <span class="ot">&lt;-</span> <span class="fu">rexp</span>(<span class="dv">200000</span>, <span class="at">rate =</span> <span class="dv">2</span>) <span class="co"># RATE: 2 transitions per person year</span></span>
+<span id="cb18-3"><a href=""></a><span class="fu">hist</span>(time_to_B)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="cohorts_2_files/figure-revealjs/unnamed-chunk-11-1.png" width="960" class="r-stretch"></section>
+<section id="rate-to-prob-works-with-single-event" class="slide level2">
+<h2>Rate-to-prob works with single event</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href=""></a><span class="fu">mean</span>(time_to_B) <span class="co"># Mean time to transition to B</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.5006151</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href=""></a><span class="fu">median</span>(time_to_B) <span class="co"># Median time to transition to B</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.3466252</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href=""></a><span class="co"># Percent transitioning to B within 1 year</span></span>
+<span id="cb23-2"><a href=""></a><span class="fu">sum</span>(time_to_B <span class="sc">&lt;</span> <span class="dv">1</span>) <span class="sc">/</span> <span class="fu">length</span>(time_to_B) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.86503</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href=""></a><span class="co"># 1-year transitioning prob using rate-to-prob</span></span>
+<span id="cb25-2"><a href=""></a><span class="dv">1</span><span class="sc">-</span><span class="fu">exp</span>(<span class="sc">-</span><span class="dv">2</span><span class="sc">*</span><span class="dv">1</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8646647</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href=""></a><span class="co"># Percent transitioning to B within 0.25 year</span></span>
+<span id="cb27-2"><a href=""></a><span class="fu">sum</span>(time_to_B <span class="sc">&lt;</span> .<span class="dv">25</span>) <span class="sc">/</span> <span class="fu">length</span>(time_to_B)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.393025</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href=""></a> <span class="co"># 0.25-year transition prob using rate-to-prob</span></span>
+<span id="cb29-2"><a href=""></a><span class="dv">1</span><span class="sc">-</span><span class="fu">exp</span>(<span class="sc">-</span><span class="dv">2</span><span class="sc">*</span><span class="fl">0.25</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.3934693</code></pre>
+</div>
+</div>
+</section>
+<section id="simulating-competing-events" class="slide level2">
+<h2>Simulating competing events</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href=""></a><span class="co"># sample time-to-transition,  200,000 individuals, 1 transition per person-year</span></span>
+<span id="cb31-2"><a href=""></a>time_to_C <span class="ot">&lt;-</span> <span class="fu">rexp</span>(<span class="dv">200000</span>, <span class="at">rate =</span> <span class="dv">1</span>)</span>
+<span id="cb31-3"><a href=""></a></span>
+<span id="cb31-4"><a href=""></a>next_event <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(time_to_B<span class="sc">&lt;</span>time_to_C,<span class="st">"B"</span>,<span class="st">"C"</span>)</span>
+<span id="cb31-5"><a href=""></a>time_to_next_event <span class="ot">&lt;-</span> <span class="fu">pmin</span>(time_to_B, time_to_C)</span>
+<span id="cb31-6"><a href=""></a></span>
+<span id="cb31-7"><a href=""></a>dt <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="st">"next_event"</span> <span class="ot">=</span> next_event, <span class="st">"time"</span> <span class="ot">=</span> time_to_next_event)</span>
+<span id="cb31-8"><a href=""></a><span class="fu">head</span>(dt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  next_event   time
+  &lt;chr&gt;       &lt;dbl&gt;
+1 C          0.0995
+2 C          0.286 
+3 B          0.198 
+4 B          0.0672
+5 B          0.231 
+6 B          0.340 </code></pre>
+</div>
+</div>
+</section>
+<section id="simulating-competing-events-1-year-cycle" class="slide level2">
+<h2>Simulating competing events 1-year cycle</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href=""></a><span class="co"># Simulated 1-year transtions from A</span></span>
+<span id="cb33-2"><a href=""></a>fromA_1yr <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb33-3"><a href=""></a>  <span class="st">"to A"</span> <span class="ot">=</span> <span class="fu">sum</span>(dt<span class="sc">$</span>time <span class="sc">&gt;=</span> <span class="dv">1</span>),</span>
+<span id="cb33-4"><a href=""></a>  <span class="st">"to B"</span> <span class="ot">=</span> <span class="fu">sum</span>(dt[next_event<span class="sc">==</span><span class="st">"B"</span>,]<span class="sc">$</span>time <span class="sc">&lt;</span> <span class="dv">1</span>),</span>
+<span id="cb33-5"><a href=""></a>  <span class="st">"to C"</span> <span class="ot">=</span> <span class="fu">sum</span>(dt[next_event<span class="sc">==</span><span class="st">"C"</span>,]<span class="sc">$</span>time <span class="sc">&lt;</span> <span class="dv">1</span>))<span class="sc">/</span><span class="fu">nrow</span>(dt)</span>
+<span id="cb33-6"><a href=""></a>fromA_1yr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    to A     to B     to C 
+0.049980 0.634285 0.315735 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href=""></a><span class="fu">expm</span>(rate_matrix<span class="sc">*</span><span class="dv">1</span>) <span class="co"># 1 year transition matrix</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           A         B         C
+A 0.04978707 0.6334753 0.3167376
+B 0.00000000 1.0000000 0.0000000
+C 0.00000000 0.0000000 1.0000000</code></pre>
+</div>
+</div>
+</section>
+<section id="simulating-competing-events-0.25-year-cycle" class="slide level2">
+<h2>Simulating competing events 0.25-year cycle</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href=""></a><span class="co"># Simulated 0.25-year transtions from A</span></span>
+<span id="cb37-2"><a href=""></a>fromA_0<span class="fl">.25</span>yr <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb37-3"><a href=""></a>  <span class="st">"to A"</span> <span class="ot">=</span> <span class="fu">sum</span>(dt<span class="sc">$</span>time <span class="sc">&gt;=</span> <span class="fl">0.25</span>),</span>
+<span id="cb37-4"><a href=""></a>  <span class="st">"to B"</span> <span class="ot">=</span> <span class="fu">sum</span>(dt[next_event<span class="sc">==</span><span class="st">"B"</span>,]<span class="sc">$</span>time <span class="sc">&lt;</span> <span class="fl">0.25</span>),</span>
+<span id="cb37-5"><a href=""></a>  <span class="st">"to C"</span> <span class="ot">=</span> <span class="fu">sum</span>(dt[next_event<span class="sc">==</span><span class="st">"C"</span>,]<span class="sc">$</span>time <span class="sc">&lt;</span> <span class="fl">0.25</span>))<span class="sc">/</span><span class="fu">nrow</span>(dt)</span>
+<span id="cb37-6"><a href=""></a>fromA_0<span class="fl">.25</span>yr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    to A     to B     to C 
+0.472525 0.351935 0.175540 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href=""></a><span class="fu">expm</span>(rate_matrix<span class="sc">*</span><span class="fl">0.25</span>) <span class="co"># 1 year transition matrix</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          A         B         C
+A 0.4723666 0.3517556 0.1758778
+B 0.0000000 1.0000000 0.0000000
+C 0.0000000 0.0000000 1.0000000</code></pre>
+</div>
+</div>
+</section>
+<section id="what-if-b-a-is-possible" class="slide level2">
+<h2>What if B → A is possible?</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href=""></a>rate_matrix2 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb41-2"><a href=""></a>  <span class="at">data =</span> <span class="fu">c</span>(</span>
+<span id="cb41-3"><a href=""></a>    <span class="sc">-</span>(<span class="dv">2</span><span class="sc">+</span><span class="dv">1</span>), <span class="dv">2</span>, <span class="dv">1</span>,</span>
+<span id="cb41-4"><a href=""></a>    <span class="dv">4</span>, <span class="sc">-</span><span class="dv">4</span>, <span class="dv">0</span>,</span>
+<span id="cb41-5"><a href=""></a>    <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>), <span class="at">byrow =</span> T, <span class="at">nrow =</span> <span class="dv">3</span>,</span>
+<span id="cb41-6"><a href=""></a>  <span class="at">dimnames =</span> <span class="fu">list</span>(</span>
+<span id="cb41-7"><a href=""></a>    <span class="at">from =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>),</span>
+<span id="cb41-8"><a href=""></a>    <span class="at">to =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>))</span>
+<span id="cb41-9"><a href=""></a>)</span>
+<span id="cb41-10"><a href=""></a>rate_matrix2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    to
+from  A  B C
+   A -3  2 1
+   B  4 -4 0
+   C  0  0 0</code></pre>
+</div>
+</div>
+</section>
+<section id="simulating-competing-events-1" class="slide level2">
+<h2>Simulating competing events</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href=""></a><span class="co"># Simulated 1-year transtions from A</span></span>
+<span id="cb43-2"><a href=""></a>fromA <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb43-3"><a href=""></a>  <span class="st">"to A"</span> <span class="ot">=</span> <span class="fu">sum</span>(dt<span class="sc">$</span>time <span class="sc">&gt;=</span> <span class="dv">1</span>),</span>
+<span id="cb43-4"><a href=""></a>  <span class="st">"to B"</span> <span class="ot">=</span> <span class="fu">sum</span>(dt[next_event<span class="sc">==</span><span class="st">"B"</span>,]<span class="sc">$</span>time <span class="sc">&lt;</span> <span class="dv">1</span>),</span>
+<span id="cb43-5"><a href=""></a>  <span class="st">"to C"</span> <span class="ot">=</span> <span class="fu">sum</span>(dt[next_event<span class="sc">==</span><span class="st">"C"</span>,]<span class="sc">$</span>time <span class="sc">&lt;</span> <span class="dv">1</span>))<span class="sc">/</span><span class="fu">nrow</span>(dt)</span>
+<span id="cb43-6"><a href=""></a>fromA</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    to A     to B     to C 
+0.049980 0.634285 0.315735 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href=""></a><span class="fu">expm</span>(rate_matrix2<span class="sc">*</span><span class="dv">1</span>) <span class="co"># 1 year transition matrix</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          A         B         C
+A 0.3140716 0.1852534 0.5006750
+B 0.3705068 0.2214449 0.4080483
+C 0.0000000 0.0000000 1.0000000</code></pre>
+</div>
+</div>
+<p><strong>WHY THE MISMATCH?</strong></p>
+<ul>
+<li><p>We are simulating a single jump process</p></li>
+<li><p>Ignores transitions A → B → A</p></li>
+</ul>
+</section>
+<section id="to-be-continued" class="slide level2">
+<h2>To be continued…</h2>
+<ul>
+<li><p>Will discuss how to address embedding error where returning to states are possible in future class</p></li>
+<li><p>For now, you should know that embedding error is an issue, though most analyses with discrete-time CSTM ignore it</p></li>
 </ul>
 </section>
 <section id="today-4" class="slide level2">
@@ -1059,128 +1339,46 @@ LE = \Sigma_{t=0}^\infty S(t)
 <ul>
 <li><p>Time-varying transitions</p></li>
 <li><p>Time-varying rewards</p></li>
-<li><p>Correcting discrete time error</p></li>
 <li><p>Capturing epidemiological outcomes</p></li>
-<li><p><strong>Differential equation models</strong></p></li>
+<li><p>Discrete time errors</p></li>
+<li><p><strong>Project &amp; open-source model presentation</strong></p></li>
 </ul>
 </section>
-<section id="differential-equation-models" class="slide level2">
-<h2>Differential equation models</h2>
+<section id="non-programming-assignments" class="slide level2">
+<h2>Non-programming assignments</h2>
 <ul>
-<li><p>Most common method for <u><strong>continuous time</strong></u> cohort modeling</p></li>
-<li><p>Transitions depend on how cohort distributed across states (compartments)</p></li>
-<li><p>Very useful for modeling epidemics</p></li>
-<li><p>Often approximated with difference equations</p></li>
+<li><p>Presentation of a published open-source modelling analysis (Th 12 March)</p></li>
+<li><p>Course project</p>
+<ul>
+<li><p>Proposal (due Fr 26 Feb)</p></li>
+<li><p>In-class presentation (Th 9 Apr)</p></li>
+<li><p>Report + code (Th 16 Apr)</p></li>
+</ul></li>
 </ul>
+<p><a href="http://htmlpreview.github.io/?https://github.com/altonrus/epib-678/blob/main/syllabus/info_assignments_nonprogramming.html">Information available in syllabus folder of class Github page</a></p>
 </section>
-<section id="differential-equation-models-1" class="slide level2">
-<h2>Differential equation models</h2>
-<p>Similarities to discrete time CSTMs</p>
-<ul>
-<li><p>Individual in one state (compartment) at a time</p></li>
-<li><p>Individuals in state treated identically</p></li>
-<li><p>Transition between states over time</p></li>
-</ul>
-<p>Differences from discrete time CSTMs</p>
-<ul>
-<li><p>Continuous time (unless using difference eqn approximation)</p></li>
-<li><p>Transition rates can depend how population cohort is distributed across states in that instant</p></li>
-</ul>
-</section>
-<section id="sir-model" class="slide level2">
-<h2>SIR model</h2>
-<p>Three states: <u><strong>S</strong></u>usceptible, <u><strong>I</strong></u>nfectious, <u><strong>R</strong></u>emoved (recovered or dead)</p>
-<p>Infection rate <span class="math inline">\(\beta\)</span> governs S <span class="math inline">\(\rightarrow\)</span> I</p>
-<p>Removal rate <span class="math inline">\(\mu\)</span> governs S <span class="math inline">\(\rightarrow\)</span> R</p>
-
-<img data-src="figs/sir_compartments.png" class="r-stretch"></section>
-<section id="differential-equations-for-sir" class="slide level2">
-<h2>Differential equations for SIR</h2>
-<div class="columns">
-<div class="column" style="width:40%;">
-<p><span class="math display">\[
-\begin{aligned}
-&amp;\frac{dS}{dt}= -\beta S I\\
-&amp;\frac{dI}{dt} = \beta S I - \mu I\\
-&amp;\frac{dR}{dt} = \mu I
-\end{aligned}
-\]</span></p>
-</div><div class="column" style="width:60%;">
-<p><span class="math display">\[
-\begin{aligned}
-&amp;S(t+m) = S(t) + \int_t^m -\beta S I dt\\
-&amp;I(t+m) = I(t) + \int_t^m (\beta S I - \mu I)dt\\
-&amp;R(t+m) = R(t) + \int_t^m \mu I dt
-\end{aligned}
-\]</span></p>
-</div></div>
-
-<img data-src="figs/sir_compartments.png" class="r-stretch"></section>
-<section id="sir" class="slide level2">
-<h2>SIR</h2>
-
-<img data-src="figs/sir_slide.png" class="r-stretch"></section>
-<section id="bigger-r0-means-bigger-and-shorter-epidemic" class="slide level2">
-<h2>Bigger R0 means bigger and shorter epidemic</h2>
-
-<img data-src="figs/R0_comparison.png" class="r-stretch"></section>
-<section id="difference-equations-a-discrete-approximation" class="slide level2">
-<h2>Difference equations: a discrete approximation</h2>
-<div class="columns">
-<div class="column" style="width:60%;">
-<p><span class="math display">\[
-\begin{aligned}
-&amp;S(t+m) = S(t) + \int_t^m -\beta S I dt\\
-&amp;I(t+m) = I(t) + \int_t^m (\beta S I - \mu I)dt\\
-&amp;R(t+m) = R(t) + \int_t^m \mu I dt
-\end{aligned}
-\]</span></p>
-</div><div class="column" style="width:40%;">
-<p><span class="math display">\[
-\begin{aligned}
-&amp;S_t = S_{t-1} -\beta^* S_{t-1} I_{t_1}\\
-\\
-&amp;I_t = I_{t-1} + \beta^* S_{t-1} I_{t-1} - \mu^* I_{t-1}\\
-\\
-&amp;R_t = R_{t-1} + \mu^* I_{t-1}
-\end{aligned}
-\]</span></p>
-</div></div>
-<p><span class="math inline">\(\beta^*\)</span> and <span class="math inline">\(\mu^*\)</span> are discrete analogs for <span class="math inline">\(\beta\)</span> and <span class="math inline">\(\mu\)</span> and their value depends on the cycle length.</p>
-</section>
-<section id="open-cohorts-models" class="slide level2">
-<h2>Open cohorts models</h2>
-<ul>
-<li><p>While (Semi)Markov models usually closed, differential eqn models can be open</p></li>
-<li><p>People enter (born, age in, get condition) and leave (die, age out)</p></li>
-<li><p>Cohort size not conserved for open cohorts</p></li>
-</ul>
-
-<img data-src="figs/demographic_sir.png" class="r-stretch"></section>
-<section id="age-structuring" class="slide level2">
-<h2>Age-structuring</h2>
-<ul>
-<li><p>In (Semi-)Markov models, usually build separate models to capture age cohorts</p></li>
-<li><p>For differential eqn model, may need to put age groups in same model for proper transition dynamics</p></li>
-</ul>
-
-<img data-src="figs/age_structured_SIR.png" class="r-stretch"></section>
 <section id="recap" class="slide level2">
 <h2>Recap</h2>
 <ul>
 <li><p>If transitions or rewards are time-varying, can create 3D arrays and select “slice” for each cycle in a loop</p></li>
 <li><p>Cycle tree method corrects discrete time error using a modified transition reward matrix</p></li>
 <li><p>Epidemiological measures can be calculated from a cohort model</p></li>
-<li><p>Differential (difference) equation models useful when distribution of population across states influences transitions (e.g., infectious diseases)</p></li>
 </ul>
 </section>
 <section id="logistics" class="slide level2">
 <h2>Logistics</h2>
 <ul>
-<li>Assignment 1 (cost-effectiveness, decision trees) due Friday 9/13</li>
-<li>Assignment 2 CSTM; due Wednesday 9/25</li>
-<li>Next class: workflow for reproducible research</li>
-<li>Office hours 1:30 - 2:20pm, room #1103</li>
+<li>Complete readings before next class</li>
+<li><strong>Assignment 1</strong> due Friday, January 23 on MyCourses → Assignments
+<ul>
+<li><u><strong>New process:</strong></u>submit Assignment 1 &amp; 2 by uploading to OneDrive folder shared with you</li>
+</ul></li>
+<li><strong>Assignment 2</strong> Cohort state transition models available
+<ul>
+<li>Due Friday, January 30</li>
+<li><strong>More time consuming than usual</strong></li>
+</ul></li>
+<li>Office hours: Mondays 2:30pm to 3:30pm in conference room 1128</li>
 </ul>
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">
@@ -1188,6 +1386,7 @@ LE = \Sigma_{t=0}^\infty S(t)
 </div>
 </div>
 </section>
+
     </div>
   </div>
 

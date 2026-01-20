@@ -2,7 +2,7 @@
 title: "Cohort models 2"
 subtitle: "EPIB  676 session 5, McGill University"
 author: "Alton Russell"
-date: "12 Sep 2024"
+date: "20 Jan 2026"
 format: revealjs
 editor: visual
 ---
@@ -11,7 +11,7 @@ editor: visual
 
 ```{r}
 #| echo: true
-library(heemod) #health economic markov models
+#library(heemod) #health economic markov models
 library(tidyr) #for spread function for wide-to-long table formating
 library(ggplot2) #plotting
 library(expm) #raise matrices to exponents with %^%
@@ -43,9 +43,9 @@ Cycle length: 1 year; Number of cycles: $T=20$
 
 ## Recall: Run a discrete time CSTM
 
-Matrix $M$ stores cohort dist'n after each cycle
+Matrix $M$ stores cohort distribution after each cycle
 
--   $n_s$ columns and $T+1$ rows
+-   $n_s$ columns and $T+1$ rows (starts at $t=0$)
 
 -   Row $t$ contains $m_t$, the cohort's dist'n after cycle $t$
 
@@ -63,15 +63,15 @@ To calculate rewards (costs or QALYs)
 
 -   Time-varying rewards
 
--   Correcting discrete time error
-
 -   Capturing epidemiological outcomes
 
--   Differential equation models
+-   Discrete time errors
 
-## Limit of (pure) Markov model
+-   Project & open-source model presentation
 
--   Transition probabilities often depend on
+## Limits of (pure) Markov model
+
+-   Transition probabilities might depend on
 
     -   **simulation time:** how long the model has been running
 
@@ -110,7 +110,7 @@ ggplot(data=t_other_cause_death, aes(x=Age, y=prob_death))+
 
     -   E.G., other cause death
 
--   A "stack" of transition matrices, one for each cycle
+-   A "**stack"** of transition matrices, one for each cycle
 
 -   $P[i,j,t]$: transition prob. from state $i$ to state $j$ in cycle $t$
 
@@ -185,13 +185,15 @@ M = matrix(rep(0, 4*21), ncol=4,
 for (i in 1:21){
   M[i,] <- m_0 %*% (mat_P %^% (i-1))
 }
+
+# Make cohort trace plot
 t_trace <- as_tibble(M) #convert from matrix
 t_trace$Cycle_num <- 0:20 #add col for cycle number
 t_trace <- t_trace |> #Long to wide
   gather(key=State, value=Count, H:D) #wide to long format
 ```
 
-## Ex: transition array with OCM
+## Ex: 3D transition array with OCM
 
 Cycle length is 1 year, cohort is age 50 at time 0.
 
@@ -208,7 +210,7 @@ for(cycle in 1:20){
   age = 50+cycle-1
   #.  get prob. other cause mortality from table
   p_OCM <- t_other_cause_death[t_other_cause_death$Age==age,"prob_death"]
-  #.  Adjust all probs DOWN to "make room" for OCM
+  #.  Adjust all probs DOWN by 1 - p_OCM to "make room" for OCM
   mat_P_this_year = mat_P*(1-p_OCM)
   #.  Adjust prob. transitioning to death UP to account for OCM
   mat_P_this_year[,"D"]<-mat_P_this_year[,"D"]+p_OCM
@@ -267,11 +269,11 @@ ggplot(data=t_trace_compare, aes(x=Cycle_num, y=Count, color=State))+
 
 -   **Time-varying rewards**
 
--   Correcting discrete time error
-
 -   Capturing epidemiological outcomes
 
--   Differential equation models
+-   Discrete time errors
+
+-   Project & open-source model presentation
 
 ## Recall: reward matrices
 
@@ -308,7 +310,7 @@ $$
 
 ## Alternative: 2D matrix in-loop
 
-If you don't like 3D arrays, instead generate cycle-specific 2D matrices within your for loop
+If you don't like 3D arrays, you can generate cycle-specific 2D matrices within the for loop that loops over cycles.
 
 ```{r}
 #| eval: false
@@ -333,104 +335,15 @@ for(i in 1:n_cycles){
 
 ## Today
 
--   Time-varying transitions and reward**s**
+-   Time-varying transitions
 
 -   Time-varying rewards
-
--   **Correcting discrete time error**
-
--   Capturing epidemiological outcomes
-
--   Differential equation models
-
-## Discrete time error
-
--   In uncorrected models, transitions occur at cycle [**end**]{.underline}
-
--   In real life, transitions occur in continuous time
-
--   Transition probs. are cumulative probability of transitioning [**during**]{.underline} a cycle
-
-## Discrete time error
-
-[![](figs/discretation_error_updown.jpeg)](www.doi.org/10.1177/0272989X13501558)
-
-[Naimark et. al. 2013](https://www.doi.org/10.1177/0272989X13501558)
-
-## Fix 1: Shorter cycle lengths
-
-As cycle length $\rightarrow$ 0, discretization error $\rightarrow$ 0.
-
-**But**, more cycles means more compute needed, and may lead to less interpretable probabilities
-
-Modelers usually use another fix
-
-## Solutions to discrete time error
-
-[![](figs/discretization_corrections.jpg){width="730"}](https://doi.org/10.1101/2020.07.27.20162651)
-
-[Srivastava et. al. 2020](https://doi.org/10.1101/2020.07.27.20162651)
-
-## Simpson's method
-
-Numerical process to approximate integrating a curve
-
-**Simpson's 1/3rd method** (quadratic approximation; requires even number of cycles):
-
--   Multiply reward by 1/3 for first and last cycle
-
--   In between, multiply by 4/3 for odd cycles and 2/3 for even
-
-**Simpson's 3/8 method** (cubic approximation; requires that number of cycles are multiple of 3):
-
--   Multiply reward by 3/8 in first and last cycle
-
--   In between, multiply by 6/8 if mult. of 3 and 9/8 otherwise
-
-## Cycle tree approach
-
--   **Intuition:** If individuals make transitions halfway through a cycle on average, they should incur half the cost (QALY) associated with their "from" state and half the cost (QALY) of their "to" state
-
--   Can be implemented similarly to transition rewards in a reward matrix
-
-$\hat{C}_t =m_{t-1} (P \bigodot C)$ or $\hat{Q}_t =m_{t-1} (P \bigodot Q)$ with C and Q as given on next slide
-
-## Cycle tree transition reward matrices
-
-$$
-\textbf{C}= 
-\begin{bmatrix}
-c_H & .5c_H+.5c_M & .5c_H+.5c_S & .5c_H+.5c_D\\ 
-.5c_M+.5c_H & c_M & .5c_M+.5c_S & .5c_M+.5c_D\\ 
-.5c_S+.5c_H & .5c_S+.5c_M & c_S & .5c_S+.5c_D\\ 
-.5c_D+.5c_H & .5c_D+.5c_M & .5c_D+.5c_S & c_D 
-\end{bmatrix},\\
-\textbf{Q} =
-\begin{bmatrix}
-q_H & .5q_H+.5q_M & .5q_H+.5q_S & .5q_H+.5q_D\\ 
-.5q_M+.5q_H & q_M & .5q_M+.5q_S & .5q_M+.5q_D\\ 
-.5q_S+.5q_H & .5q_S+.5q_M & q_S & .5q_S+.5q_D\\ 
-.5q_D+.5q_H & .5q_D+.5q_M & .5q_D+.5q_S & q_D 
-\end{bmatrix}
-$$
-
-## Comparison of discrete time correction methods
-
-Simpson rule and cycle tree method both good. I find cycle tree method intuitive (and it doesn't matter if total number of cycles are a multiple of 2 or 3)
-
-![[Naimark et. al. 2013](https://doi.org/10.1177/0272989X13501558)](figs/discrete_time_corrections_compare.jpeg)
-
-## Today
-
--   **Time-varying transitions**
-
--   Time-varying rewards
-
--   Correcting discrete time error
 
 -   **Capturing epidemiological outcomes**
 
--   Differential equation models
+-   Discrete time errors
+
+-   Project & open-source model presentation
 
 ## Why capture epidemiologic outcomes
 
@@ -476,17 +389,327 @@ Expected age at death = remaining life expectancy + cohorts age at $t=0$.
 
 ## Incidence
 
--   Proportion of population entering health state at $t$
+-   Proportion of population that enters health state during $t$
 
 -   For a state $j$:
 
-    -   $m_{t-1} P[:,j]$ is the number entering or staying in state $j$ in cycle $t$
+    -   $m_{t-1} P[:,j]$ is the number that **entered or stayed** in state $j$ in cycle $t$
 
-    -   $m_{t-1}^j P[j,j]$ is the number staying in state $j$ in cycle $t$
+    -   $m_{t-1}^j P[j,j]$ is the number **that stayed** in state $j$ in cycle $t$
 
-    -   $m_{t-1} P[:,j] - m_{t-1}^j P[j,j]$ is the number entering state $j$ in cycle $t$
+    -   $m_{t-1} P[:,j] - m_{t-1}^j P[j,j]$ is the number **that entered** state $j$ in cycle $t$
 
--   Divide by number alive at time $t$ to make it a proportion
+-   Divide by number alive at time $t-1$ to make it a proportion
+
+## Today
+
+-   Time-varying transitions and reward**s**
+
+-   Time-varying rewards
+
+-   Capturing epidemiological outcomes
+
+-   **Discrete time errors**
+
+-   Project & open-source model presentation
+
+## Two types of discrete time errors
+
+Using a discrete time approximation for a continuous process can introduce two types
+
+**Integration error:** error due to only allowing transitions at the end of discrete cycles
+
+-   Corrections usually applied
+
+**Embedding error:** misalignment between per-cycle transition probabilities and the underlying continuous process[^1]
+
+[^1]: Source: [Graves et. al. 2021 MDM](https://doi.org/10.1177/0272989X21995805)
+
+-   Not well-recognized; seldom corrected
+
+## Discrete time integration error
+
+-   In uncorrected models, transitions occur at cycle [**end**]{.underline}
+
+-   In real life, transitions occur in continuous time
+
+-   Transition probs. are cumulative probability of transitioning [**during**]{.underline} a cycle
+
+## Discrete time integration error
+
+[![](figs/discretation_error_updown.jpeg)](www.doi.org/10.1177/0272989X13501558)
+
+[Naimark et. al. 2013](https://www.doi.org/10.1177/0272989X13501558)
+
+## Fix 1: Shorter cycle lengths
+
+As cycle length $\rightarrow$ 0, discretization error $\rightarrow$ 0.
+
+**But**, more cycles means more compute needed, and may lead to less interpretable probabilities
+
+Modelers usually use another fix
+
+## Solutions to discrete time error
+
+[![](figs/discretization_corrections.jpg){width="730"}](https://doi.org/10.1101/2020.07.27.20162651)
+
+[Srivastava et. al. 2020](https://doi.org/10.1101/2020.07.27.20162651)
+
+## Simpson's method
+
+Numerical process to approximate integrating a curve
+
+**Simpson's 1/3rd method** (quadratic approximation; requires even number of cycles):
+
+-   Multiply reward by 1/3 for first and last cycle
+
+-   In between, multiply by 4/3 for odd cycles and 2/3 for even
+
+**Simpson's 3/8 method** (cubic approximation; requires that number of cycles are multiple of 3):
+
+-   Multiply reward by 3/8 in first and last cycle
+
+-   In between, multiply by 6/8 if mult. of 3 and 9/8 otherwise
+
+## Cycle tree approach
+
+-   **Intuition:** If individuals make transitions halfway through a cycle on average, they should incur half the cost (QALY) associated with their "from" state and half the cost (QALY) of their "to" state
+
+-   Implementation similar to transition rewards using a reward matrix
+
+$\hat{C}_t =m_{t-1} (P \bigodot C)$ or $\hat{Q}_t =m_{t-1} (P \bigodot Q)$ with C and Q as given on next slide
+
+## Cycle tree transition reward matrices
+
+$$
+\textbf{C}= 
+\begin{bmatrix}
+c_H & .5c_H+.5c_M & .5c_H+.5c_S & .5c_H+.5c_D\\ 
+.5c_M+.5c_H & c_M & .5c_M+.5c_S & .5c_M+.5c_D\\ 
+.5c_S+.5c_H & .5c_S+.5c_M & c_S & .5c_S+.5c_D\\ 
+.5c_D+.5c_H & .5c_D+.5c_M & .5c_D+.5c_S & c_D 
+\end{bmatrix},\\
+\textbf{Q} =
+\begin{bmatrix}
+q_H & .5q_H+.5q_M & .5q_H+.5q_S & .5q_H+.5q_D\\ 
+.5q_M+.5q_H & q_M & .5q_M+.5q_S & .5q_M+.5q_D\\ 
+.5q_S+.5q_H & .5q_S+.5q_M & q_S & .5q_S+.5q_D\\ 
+.5q_D+.5q_H & .5q_D+.5q_M & .5q_D+.5q_S & q_D 
+\end{bmatrix}
+$$
+
+## Comparing integration error corrections
+
+Simpson rule and cycle tree method perform similarly. I find cycle tree method intuitive (and it doesn't matter if total number of cycles are a multiple of 2 or 3)
+
+![[Naimark et. al. 2013](https://doi.org/10.1177/0272989X13501558)](figs/discrete_time_corrections_compare_ARedits.png)
+
+## Embedding error
+
+-   Misalignment between transition probabilities and underlying continuous-time process
+
+-   Occurs when:
+
+    -   literature-based parameters are transformed and embedded using common rate-to-prob formala $P = 1 - e^{-rt}$
+
+    -   Competing events (transitions to \>1 state possible)
+
+## Solving embedding error
+
+Vast majority of analyses do not address. But you can:
+
+-   Use continuous time rate matrix $Q$ to represent transition rates
+-   Convert to discrete time transition matrix $P$ using matrix exponential: $P = e^{Qt}$
+
+## Revisiting rate-to-prob formula
+
+$$
+p(t) = 1 - e^{-rt} \quad r = -\frac{1}{t}log(1-p)
+$$
+
+Exactly correct [**iff**]{.underline}:
+
+-   Transitions are independent with constant average rate
+
+    -   Poisson point process, exponentially distributed events
+
+-   No competing events
+
+    -   Only 1 possible transition from each state
+
+## Continuous time rate matrix Q
+
+-   Off-diagonal entries are transition rates $r_{i \rightarrow j}$
+-   Diagonal entries are negative sum of rates out of state $i$
+-   Rows sum to 0
+
+$3x3$ example:
+
+$$
+Q =
+\begin{bmatrix}
+-(r_{1 \rightarrow 2}+r_{1 \rightarrow 3}) & r_{1 \rightarrow 2} & r_{1 \rightarrow 3}\\
+r_{2 \rightarrow 1} & -(r_{2 \rightarrow 1}+r_{2 \rightarrow 3}) & r_{2 \rightarrow 3}\\
+r_{3 \rightarrow 1} & r_{3 \rightarrow 2} & -(r_{3 \rightarrow 1}+r_{3 \rightarrow 2})
+\end{bmatrix}
+$$
+
+## Rate matrix example
+
+```{r}
+#| eval: true
+#| echo: true
+
+rate_matrix <- matrix(
+  data = c(
+    -(2+1), 2, 1,
+    0, 0, 0,
+    0, 0, 0), byrow = T, nrow = 3,
+  dimnames = list(
+    from = c("A", "B", "C"),
+    to = c("A", "B", "C"))
+)
+rate_matrix
+```
+
+Note: absorbing states have 0 rates out, so row of 0s
+
+## Rate matrix → transition matrix
+
+$$
+T_{prob} = e^{Qt}
+$$
+
+$Q$ is the continuous rate matrix; $t$ is the discrete cycle length
+
+```{r}
+#| eval: true
+#| echo: true
+expm(rate_matrix*1) # 1 year transition matrix
+expm(rate_matrix*0.25) # 0.25 year transition matrix
+```
+
+Note: calculate matrix exponential using $expm::expm()$
+
+## Simulating single event
+
+```{r}
+#| eval: true
+#| echo: true
+
+# sample time-to-transition,  200,000 individual, 
+time_to_B <- rexp(200000, rate = 2) # RATE: 2 transitions per person year
+hist(time_to_B)
+```
+
+## Rate-to-prob works with single event
+
+```{r}
+#| eval: true
+#| echo: true
+
+mean(time_to_B) # Mean time to transition to B
+median(time_to_B) # Median time to transition to B
+# Percent transitioning to B within 1 year
+sum(time_to_B < 1) / length(time_to_B) 
+# 1-year transitioning prob using rate-to-prob
+1-exp(-2*1) 
+# Percent transitioning to B within 0.25 year
+sum(time_to_B < .25) / length(time_to_B)
+ # 0.25-year transition prob using rate-to-prob
+1-exp(-2*0.25)
+```
+
+## Simulating competing events
+
+```{r}
+#| eval: true
+#| echo: true
+
+# sample time-to-transition,  200,000 individuals, 1 transition per person-year
+time_to_C <- rexp(200000, rate = 1)
+
+next_event <- ifelse(time_to_B<time_to_C,"B","C")
+time_to_next_event <- pmin(time_to_B, time_to_C)
+
+dt <- tibble("next_event" = next_event, "time" = time_to_next_event)
+head(dt)
+```
+
+## Simulating competing events 1-year cycle
+
+```{r}
+#| eval: true
+#| echo: true
+
+# Simulated 1-year transtions from A
+fromA_1yr <- c(
+  "to A" = sum(dt$time >= 1),
+  "to B" = sum(dt[next_event=="B",]$time < 1),
+  "to C" = sum(dt[next_event=="C",]$time < 1))/nrow(dt)
+fromA_1yr
+expm(rate_matrix*1) # 1 year transition matrix
+```
+
+## Simulating competing events 0.25-year cycle
+
+```{r}
+#| eval: true
+#| echo: true
+
+# Simulated 0.25-year transtions from A
+fromA_0.25yr <- c(
+  "to A" = sum(dt$time >= 0.25),
+  "to B" = sum(dt[next_event=="B",]$time < 0.25),
+  "to C" = sum(dt[next_event=="C",]$time < 0.25))/nrow(dt)
+fromA_0.25yr
+expm(rate_matrix*0.25) # 1 year transition matrix
+```
+
+## What if B → A is possible?
+
+```{r}
+#| eval: true
+#| echo: true
+
+rate_matrix2 <- matrix(
+  data = c(
+    -(2+1), 2, 1,
+    4, -4, 0,
+    0, 0, 0), byrow = T, nrow = 3,
+  dimnames = list(
+    from = c("A", "B", "C"),
+    to = c("A", "B", "C"))
+)
+rate_matrix2
+```
+
+## Simulating competing events
+
+```{r}
+#| eval: true
+#| echo: true
+
+# Simulated 1-year transtions from A
+fromA <- c(
+  "to A" = sum(dt$time >= 1),
+  "to B" = sum(dt[next_event=="B",]$time < 1),
+  "to C" = sum(dt[next_event=="C",]$time < 1))/nrow(dt)
+fromA
+expm(rate_matrix2*1) # 1 year transition matrix
+```
+
+**WHY THE MISMATCH?**
+
+-   We are simulating a single jump process
+
+-   Ignores transitions A → B → A
+
+## To be continued...
+
+-   Will discuss how to address embedding error where returning to states are possible in future class
+
+-   For now, you should know that embedding error is an issue, though most analyses with discrete-time CSTM ignore it
 
 ## Today
 
@@ -494,127 +717,25 @@ Expected age at death = remaining life expectancy + cohorts age at $t=0$.
 
 -   Time-varying rewards
 
--   Correcting discrete time error
-
 -   Capturing epidemiological outcomes
 
--   **Differential equation models**
+-   Discrete time errors
 
-## Differential equation models
+-   **Project & open-source model presentation**
 
--   Most common method for [**continuous time**]{.underline} cohort modeling
+## Non-programming assignments
 
--   Transitions depend on how cohort distributed across states (compartments)
+-   Presentation of a published open-source modelling analysis (Th 12 March)
 
--   Very useful for modeling epidemics
+-   Course project
 
--   Often approximated with difference equations
+    -   Proposal (due Fr 26 Feb)
 
-## Differential equation models
+    -   In-class presentation (Th 9 Apr)
 
-Similarities to discrete time CSTMs
+    -   Report + code (Th 16 Apr)
 
--   Individual in one state (compartment) at a time
-
--   Individuals in state treated identically
-
--   Transition between states over time
-
-Differences from discrete time CSTMs
-
--   Continuous time (unless using difference eqn approximation)
-
--   Transition rates can depend how population cohort is distributed across states in that instant
-
-## SIR model
-
-Three states: [**S**]{.underline}usceptible, [**I**]{.underline}nfectious, [**R**]{.underline}emoved (recovered or dead)
-
-Infection rate $\beta$ governs S $\rightarrow$ I
-
-Removal rate $\mu$ governs S $\rightarrow$ R
-
-![](figs/sir_compartments.png)
-
-## Differential equations for SIR
-
-::: columns
-::: {.column width="40%"}
-$$
-\begin{aligned}
-&\frac{dS}{dt}= -\beta S I\\
-&\frac{dI}{dt} = \beta S I - \mu I\\
-&\frac{dR}{dt} = \mu I
-\end{aligned}
-$$
-:::
-
-::: {.column width="60%"}
-$$
-\begin{aligned}
-&S(t+m) = S(t) + \int_t^m -\beta S I dt\\
-&I(t+m) = I(t) + \int_t^m (\beta S I - \mu I)dt\\
-&R(t+m) = R(t) + \int_t^m \mu I dt
-\end{aligned}
-$$
-:::
-:::
-
-![](figs/sir_compartments.png)
-
-## SIR
-
-![](figs/sir_slide.png)
-
-## Bigger R0 means bigger and shorter epidemic
-
-![](figs/R0_comparison.png)
-
-## Difference equations: a discrete approximation
-
-::: columns
-::: {.column width="60%"}
-$$
-\begin{aligned}
-&S(t+m) = S(t) + \int_t^m -\beta S I dt\\
-&I(t+m) = I(t) + \int_t^m (\beta S I - \mu I)dt\\
-&R(t+m) = R(t) + \int_t^m \mu I dt
-\end{aligned}
-$$
-:::
-
-::: {.column width="40%"}
-$$
-\begin{aligned}
-&S_t = S_{t-1} -\beta^* S_{t-1} I_{t_1}\\
-\\
-&I_t = I_{t-1} + \beta^* S_{t-1} I_{t-1} - \mu^* I_{t-1}\\
-\\
-&R_t = R_{t-1} + \mu^* I_{t-1}
-\end{aligned}
-$$
-:::
-:::
-
-$\beta^*$ and $\mu^*$ are discrete analogs for $\beta$ and $\mu$ and their value depends on the cycle length.
-
-## Open cohorts models
-
--   While (Semi)Markov models usually closed, differential eqn models can be open
-
--   People enter (born, age in, get condition) and leave (die, age out)
-
--   Cohort size not conserved for open cohorts
-
-![](figs/demographic_sir.png)
-
-## Age-structuring
-
--   In (Semi-)Markov models, usually build separate models to capture age cohorts
-
--   For differential eqn model, may need to put age groups in same model for proper transition dynamics
-
-![](figs/age_structured_SIR.png)
+[Information available in syllabus folder of class Github page](http://htmlpreview.github.io/?https://github.com/altonrus/epib-678/blob/main/syllabus/info_assignments_nonprogramming.html)
 
 ## Recap
 
@@ -624,11 +745,12 @@ $\beta^*$ and $\mu^*$ are discrete analogs for $\beta$ and $\mu$ and their value
 
 -   Epidemiological measures can be calculated from a cohort model
 
--   Differential (difference) equation models useful when distribution of population across states influences transitions (e.g., infectious diseases)
-
 ## Logistics
 
--   Assignment 1 (cost-effectiveness, decision trees) due Friday 9/13
--   Assignment 2 CSTM; due Wednesday 9/25
--   Next class: workflow for reproducible research
--   Office hours 1:30 - 2:20pm, room #1103
+-   Complete readings before next class
+-   **Assignment 1** due Friday, January 23 on MyCourses → Assignments
+    -   [**New process:**]{.underline}submit Assignment 1 & 2 by uploading to OneDrive folder shared with you
+-   **Assignment 2** Cohort state transition models available
+    -   Due Friday, January 30
+    -   **More time consuming than usual**
+-   Office hours: Mondays 2:30pm to 3:30pm in conference room 1128

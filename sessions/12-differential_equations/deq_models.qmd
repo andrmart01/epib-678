@@ -1,0 +1,156 @@
+---
+title: "Differential equations modells"
+subtitle: "EPIB  676 session 12, McGill University"
+author: "Alton Russell"
+date: "12 Feb 2026"
+format: revealjs
+editor: visual
+---
+
+## Packages
+
+```{r}
+#| echo: true
+
+
+#use install.packages("Package") for any you don't have already
+
+theme_set(theme_bw()) #set ggplot theme
+```
+
+## Today
+
+-   **Intro to DEQ and compartmental infectious disease models**
+
+## Differential equation models
+
+-   Most common method for [**continuous time**]{.underline} cohort modeling
+
+-   Transitions depend on how cohort distributed across states (compartments)
+
+-   Very useful for modeling epidemics
+
+-   Often approximated with difference equations
+
+## Differential equation models
+
+Similarities to discrete time CSTMs
+
+-   Individual in one state (compartment) at a time
+
+-   Individuals in state treated identically
+
+-   Transition between states over time
+
+Differences from discrete time CSTMs
+
+-   Continuous time (unless using difference eqn approximation)
+
+-   Transition rates can depend how population cohort is distributed across states in that instant
+
+## SIR model
+
+Three states: [**S**]{.underline}usceptible, [**I**]{.underline}nfectious, [**R**]{.underline}emoved (recovered or dead)
+
+Infection rate $\beta$ governs S $\rightarrow$ I
+
+Removal rate $\mu$ governs S $\rightarrow$ R
+
+![](figs/sir_compartments.png)
+
+## Differential equations for SIR
+
+::::: columns
+::: {.column width="40%"}
+$$
+\begin{aligned}
+&\frac{dS}{dt}= -\beta S I\\
+&\frac{dI}{dt} = \beta S I - \mu I\\
+&\frac{dR}{dt} = \mu I
+\end{aligned}
+$$
+:::
+
+::: {.column width="60%"}
+$$
+\begin{aligned}
+&S(t+m) = S(t) + \int_t^m -\beta S I dt\\
+&I(t+m) = I(t) + \int_t^m (\beta S I - \mu I)dt\\
+&R(t+m) = R(t) + \int_t^m \mu I dt
+\end{aligned}
+$$
+:::
+:::::
+
+![](figs/sir_compartments.png)
+
+## SIR
+
+![](figs/sir_slide.png)
+
+## Bigger R0 means bigger and shorter epidemic
+
+![](figs/R0_comparison.png)
+
+## Difference equations: a discrete approximation
+
+::::: columns
+::: {.column width="60%"}
+$$
+\begin{aligned}
+&S(t+m) = S(t) + \int_t^m -\beta S I dt\\
+&I(t+m) = I(t) + \int_t^m (\beta S I - \mu I)dt\\
+&R(t+m) = R(t) + \int_t^m \mu I dt
+\end{aligned}
+$$
+:::
+
+::: {.column width="40%"}
+$$
+\begin{aligned}
+&S_t = S_{t-1} -\beta^* S_{t-1} I_{t_1}\\
+\\
+&I_t = I_{t-1} + \beta^* S_{t-1} I_{t-1} - \mu^* I_{t-1}\\
+\\
+&R_t = R_{t-1} + \mu^* I_{t-1}
+\end{aligned}
+$$
+:::
+:::::
+
+$\beta^*$ and $\mu^*$ are discrete analogs for $\beta$ and $\mu$ and their value depends on the cycle length.
+
+## Open cohorts models
+
+-   While (Semi)Markov models usually closed, differential eqn models can be open
+
+-   People enter (born, age in, get condition) and leave (die, age out)
+
+-   Cohort size not conserved for open cohorts
+
+![](figs/demographic_sir.png)
+
+## Age-structuring
+
+-   In (Semi-)Markov models, usually build separate models to capture age cohorts
+
+-   For differential eqn model, may need to put age groups in same model for proper transition dynamics
+
+![](figs/age_structured_SIR.png)
+
+## Recap
+
+-   If transitions or rewards are time-varying, can create 3D arrays and select "slice" for each cycle in a loop
+
+-   Cycle tree method corrects discrete time error using a modified transition reward matrix
+
+-   Epidemiological measures can be calculated from a cohort model
+
+-   Differential (difference) equation models useful when distribution of population across states influences transitions (e.g., infectious diseases)
+
+## Logistics
+
+-   Assignment 1 (cost-effectiveness, decision trees) due Friday 9/13
+-   Assignment 2 CSTM; due Wednesday 9/25
+-   Next class: workflow for reproducible research
+-   Office hours 1:30 - 2:20pm, room #1103
