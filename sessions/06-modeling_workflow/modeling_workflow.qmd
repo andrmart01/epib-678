@@ -2,21 +2,11 @@
 title: "Reproducible modeling workflow"
 subtitle: "EPIB  676 session 6, McGill University"
 author: "Alton Russell"
-date: "17 Sep 2024"
+date: "22 Jan 2026"
 format: revealjs
 editor: visual
 ---
 
-
-## TO EXPLORE FOR UPDATING
-
-<https://quarto.org/docs/manuscripts/>
-
-<https://mine.quarto.pub/quarto-manuscripts-rmed/#/title-slide>
-
-<https://quarto.org/docs/blog/posts/2023-05-22-quarto-for-academics/>
-
-<https://claudiozandonella.github.io/trackdown/>
 
 ## Today
 
@@ -182,7 +172,7 @@ Increase reproducibility without sharing data with
 
 -  Use console when developing code, but 'restart r and clear output' before final run
 
--  Set global options to maximize reproducibility
+-  Can set global options to maximize reproducibility
 
 ![](figs/rstudio-global-options.jpeg)
 ## Renv
@@ -247,7 +237,7 @@ Increase reproducibility without sharing data with
 
 - Based on Linux distribution (usually Ubuntu)
 
--  On new machine (with Linux), you can create the container based on the image
+-  On new machine (with Linux), you can load the container based on the image
 
 ## Literate programming
 
@@ -285,6 +275,7 @@ Permanent third-party repo \> github repo
 Can clone or download my template here:
 
 <https://github.com/altonrus/generic-project>
+
 
 ## R project organization
 
@@ -624,7 +615,17 @@ It talks longer to write inline code than hard-code numbers.
 -   Two options
 
    - Upload manually 
-   - :ink Github account and auto-update Zenodo whenever making a 'release' on Github
+   - Link Github account and auto-update Zenodo whenever making a 'release' on Github
+   
+## Quarto Manuscripts
+
+Nice system. I will likely change my template to use this (eventually)
+
+<https://mine.quarto.pub/quarto-manuscripts-rmed/#/title-slide>
+
+<https://quarto.org/docs/manuscripts/>
+
+<https://quarto.org/docs/blog/posts/2023-05-22-quarto-for-academics/>
 
 ## Example: Evaluating COVID-19 quarantine and testing policies for arriving travelers
 
@@ -653,15 +654,12 @@ It talks longer to write inline code than hard-code numbers.
 
 -  [Quarto journal extensions](https://quarto.org/docs/extensions/listing-journals.html)
 
-## Non-programing assignments
-
-See [Info for non-programming assignments](https://htmlpreview.github.io/?https://github.com/altonrus/epib-676/blob/main/syllabus/info_assignments_nonprogramming.html) in syllabus folder of Github.
-
--   Project proposal due Nov. 1
--   Open-source modelling presentations Nov. 5
-
 ## Logistics
 
--   Assignment 2 CSTM due Wednesday 9/25
--   Next 3 classes on simulation
--   Office hours 1:30 - 2:30pm, room #1103
+-   Complete readings before next class
+-   **Assignment 1** due Friday, January 23 ~~on MyCourses → Assignments~~
+    -   [**New process:**]{.underline} submit Assignment 0 & 1 by uploading to OneDrive folder shared with you by Friday
+-   **Assignment 2** Cohort state transition models available
+    -   Due Friday, January 30
+    -   **More time consuming than usual**
+-   Office hours: Mondays 2:30pm to 3:30pm, room 1128
