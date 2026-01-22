@@ -105,14 +105,9 @@ Manuscript is an advertisement. The product is the associated work
 
 **Messy code \>\>\> No code!**
 
-## "Data available on request"
+## "Data available on reasonable request"[^1]
 
-Gabelica et. al.[^2] found:
-
-[^2]: Gabelica, Bojčić, and Puljakc 2022. *Journal of Clinical Epidemiology* 2022. <https://doi.org/10.1016/j.jclinepi.2022.05.019>
-
--   3416 of 3556 articles (96%) included data availability statements
-
+-   3416 of 3556 articles (96%) in BMC-family journals pubilshed in Jan 2019 included data availability statements
 -   1782 (42%) indicated data available on request, **but**
 
     -   1528 (86%) did not respond
@@ -120,6 +115,9 @@ Gabelica et. al.[^2] found:
     -   131 (7%) declined to share
 
     -   123 (7%) shared their data
+    
+[^1]: Gabelica, Bojčić, and Puljakc 2022. *Journal of Clinical Epidemiology* 2022. <https://doi.org/10.1016/j.jclinepi.2022.05.019>
+
 
 ## "Research should be as open as possible and as closed as necessary"
 
@@ -127,7 +125,7 @@ Gabelica et. al.[^2] found:
 
 <br>
 
-Data sharing isn't always possible
+Data sharing isn't always ethical or permissible
 
 ## Can't share data due to privacy?
 

@@ -1,8 +1,8 @@
 ---
-title: "Simulation 1"
+title: "Intro to microsimulation"
 subtitle: "EPIB  676 session 7, McGill University"
 author: "Alton Russell"
-date: "27 JAn 2026"
+date: "27 Jan 2026"
 format: revealjs
 editor: visual
 ---

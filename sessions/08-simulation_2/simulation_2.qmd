@@ -1,8 +1,8 @@
 ---
-title: "Simulation 2: Efficiency"
+title: "State transition and discrete event simulation"
 subtitle: "EPIB  676 session 8, McGill University"
 author: "Alton Russell"
-date: "24 Sep 2023"
+date: "29 Jan 2026"
 format: revealjs
 editor: visual
 ---
@@ -15,10 +15,10 @@ library(ggplot2)
 library(Rcpp)
 ```
 
-
 ## Today
 
--   **Simulating state transition models**
+-   [**State transition microsimulation**]{.underline}
+-   Discrete event simulation
 
 ## Why simulate a state transition model?
 
@@ -36,17 +36,21 @@ Transitions, costs, health outcomes can depend on complex functions of
 
 ## Tracking individuals
 
-For each variable, use $n_i \times n_t$ matrices, or $n_i \times (n_t+1)$, where $n_i$ is the number of individuals and $n_t$ is the number of cycles.
+For each variable, use $n_i \times n_t$ matrices, or $n_i \times (n_t+1)$, where:
 
-**Setup building on our CSTM notation:**
+-   $n_i$ is the number of individuals
+
+-   $n_t$ is the number of cycles.
+
+**Setup** (building on our CSTM notation)**:**
 
 -   $M_m[i,t]$ matrix gives state of individual $i$ during cycle $t$
 
 -   $M_c[i,t]$ matrix gives costs accrued by individual $i$ during cycle $t$
 
--   $M_e[i,t]$ matrix gives the health outcome accumulated by individual $i$ during cycle $t$
+-   $M_q[i,t]$ matrix gives the QALYs experienced by individual $i$ during cycle $t$
 
--   Can add more
+-   Make such matrices for any characteristic you wish to track over time
 
 ## Sick-sicker sim, Krijkamp et. al. 2018
 
@@ -64,6 +68,10 @@ Open up `sicksicker_microsim_B.R`. We will walk through it together
 
 ![](figs/sim_CSTM_sim_error.png)
 
+## Today
+
+-   State transition microsimulation
+-   [**Discrete event simulation**]{.underline}
 
 ## Credit
 
@@ -227,13 +235,6 @@ cat(paste0("i: ", 1:15, "   event: ", event, "   time: ", time, "\n"))
 -   [r-hta.org tutorial using descem, Alvarez and Ribero](https://r-hta.org/tutorial/descem/)
 
 Dedicated software: Arena, Simul8
-
-
-
-
-
-
-
 
 ## Logistics
 

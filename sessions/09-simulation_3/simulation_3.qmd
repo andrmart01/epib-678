@@ -676,8 +676,6 @@ Fixed cycle lengths usually easier to program
 
 -   [EpiModel R package](https://doi.org/10.18637/jss.v084.i08) (has compartmental and network models)
 
-
-
 ## Today
 
 -   Discrete event simulation
