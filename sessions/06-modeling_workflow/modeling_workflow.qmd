@@ -659,7 +659,7 @@ Nice system. I will likely change my template to use this (eventually)
 -   Complete readings before next class
 -   **Assignment 1** due Friday, January 23 ~~on MyCourses → Assignments~~
     -   [**New process:**]{.underline} submit Assignment 0 & 1 by uploading to OneDrive folder shared with you by Friday
--   **Assignment 2** Cohort state transition models available
-    -   Due Friday, January 30
+-   **Assignment 2** Cohort state transition models due Friday, January 30
     -   **More time consuming than usual**
+    -   Suggest starting before Monday's office hours
 -   Office hours: Mondays 2:30pm to 3:30pm, room 1128

@@ -2,7 +2,7 @@
 title: "Simulation 1"
 subtitle: "EPIB  676 session 7, McGill University"
 author: "Alton Russell"
-date: "19 Sep 2024"
+date: "27 JAn 2026"
 format: revealjs
 editor: visual
 ---
@@ -19,15 +19,13 @@ library(ggplot2)
 
 ## Today
 
--   **Microsimulation basics**
+-   [**Microsimulation basics**]{.underline}
 
 -   Sampling
 
 -   Convergence
 
 -   Simulating decision trees
-
--   Simulating state transition models
 
 ## State explosion: a limit of cohort models
 
@@ -43,13 +41,13 @@ Can quickly become unwieldy:
 
 ## Advantage of microsimulation models
 
--   Explicitly model individuals, not cohorts
+-   Explicitly model **individuals**, not cohorts
 
 -   Capture individual (patient) variation
 
 -   Model diverse pathways
 
--   Simulants' history can impact future events
+-   Individuals' history can impact future events
 
     -   No Markov assumption
 
@@ -65,9 +63,9 @@ Repeated sampling of random numbers to estimate a quantity. Used in risk analysi
 
 -   For several (1000's of) repetitions:
 
-    -   Draw a value for each input
+    -   Sample inputs
 
-    -   Compute outcome
+    -   Compute outcome(s)
 
 -   Aggregate results
 :::
@@ -110,7 +108,7 @@ N = 500000
 monte_carlo_pi(N)
 ```
 
-## Patient level Monte Carlo simulation
+## Patient Monte Carlo simulation
 
 -   Identify **inputs** and assign distributions
 
@@ -124,7 +122,7 @@ monte_carlo_pi(N)
 
     -   Generate a patient
 
-    -   Simulate outcomes under \>1 strategy
+    -   Simulate their outcomes (under \>1 strategy)
 
 -   Aggregate population outcomes under each strategy
 
@@ -134,7 +132,7 @@ monte_carlo_pi(N)
 
 -   Tracks characteristics, health states, outcomes
 
--   [No interactions]{.underline} between individuals
+-   [No interaction]{.underline} between individuals
 
     -   Contagion $\rightarrow$ agent based simulation
     -   Capacity/queues $\rightarrow$ discrete event simulation
@@ -145,7 +143,7 @@ Some use different terminology and consider agent base or discrete event models 
 
 ## "Memory" in a microsimulation
 
-Risks, costs, and health outcomes may depend on any variable you choose to track
+Risks, costs, and health outcomes can depend on any variable you choose to track
 
 -   Patient baseline characteristics
 
@@ -171,7 +169,7 @@ Think [**conditional distributions**]{.underline} (given age, sex, history, etc.
 
 -   "X% of patients would have costs over \$Y" or "adverse event would occur in X% of patients from Y subgroup"
 
-Microsims only capture full variability if parameterized to do so
+[**But**]{.underline}, only capture full variability if parameterized to do so
 
 ## Downside: complexity and compute
 
@@ -199,11 +197,11 @@ Microsims only capture full variability if parameterized to do so
 
 -   Microsimulation basics
 
--   **Sampling in microsimulation**
+-   [**Sampling**]{.underline}
+
+-   Convergence
 
 -   Simulating decision trees
-
--   Simulating cohort state transitions
 
 ## Two levels of uncertainty
 
@@ -217,7 +215,7 @@ Example:
 
 -   Will I get cancer? $\rightarrow$ stochasticity
 
-Microsimulations simulate [stochasticity]{.underline}. Parametric uncertainty assessed through sensitivity analysis (planned for session 11)
+[Stochasticity]{.underline} occurs within a microsimulation run. Parametric uncertainty assessed through sensitivity analysis (more later)
 
 ## Bayesian analog
 
@@ -227,9 +225,9 @@ Posterior distribution describes **parameteric uncertainty**. Sampling distribut
 
 ## Two options for sampling
 
--   **Sampling from distribution**
+-   **Sampling from distributions**
 
--   Sampling from dataset directly
+-   Sampling from datasets
 
 ## Sampling a binary outcome
 
@@ -274,7 +272,7 @@ table(v_race)/length(v_race)
 
 ## Sampling from empirical dist'n
 
-Equivalent to directly sampling from data
+Equivalent to directly sampling single varaible from data
 
 ```{r}
 #| echo: true
@@ -334,13 +332,13 @@ Probabilities, costs, health outcomes can be correlated, could depend on baselin
 
 ## Sample directly or fit distribution?
 
-Reasons to sample directly
+[Why sample directly?]{.underline}
 
 -   No assumptions
 
 -   Sampling \>1 variable for each individual maintains correlation without fancy modeling
 
-Reasons to fit distribution (even if you have data)
+[Why fit distribution (even if you have data)?]{.underline}
 
 -   Small or biased samples may not include full variability of target population
 
@@ -348,13 +346,23 @@ Reasons to fit distribution (even if you have data)
 
 -   Others can run your model even if data cannot be shared
 
+## Today
+
+-   Microsimulation basics
+
+-   Sampling
+
+-   [**Convergence**]{.underline}
+
+-   Simulating decision trees
+
 ## How many patients to simulate?
 
--   Population estimates of interest should not depend on stochasticity (which patient or random numbers happened to be generate)
+-   Population estimates of interest should not depend on stochasticity (which random numbers happened to be used in a simulation repitition)
 
 -   Should simulate enough patients (or repetitions) such that that error due to stochasticity is negligible
 
--   Options
+-   Options for assessing?
 
     1.  Calculate Monte Carlo Standard Error
 
@@ -365,6 +373,7 @@ Reasons to fit distribution (even if you have data)
 ## Running model multiple times
 
 ```{r}
+#| echo: true
 N=1000
 set.seed(100); a = monte_carlo_pi(N)
 set.seed(200); b = monte_carlo_pi(N)
@@ -375,13 +384,17 @@ mean(b)
 mean(c)
 ```
 
-## New version of 'monte_carlo_pi()'
+## Monte Carlo standard error
+
+Requires a new version of `monte_carlo_pi()` that outputs all repititions
 
 ```{r}
+#| echo: true
 mcSim_pi_repetitions = function(N) {
   4*(sqrt(runif(N)^2 + runif(N)^2) <=1)
 }
 mc_output_1000 = mcSim_pi_repetitions(1000)
+
 head(mc_output_1000)
 mean(mc_output_1000)
 
@@ -392,6 +405,7 @@ mean(mc_output_100000)
 ## Monte Carlo standard error
 
 ```{r}
+#| echo: true
 # Monte Carlo standard error N = 1,000
 sqrt(var(mc_output_1000) /1000)
 
@@ -404,6 +418,7 @@ sqrt(var(mc_output_100000) /100000)
 ## Bootstrap resampling
 
 ```{r}
+#| echo: true
 n_boot = 5000
 boot_output_1000 <- replicate(n_boot, 
                          mean(sample(mc_output_1000, N, replace = T)))
@@ -422,11 +437,11 @@ quantile(boot_output_100000, p = c(0.025, 0.975))
 
 -   Microsimulation basics
 
--   Sampling values
+-   Sampling
 
--   **Simulating decision trees**
+-   Convergence
 
--   Simulating state transition models
+-   [**Simulating decision trees**]{.underline}
 
 ## When to simulate decision tree?
 
@@ -450,7 +465,7 @@ quantile(boot_output_100000, p = c(0.025, 0.975))
 
 ## Use case: transfusion-transmitted infections
 
--   Transfused patients may receive a combination of red blood cells, platelets, and plasma
+-   Transfused patients receive some combination of red blood cells, platelets, and/or plasma
 
 -   Infection risk can vary by product
 
@@ -510,8 +525,6 @@ t_simulants |>
 
 ![](figs/simulated_decision_tree_zika.png)
 
-
-
 ## Recap
 
 -   Microsims model individuals' pathways, allow for complex relationships between variables
@@ -522,5 +535,7 @@ t_simulants |>
 
 ## Logistics
 
--   Assignment 2 due 11:59 Wed, Sep 27
--   Assignment 3 available tonight, due Wed, Oct 11
+-   Complete readings before next class
+-   **Assignment 2** Cohort state transition models due Friday, January 30
+    -   **More time consuming than usual**
+-   Office hours: Mondays 2:30pm to 3:30pm, room 1128
