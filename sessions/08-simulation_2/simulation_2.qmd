@@ -17,8 +17,10 @@ library(Rcpp)
 
 ## Today
 
--   [**State transition microsimulation**]{.underline}
--   Discrete event simulation
+-   [**Individual discrete time state transition simulation**]{.underline}
+-   Time to event modelling
+-   Discrete event simulation without capacity constraints
+-   Discrete event simulation with capacity constraints
 
 ## Why simulate a state transition model?
 
@@ -70,8 +72,30 @@ Open up `sicksicker_microsim_B.R`. We will walk through it together
 
 ## Today
 
--   State transition microsimulation
--   [**Discrete event simulation**]{.underline}
+-   Individual discrete time state transition simulation
+-   [**Time to event modelling**]{.underline}
+-   Discrete event simulation without capacity constraints
+-   Discrete event simulation with capacity constraints
+
+## Intensity functions
+
+-   Events (transitions) can be modeled with intensity functions (hazard functions)
+-   Intensity function $\lambda_{ij}(t)$ gives instantaneous risk of transition from state $i$ to $j$ at time $t$
+-   Cumulative intensity function: $\Lambda_{ij}(t) = \int_0^t \lambda_{ij}(u) du$
+
+## Today
+
+-   Individual discrete time state transition simulation
+-   Time to event modelling
+-   [**Discrete event simulation without capacity constraints**]{.underline}
+-   Discrete event simulation with capacity constraints
+
+## Today
+
+-   Individual discrete time state transition simulation
+-   Time to event modelling
+-   Discrete event simulation without capacity constraints
+-   [**Discrete event simulation with capacity constraints**]{.underline}
 
 ## Credit
 
