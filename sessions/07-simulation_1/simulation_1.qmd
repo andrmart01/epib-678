@@ -412,7 +412,7 @@ MCSE goes to 0 as N goes to infinity
 
 ## Monte Carlo standard error
 
-Requires a new version of `monte_carlo_pi()` that outputs all repititions
+To demonstrate, we need a new version of `monte_carlo_pi()` that outputs a vector of all repetitions of the simulation
 
 ```{r}
 #| echo: true
@@ -475,7 +475,7 @@ quantile(boot_output_100000, p = c(0.025, 0.975))
 
 -   Want to model individual-level variability
 
-    -   For what % of patients is the intervention preferred?
+    -   What % of patients have better outcomes with the intervention?
 
 ## Basic procedure
 
