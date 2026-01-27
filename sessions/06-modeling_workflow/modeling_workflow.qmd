@@ -568,14 +568,14 @@ It talks longer to write inline code than hard-code numbers.
 :::
 :::
 
-## Citations: Zotero → Bibtex → .Rmd
+## Citations Zotero→Bibtex→.Qmd
 
 ::: columns
-::: {.column width="40%"}
+::: {.column width="35%"}
 ![](figs/zotero-screenshots.png)
 :::
 
-::: {.column width="60%"}
+::: {.column width="65%"}
 -   Export Zotero collection to Bibtex in same folder as manuscript.qmd
 
 -   To replace default CiteKey, add `Citation Key: <CiteKey>` to 'extra' field

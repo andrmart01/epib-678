@@ -19,6 +19,22 @@ library(ggplot2)
 
 ## Today
 
+-   [**Wrapping up reproducible research with Quarto**]{.underline}
+
+-   Microsimulation basics
+
+-   Sampling
+
+-   Convergence
+
+-   Simulating decision trees
+
+## Wrapping up reproducible research with Quarto
+
+<https://htmlpreview.github.io/?https://github.com/altonrus/epib-678/blob/main/sessions/06-modeling_workflow/modeling_workflow.html#/screenshot-of-knit-manuscript>
+
+## Today
+
 -   [**Microsimulation basics**]{.underline}
 
 -   Sampling
@@ -143,9 +159,9 @@ Some use different terminology and consider agent base or discrete event models 
 
 ## "Memory" in a microsimulation
 
-Risks, costs, and health outcomes can depend on any variable you choose to track
+Risks, costs, and health outcomes can depend on any variable you choose to track:
 
--   Patient baseline characteristics
+-   Patients' baseline characteristics
 
 -   Simulation time (or patient age)
 
@@ -175,7 +191,7 @@ Think [**conditional distributions**]{.underline} (given age, sex, history, etc.
 
 -   Flexibility & functionality comes with complexity
 
--   Harder to program and parameterize
+-   Can be harder to program, parameterize, debug
 
 -   Long runtime, particularly with rare events and without code optimization
 
@@ -272,7 +288,7 @@ table(v_race)/length(v_race)
 
 ## Sampling from empirical dist'n
 
-Equivalent to directly sampling single varaible from data
+Equivalent to directly sampling a single variable from data
 
 ```{r}
 #| echo: true
@@ -324,11 +340,11 @@ Probabilities, costs, health outcomes can be correlated, could depend on baselin
 
 -   Or derive estimate of joint distribution
 
-    -   Iterative proportional fitting ([Husby et. al. 2018)](https://www.microsimulation.pub/articles/00184)
+    -   Iterative proportional fitting [(Husby et. al. 2018)](https://www.microsimulation.pub/articles/00184)
 
     -   Copulas [(Jeong et al 2015)](https://doi.org/10.1371/journal.pone.0159496)
 
-    -   Bayesian parameter calibration (session 11)
+    -   Bayesian parameter calibration (session 13)
 
 ## Sample directly or fit distribution?
 
@@ -383,6 +399,16 @@ mean(a)
 mean(b)
 mean(c)
 ```
+
+## Monte Carlo standard error
+
+For some model outcome $\hat{x}$ (e.g., total or incremental cost or QALy; ICER; etc), the Monte Carlo standard error (MCSE) quantifies variability in $E(X)$ across $N$ simulated individuals due to stochasticity.
+
+$$
+\text{MCSE} = \sqrt{\frac{\text{Var}(\hat{x})}{N}}
+$$
+
+MCSE goes to 0 as N goes to infinity
 
 ## Monte Carlo standard error
 
@@ -535,7 +561,7 @@ t_simulants |>
 
 ## Logistics
 
--   Complete readings before next class
+-   Complete reading before next class
 -   **Assignment 2** Cohort state transition models due Friday, January 30
     -   **More time consuming than usual**
 -   Office hours: Mondays 2:30pm to 3:30pm, room 1128

@@ -738,10 +738,14 @@ $$
 
 -   Can create "discount multiplier vector" and apply to cost and outcomes from each cycle
 
+TO DO: Check if it should be
+
 ```{r}
 #| echo: true
 disc_rate = 0.03; cycle_length = 0.5; n_cycles = 10
+#
 disc_mults <- 1/((1+(disc_rate*cycle_length))^(1:n_cycles))
+# disc_mults <- 1/((1+disc_rate)^((1:n_cycles)*cycle_length))
 disc_mults
 v_costs_per_cycle = rep(1000, n=10)
 sum(v_costs_per_cycle*disc_mults)

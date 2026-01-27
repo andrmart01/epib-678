@@ -417,6 +417,20 @@ Alton Russell
 <section id="today" class="slide level2">
 <h2>Today</h2>
 <ul>
+<li><p><u><strong>Wrapping up reproducible research with Quarto</strong></u></p></li>
+<li><p>Microsimulation basics</p></li>
+<li><p>Sampling</p></li>
+<li><p>Convergence</p></li>
+<li><p>Simulating decision trees</p></li>
+</ul>
+</section>
+<section id="wrapping-up-reproducible-research-with-quarto" class="slide level2">
+<h2>Wrapping up reproducible research with Quarto</h2>
+<p><a href="https://htmlpreview.github.io/?https://github.com/altonrus/epib-678/blob/main/sessions/06-modeling_workflow/modeling_workflow.html#/screenshot-of-knit-manuscript" class="uri">https://htmlpreview.github.io/?https://github.com/altonrus/epib-678/blob/main/sessions/06-modeling_workflow/modeling_workflow.html#/screenshot-of-knit-manuscript</a></p>
+</section>
+<section id="today-1" class="slide level2">
+<h2>Today</h2>
+<ul>
 <li><p><u><strong>Microsimulation basics</strong></u></p></li>
 <li><p>Sampling</p></li>
 <li><p>Convergence</p></li>
@@ -491,7 +505,7 @@ Alton Russell
 <span id="cb2-12"><a href=""></a>N <span class="ot">=</span> <span class="dv">500000</span></span>
 <span id="cb2-13"><a href=""></a><span class="fu">monte_carlo_pi</span>(N)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 3.145288</code></pre>
+<pre><code>[1] 3.141624</code></pre>
 </div>
 </div>
 </section>
@@ -539,9 +553,9 @@ Alton Russell
 </section>
 <section id="memory-in-a-microsimulation" class="slide level2">
 <h2>“Memory” in a microsimulation</h2>
-<p>Risks, costs, and health outcomes can depend on any variable you choose to track</p>
+<p>Risks, costs, and health outcomes can depend on any variable you choose to track:</p>
 <ul>
-<li><p>Patient baseline characteristics</p></li>
+<li><p>Patients’ baseline characteristics</p></li>
 <li><p>Simulation time (or patient age)</p></li>
 <li><p>Patient’s path up until that point</p>
 <ul>
@@ -568,7 +582,7 @@ Alton Russell
 <h2>Downside: complexity and compute</h2>
 <ul>
 <li><p>Flexibility &amp; functionality comes with complexity</p></li>
-<li><p>Harder to program and parameterize</p></li>
+<li><p>Can be harder to program, parameterize, debug</p></li>
 <li><p>Long runtime, particularly with rare events and without code optimization</p></li>
 </ul>
 <p><u><strong>Strategy:</strong></u> get a minimally viable model working, add complexity where warranted</p>
@@ -583,7 +597,7 @@ Alton Russell
 <p><u><strong>Model parameters:</strong></u> probabilities, distributions over outcomes</p>
 <p><u><strong>Model:</strong></u> function that generates individuals and applies parameters to calculate outcomes</p>
 </section>
-<section id="today-1" class="slide level2">
+<section id="today-2" class="slide level2">
 <h2>Today</h2>
 <ul>
 <li><p>Microsimulation basics</p></li>
@@ -627,7 +641,7 @@ Alton Russell
 <span id="cb4-3"><a href=""></a>v_isFemale <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n=</span><span class="dv">100</span>, <span class="at">size=</span><span class="dv">1</span>, <span class="at">p=</span>p_female)</span>
 <span id="cb4-4"><a href=""></a><span class="fu">sum</span>(v_isFemale)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 62</code></pre>
+<pre><code>[1] 73</code></pre>
 </div>
 </div>
 <p>Option 2: sampling from uniform distribution</p>
@@ -636,7 +650,7 @@ Alton Russell
 <span id="cb6-2"><a href=""></a>v_isFemale <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(<span class="fu">runif</span>(<span class="at">n=</span><span class="dv">100</span>) <span class="sc">&lt;</span> <span class="fl">0.7</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
 <span id="cb6-3"><a href=""></a><span class="fu">sum</span>(v_isFemale)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 72</code></pre>
+<pre><code>[1] 61</code></pre>
 </div>
 </div>
 </section>
@@ -655,20 +669,20 @@ Alton Russell
 <div class="cell-output cell-output-stdout">
 <pre><code>v_race
      black indigenous     latino      other      white 
-        12          8         21         20         39 </code></pre>
+         7          4         19         17         53 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href=""></a><span class="co"># Distribution of race in simulated population</span></span>
 <span id="cb10-2"><a href=""></a><span class="fu">table</span>(v_race)<span class="sc">/</span><span class="fu">length</span>(v_race)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>v_race
      black indigenous     latino      other      white 
-      0.12       0.08       0.21       0.20       0.39 </code></pre>
+      0.07       0.04       0.19       0.17       0.53 </code></pre>
 </div>
 </div>
 </section>
 <section id="sampling-from-empirical-distn" class="slide level2">
 <h2>Sampling from empirical dist’n</h2>
-<p>Equivalent to directly sampling single varaible from data</p>
+<p>Equivalent to directly sampling a single variable from data</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href=""></a>v_emp_cost_per_pt <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">240</span>, <span class="dv">345</span>, <span class="dv">191</span>, <span class="dv">560</span>, <span class="dv">434</span>, <span class="dv">123</span>, <span class="dv">640</span>, <span class="dv">260</span>, <span class="dv">257</span>, <span class="dv">231</span>, <span class="dv">1100</span>, <span class="dv">503</span>)</span>
 <span id="cb12-2"><a href=""></a>cost_emp_dist <span class="ot">&lt;-</span> <span class="fu">ecdf</span>(v_emp_cost_per_pt)</span>
@@ -677,7 +691,7 @@ Alton Russell
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href=""></a><span class="co"># Can sample with replacement</span></span>
 <span id="cb13-2"><a href=""></a><span class="fu">sample</span>(v_emp_cost_per_pt, <span class="at">size=</span><span class="dv">10</span>, <span class="at">replace =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] 640 560 503 640 231 240 123 560 345 231</code></pre>
+<pre><code> [1] 503 434 240 434 640 560 191 191 434 260</code></pre>
 </div>
 </div>
 <img data-src="simulation_1_files/figure-revealjs/unnamed-chunk-6-1.png" width="960" class="r-stretch"></section>
@@ -729,9 +743,9 @@ rate  0.905046 1.000000</code></pre>
 </ul></li>
 <li><p>Or derive estimate of joint distribution</p>
 <ul>
-<li><p>Iterative proportional fitting (<a href="https://www.microsimulation.pub/articles/00184">Husby et. al.&nbsp;2018)</a></p></li>
+<li><p>Iterative proportional fitting <a href="https://www.microsimulation.pub/articles/00184">(Husby et. al.&nbsp;2018)</a></p></li>
 <li><p>Copulas <a href="https://doi.org/10.1371/journal.pone.0159496">(Jeong et al 2015)</a></p></li>
-<li><p>Bayesian parameter calibration (session 11)</p></li>
+<li><p>Bayesian parameter calibration (session 13)</p></li>
 </ul></li>
 </ul>
 </section>
@@ -749,7 +763,7 @@ rate  0.905046 1.000000</code></pre>
 <li><p>Others can run your model even if data cannot be shared</p></li>
 </ul>
 </section>
-<section id="today-2" class="slide level2">
+<section id="today-3" class="slide level2">
 <h2>Today</h2>
 <ul>
 <li><p>Microsimulation basics</p></li>
@@ -795,6 +809,14 @@ rate  0.905046 1.000000</code></pre>
 </section>
 <section id="monte-carlo-standard-error" class="slide level2">
 <h2>Monte Carlo standard error</h2>
+<p>For some model outcome <span class="math inline">\(\hat{x}\)</span> (e.g., total or incremental cost or QALy; ICER; etc), the Monte Carlo standard error (MCSE) quantifies variability in <span class="math inline">\(E(X)\)</span> across <span class="math inline">\(N\)</span> simulated individuals due to stochasticity.</p>
+<p><span class="math display">\[
+\text{MCSE} = \sqrt{\frac{\text{Var}(\hat{x})}{N}}
+\]</span></p>
+<p>MCSE goes to 0 as N goes to infinity</p>
+</section>
+<section id="monte-carlo-standard-error-1" class="slide level2">
+<h2>Monte Carlo standard error</h2>
 <p>Requires a new version of <code>monte_carlo_pi()</code> that outputs all repititions</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href=""></a>mcSim_pi_repetitions <span class="ot">=</span> <span class="cf">function</span>(N) {</span>
@@ -817,7 +839,7 @@ rate  0.905046 1.000000</code></pre>
 </div>
 </div>
 </section>
-<section id="monte-carlo-standard-error-1" class="slide level2">
+<section id="monte-carlo-standard-error-2" class="slide level2">
 <h2>Monte Carlo standard error</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href=""></a><span class="co"># Monte Carlo standard error N = 1,000</span></span>
@@ -870,7 +892,7 @@ rate  0.905046 1.000000</code></pre>
 </div>
 </div>
 </section>
-<section id="today-3" class="slide level2">
+<section id="today-4" class="slide level2">
 <h2>Today</h2>
 <ul>
 <li><p>Microsimulation basics</p></li>
@@ -997,7 +1019,7 @@ rate  0.905046 1.000000</code></pre>
 <section id="logistics" class="slide level2">
 <h2>Logistics</h2>
 <ul>
-<li>Complete readings before next class</li>
+<li>Complete reading before next class</li>
 <li><strong>Assignment 2</strong> Cohort state transition models due Friday, January 30
 <ul>
 <li><strong>More time consuming than usual</strong></li>

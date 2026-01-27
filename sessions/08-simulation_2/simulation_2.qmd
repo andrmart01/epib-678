@@ -46,13 +46,13 @@ For each variable, use $n_i \times n_t$ matrices, or $n_i \times (n_t+1)$, where
 
 **Setup** (building on our CSTM notation)**:**
 
--   $M_m[i,t]$ matrix gives state of individual $i$ during cycle $t$
+-   $M_m[i,t]$ gives state of individual $i$ in cycle $t$
 
--   $M_c[i,t]$ matrix gives costs accrued by individual $i$ during cycle $t$
+-   $M_c[i,t]$ gives costs accrued by individual $i$ in cycle $t$
 
--   $M_q[i,t]$ matrix gives the QALYs experienced by individual $i$ during cycle $t$
+-   $M_q[i,t]$ gives QALYs experienced by indiv. $i$ in cycle $t$
 
--   Make such matrices for any characteristic you wish to track over time
+-   Can make matrices for anything you wish to track over time
 
 ## Sick-sicker sim, Krijkamp et. al. 2018
 
@@ -66,7 +66,21 @@ For each variable, use $n_i \times n_t$ matrices, or $n_i \times (n_t+1)$, where
 
 Open up `sicksicker_microsim_B.R`. We will walk through it together
 
-## Simulate enough patients that simulation error is negligible
+## Recall: how to decide how many individuals to sample?
+
+-   Simulate enough patients that monte carlo simulaiton error is negligible
+
+-   Can assess via
+
+    -   Monte Carlo standard error
+
+    -   Running multiple simulations with different seeds & comparing outcomes
+
+    -   Bootstrap resampling of simulated individuals
+
+See: "Convergence" section of session 7 slides
+
+## "Convergence" plots
 
 ![](figs/sim_CSTM_sim_error.png)
 
@@ -77,11 +91,92 @@ Open up `sicksicker_microsim_B.R`. We will walk through it together
 -   Discrete event simulation without capacity constraints
 -   Discrete event simulation with capacity constraints
 
-## Intensity functions
+## Intensity (hazard) functions
 
--   Events (transitions) can be modeled with intensity functions (hazard functions)
+-   Events (transitions) can be modeled with intensity functions
 -   Intensity function $\lambda_{ij}(t)$ gives instantaneous risk of transition from state $i$ to $j$ at time $t$
--   Cumulative intensity function: $\Lambda_{ij}(t) = \int_0^t \lambda_{ij}(u) du$
+-   Often easier to work with the cumulative intensity function:
+    -   $\Lambda_{ij}(t) = \int_0^t \lambda_{ij}(u) du$
+    -   Probability of transitioning from $i$ to $j$ between time 0 and $t$
+
+## Homogeneous Poisson process
+
+-   Constant intensity function: $\lambda_{ij}(t) = \lambda_{ij}$
+-   Time to event is exponentially distributed
+
+$$f_{ij}(t) = \lambda_{ij} e^{-\lambda_{ij} t}$$
+
+```{r}
+#| echo: true
+
+# Example: simulate time to event from exponential distribution
+set.seed(123)
+n = 10
+lambda = 0.2 # constant hazard
+time_to_event = rexp(n, rate = lambda)
+time_to_event
+
+```
+
+## Non-homogeneous Poisson process
+
+-   Time-varying intensity function: $\lambda_{ij}(t)$
+-   Parametric time-to-event distributions
+    -   Weibull, Gompertz distributions
+    -   Cumulative intensity function used to derive time to event
+-   Nonparametric time-to-event distributions
+    -   Life tables
+
+## Sampling time-to-event with inversion method
+
+1.  Sample $u$ from Uniform(0,1)
+
+2.  Set cumulative distribution function equal to $u$:
+
+    $$F_{ij}(t) = 1 - e^{-\Lambda_{ij}(t)} = u$$
+
+3.  Solve for $t$ to get time to event: $$t = F_{ij}^{-1}(u)$$
+
+## Inversion method examples
+
+Exponential CDF:
+
+$$F_{ij}(t) = 1 - e^{-\lambda_{ij} t}$$
+
+Exponential inverted CDF:
+
+$$t = -\frac{\log(1-u)}{\lambda_{ij}}$$
+Weibull CDF (a is scale parameter, b is shape parameter):
+$$F_{ij}(t) = 1 - e^{-(t/a)^{b}}$$
+
+Weibull inverted CDF:
+$$ t = -a \log(1-u)^{1/b} $$
+
+## Inversion method in R
+
+```{r}
+#| echo: true
+#| message: false
+n = 100; u = runif(n)
+#Exponential intensity function
+lambda = 0.2
+time_to_event_Exponential = - log(1 - u) / (1/lambda)
+summary(time_to_event_Exponential)
+#Weibull
+shape = 1.5; scale = 2
+time_to_event_Weibull = -1*scale * log(1 - u)^(1/shape)
+summary(time_to_event_Weibull)
+```
+
+## Simulate competing events
+
+If \>1 event can happen from the individual's current state:
+
+-   Simulate time-to-event (or "dwell time") for each
+
+-   Pick the shortest one and update the clock
+
+This is known as [**next-event-advance-clock**]{.underline}
 
 ## Today
 
