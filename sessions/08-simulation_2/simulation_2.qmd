@@ -12,15 +12,15 @@ editor: visual
 ```{r}
 #| echo: true
 library(ggplot2)
+library(data.table)
 library(Rcpp)
 ```
 
 ## Today
 
 -   [**Individual discrete time state transition simulation**]{.underline}
--   Time to event modelling
--   Discrete event simulation without capacity constraints
--   Discrete event simulation with capacity constraints
+-   Intro to discrete event simulation
+-   Time to event modelling for DES
 
 ## Why simulate a state transition model?
 
@@ -46,11 +46,11 @@ For each variable, use $n_i \times n_t$ matrices, or $n_i \times (n_t+1)$, where
 
 **Setup** (building on our CSTM notation)**:**
 
--   $M_m[i,t]$ gives state of individual $i$ in cycle $t$
+-   $M_m[i,t\in (0,T)]$ gives state of indiv. $i$ in cycle $t$
 
--   $M_c[i,t]$ gives costs accrued by individual $i$ in cycle $t$
+-   $M_c[i,t\in (1,T)]$ gives costs accrued by indiv. $i$ in cycle $t$
 
--   $M_q[i,t]$ gives QALYs experienced by indiv. $i$ in cycle $t$
+-   $M_q[i,t\in (1,T)]$ gives QALYs acrued by indiv. $i$ in cycle $t$
 
 -   Can make matrices for anything you wish to track over time
 
@@ -66,11 +66,11 @@ For each variable, use $n_i \times n_t$ matrices, or $n_i \times (n_t+1)$, where
 
 Open up `sicksicker_microsim_B.R`. We will walk through it together
 
-## Recall: how to decide how many individuals to sample?
+## Recall: how many individuals to sample?
 
--   Simulate enough patients that monte carlo simulaiton error is negligible
+-   Enough that Monte Carlo simulation error is negligible
 
--   Can assess via
+-   To assess:
 
     -   Monte Carlo standard error
 
@@ -87,134 +87,32 @@ See: "Convergence" section of session 7 slides
 ## Today
 
 -   Individual discrete time state transition simulation
--   [**Time to event modelling**]{.underline}
--   Discrete event simulation without capacity constraints
--   Discrete event simulation with capacity constraints
-
-## Intensity (hazard) functions
-
--   Events (transitions) can be modeled with intensity functions
--   Intensity function $\lambda_{ij}(t)$ gives instantaneous risk of transition from state $i$ to $j$ at time $t$
--   Often easier to work with the cumulative intensity function:
-    -   $\Lambda_{ij}(t) = \int_0^t \lambda_{ij}(u) du$
-    -   Probability of transitioning from $i$ to $j$ between time 0 and $t$
-
-## Homogeneous Poisson process
-
--   Constant intensity function: $\lambda_{ij}(t) = \lambda_{ij}$
--   Time to event is exponentially distributed
-
-$$f_{ij}(t) = \lambda_{ij} e^{-\lambda_{ij} t}$$
-
-```{r}
-#| echo: true
-
-# Example: simulate time to event from exponential distribution
-set.seed(123)
-n = 10
-lambda = 0.2 # constant hazard
-time_to_event = rexp(n, rate = lambda)
-time_to_event
-
-```
-
-## Non-homogeneous Poisson process
-
--   Time-varying intensity function: $\lambda_{ij}(t)$
--   Parametric time-to-event distributions
-    -   Weibull, Gompertz distributions
-    -   Cumulative intensity function used to derive time to event
--   Nonparametric time-to-event distributions
-    -   Life tables
-
-## Sampling time-to-event with inversion method
-
-1.  Sample $u$ from Uniform(0,1)
-
-2.  Set cumulative distribution function equal to $u$:
-
-    $$F_{ij}(t) = 1 - e^{-\Lambda_{ij}(t)} = u$$
-
-3.  Solve for $t$ to get time to event: $$t = F_{ij}^{-1}(u)$$
-
-## Inversion method examples
-
-Exponential CDF:
-
-$$F_{ij}(t) = 1 - e^{-\lambda_{ij} t}$$
-
-Exponential inverted CDF:
-
-$$t = -\frac{\log(1-u)}{\lambda_{ij}}$$
-Weibull CDF (a is scale parameter, b is shape parameter):
-$$F_{ij}(t) = 1 - e^{-(t/a)^{b}}$$
-
-Weibull inverted CDF:
-$$ t = -a \log(1-u)^{1/b} $$
-
-## Inversion method in R
-
-```{r}
-#| echo: true
-#| message: false
-n = 100; u = runif(n)
-#Exponential intensity function
-lambda = 0.2
-time_to_event_Exponential = - log(1 - u) / (1/lambda)
-summary(time_to_event_Exponential)
-#Weibull
-shape = 1.5; scale = 2
-time_to_event_Weibull = -1*scale * log(1 - u)^(1/shape)
-summary(time_to_event_Weibull)
-```
-
-## Simulate competing events
-
-If \>1 event can happen from the individual's current state:
-
--   Simulate time-to-event (or "dwell time") for each
-
--   Pick the shortest one and update the clock
-
-This is known as [**next-event-advance-clock**]{.underline}
-
-## Today
-
--   Individual discrete time state transition simulation
--   Time to event modelling
--   [**Discrete event simulation without capacity constraints**]{.underline}
--   Discrete event simulation with capacity constraints
-
-## Today
-
--   Individual discrete time state transition simulation
--   Time to event modelling
--   Discrete event simulation without capacity constraints
--   [**Discrete event simulation with capacity constraints**]{.underline}
-
-## Credit
-
-Much of this section is based on:
-
-[*Discrete Event Simulation for Health Technology Assessment (2016) by Caro et. al.*](https://www.routledge.com/Discrete-Event-Simulation-for-Health-Technology-Assessment/Caro-Moller-Karnon-Stahl-Ishak/p/book/9780367737689)
+-   [**Intro to discrete event simulation**]{.underline}
+-   Time to event modelling for DES
 
 ## Discrete event simulation strengths
 
--   Model heterogeneous population\*
+[**Like individual state-transition microsimulation**]{.underline}
 
--   Time-varying parameters\*
+-   Model heterogeneous population
 
-\*same as microsim
+-   Time-varying parameters
+
+[**Unlike individual state-transition microsimulation**]{.underline}
 
 -   Represent disease as continuous process
 
+-   Easier to incorporate competing risk, time-varying characteritics
+
 -   Model [**capacity-constrained**]{.underline} resources
 
--   Entity types interact (patient, provider, tumor, etc.)^+^
+    -   Limited form of interaction between patients
 
-^+^In a limited way
+## Modeling state-transitions as a DES
 
-## Key components
+![](figs/DEStut%20fig1.png)
+
+## Components
 
 -   **Events:** instantaneous change to entity or system
 
@@ -242,7 +140,7 @@ Much of this section is based on:
 
 -   Health applications focus more on **entities'** state and pathway (patients)
 
-    -   Often track more entity-level attributes
+    -   More focus on entity-level attributes
 
 ## Examples of events
 
@@ -264,7 +162,11 @@ Arrows show sequence of events.
 
 -   Unlike discrete time models with a constant cycle length, the "step size" varies depending on the time between events
 
-    -   "Next-event-time-advance"
+    -   "Next-event-advance-clock"
+
+## Next-event-advance clock
+
+![](figs/DEStut%20fig2.png)
 
 ## Attributes
 
@@ -302,27 +204,13 @@ Arrows show sequence of events.
 
 ![](figs/des_advance_6.png)
 
-## Example: time to competing events
-
-```{r}
-#| echo: true
-
-# Events can have different distributions
-time_to_checkup = rep(1, 15) # Always 1 year apart
-time_to_polyp = rexp(n=15, rate = 1.5) # Sampled from distribution
-# The clock goes until the next one occurs
-time = pmin(time_to_checkup, time_to_polyp)
-event=ifelse(time_to_checkup<time_to_polyp, "checkup","polyp developed")
-cat(paste0("i: ", 1:15, "   event: ", event, "   time: ", time, "\n"))
-```
-
 ## Global variables
 
 -   Track the state of the [**system**]{.underline}
 
 -   Memory-efficient (vs. individual attributes)
 
--   Some applications track only global variables
+-   Some applications track only global variables (but usually not in health)
 
 ![](figs/attribute-vs-global-variable.png)
 
@@ -330,33 +218,245 @@ cat(paste0("i: ", 1:15, "   event: ", event, "   time: ", time, "\n"))
 
 ![](figs/global_variable_examples.png)
 
-## Time
+## Today
 
--   Pre-specify total simulation time, run until reach
+-   Individual discrete time state transition simulation
+-   Intro to discrete event simulation
+-   [**Time to event modelling for DES**]{.underline}
 
--   Entities enter (are created) and exit at various times
+## Time to event
 
--   Capacity constrained resources are "seized" and "released" by entities
+-   $T_{n}$ denotes the $n^{th}$ event
 
-    -   Entities must queue if all resources are seized
-    -   This is the interaction between entities!
+-   $\tau_{n-1}= T_n - T_{n-1}$ is the *dwell time* or *inter-event* time
 
-## Resource capacity and availability
+-   $F(\tau)_{i,j}$ is the cumulative distribution function
 
-![](figs/capacity_illustration.png)
+    -   Probability of transitioning from state $i$ to $j$ in time $\tau < t$
 
-## Resources for DES
+## Intensity functions
 
--   [Simmer R package](https://r-simmer.org/) \[[2021 workshop Koen Degeling](https://r-hta.org/events/workshop/2021/degeling.pdf)\], \[[2019 presentation Biller et. al](http://www.trutschnig.net/Slides_simmer_Biller_Koehnke_Mayr.pdf).\]
+-   Events (transitions) can be modeled with intensity functions
+    -   Hazard function in survival analysis
+-   Intensity function $\lambda_{ij}(t)$ gives instantaneous risk of transition from state $i$ to $j$ at time $t$
+-   Often, we work with the cumulative intensity function:
+    -   $F(\tau)_{i,j} = \Lambda_{ij}(t) = \int_0^t \lambda_{ij}(u) du$
+    -   Probability of transition from $i$ to $j$ between time 0 and $t$
 
--   [Microsimulation package](https://cran.r-project.org/web/packages/microsimulation/index.html) \[[2021 workshop Mark Clements](https://r-hta.org/events/workshop/2021/clements.pdf)\]
+## Homogeneous Poisson process
 
--   [r-hta.org tutorial using descem, Alvarez and Ribero](https://r-hta.org/tutorial/descem/)
+-   Constant intensity function: $\lambda_{ij}(t) = \lambda_{ij}$
+-   Time to event is exponentially distributed
 
-Dedicated software: Arena, Simul8
+$$f_{ij}(t) = \lambda_{ij} e^{-\lambda_{ij} t}$$
+
+```{r}
+#| echo: true
+
+# Example: simulate time to event from exponential distribution
+set.seed(123)
+n = 10
+lambda = 0.2 # constant hazard
+time_to_event = rexp(n, rate = lambda)
+time_to_event
+
+```
+
+## Non-homogeneous Poisson process
+
+-   Time-varying intensity function: $\lambda_{ij}(t)$
+-   Parametric time-to-event distributions
+    -   Weibull, Gompertz distributions
+-   Nonparametric time-to-event distributions
+    -   Can model other cause mortality using a peicewise intensity function based on life tables
+
+## Sample time-to-event with inversion method
+
+-   Sample $u$ from Uniform(0,1)
+
+-   Set cumulative distribution function equal to $u$:
+
+    $$F_{ij}(t) = u$$
+
+-   Solve for $t$ to get time to event: $$t = F_{ij}^{-1}(u)$$
+
+## Weibull CDF (from Wikipedia)
+
+![](figs/Weibull_CDF_wikipedia.png)
+
+## Inversion method examples
+
+Exponential CDF, inverted CDF
+
+$$F_{ij}(t) = 1 - e^{-\lambda_{ij} t}, \qquad t = -\frac{\log(1-u)}{\lambda_{ij}}$$
+
+Weibull CDF, inverted CDF (a is scale parameter, b is shape parameter): $$F_{ij}(t) = 1 - e^{-(t/a)^{b}}, \qquad t = a(- \log(1-u))^{1/b} $$
+
+## Inversion method in R
+
+```{r}
+#| echo: true
+#| message: false
+n = 100; u = runif(n)
+
+#EXPONENTIAL intensity function
+lambda = 0.2
+time_to_event_Exponential = - log(1 - u) / (1/lambda)
+
+summary(time_to_event_Exponential)
+
+# WEIBULL
+shape = 1.5; scale = 0.5
+time_to_event_Weibull = scale * (-1*log(1 - u))^(1/shape)
+
+summary(time_to_event_Weibull)
+```
+
+## Sampling other cause mortality
+
+-   Can use nonhomogeneous poisson point process with piecewise exponential hazard
+
+-   P(death) each year is exponentially distributed with rate $\lambda_{\text{(OCM age X)}}$
+
+$$
+\begin{align}
+F_{ij}(t) &= 1 - e^{-\lambda_{ij} t}\\
+P(\text{death age x}) &= 1 - e^{-\lambda_{\text{(OCM age X)}} (1 year))}\\
+\lambda_{\text{(OCM age X)}} &= - \log(1-P(\text{death age x}))
+\end{align}
+$$
+
+## Recall: P(death age x) from life table
+
+```{r}
+#| echo: true
+
+t_other_cause_death <- fread("prob_death_by_age_2020_StatsCan.csv",
+                                 sep=",") #fread is data.table function for loading from CSV
+
+str(t_other_cause_death)
+ggplot(data=t_other_cause_death, aes(x=Age, y=prob_death))+
+  geom_point()+geom_line()
+```
+
+## Piecewise NHPP function
+
+```{r}
+#| echo: true
+
+# SOURCE: https://github.com/LopezM-Mauricio/DES_tutorial_timedep_SickSicker/blob/main/R/DES_functions.R
+# PAPER: Garibay-Treviño DU, Jalal H, Alarid-Escudero F.
+#.   Med Decis Making. 2025 Feb;45(2):205-213. doi: 10.1177/0272989X241308768
+
+#---------------------------------------------------- #
+##  Non-parametric Sampling of Event Times        -----
+#---------------------------------------------------- #
+#' Nonparametric sampling of time to events from a discrete nonhomogeneous 
+#' Poisson point process
+#'
+#' \code{nps_nhppp} samples states for multiple individuals simultaneously.
+#' 
+#' The elements of each row of the matrix `m_probs` should sum up to 1. In case
+#' this does not happens, all the rows where this condition is not met will be
+#' normalized.
+#'
+#' @param m_probs matrix with probabilities for each category. Each row 
+#' represents one individual and each column an specific category. 
+#' @param v_categories An optional argument. It is a vector containing the name of 
+#' the categories to sample from. The length of this vector must be equal to 
+#' the number of columns of `m_probs`.
+#' @return A vector filled with sampled categories.
+#' @export
+nps_nhppp <- function(m_probs, 
+                      v_categories = NULL, 
+                      correction = c("none", "uniform")) {
+  
+  if (!is.numeric(m_probs)) {
+    stop("`m_probs` must be a matrix filled with numeric elements")
+  }
+  
+  if (!isTRUE(all.equal(target = rep(1, nrow(m_probs)), 
+                        current = as.numeric(rowSums(m_probs))))) {
+    
+    #* Find rows where the sum of their elements is not equal to 1.
+    #* We use a very small value to check that they are equal to 1 since
+    #* == and != sometimes do not work as desired. The value 1.5e-8
+    #* was taken as the same level of tolerance as the `all.equal` function.
+    v_rows_to_norm <- which(abs(1 - rowSums(m_probs)) > 1.5e-8)
+    
+    warning(
+      "The rows: ", 
+      paste(as.character(v_rows_to_norm), collapse = ", "), 
+      " in `m_probs` do not sum up to 1. The values within these rows will be normalized and then used in the sampling process. In case this behaviour is not desired modify the content of `m_probs`.")
+    
+    # Normalize rows
+    if (length(v_rows_to_norm) == 1) {
+      m_probs[v_rows_to_norm, ] <- m_probs[v_rows_to_norm, ]/sum(m_probs[v_rows_to_norm, ])
+    }
+    if (length(v_rows_to_norm) > 1) {
+      m_probs[v_rows_to_norm, ] <- m_probs[v_rows_to_norm, ]/rowSums(m_probs[v_rows_to_norm, ])
+    }
+  }
+  
+  # Number of categories to sample from
+  n_cat <- ncol(m_probs)
+  
+  if (is.null(v_categories)) {
+    #' Generate the numeric categories based on the number of columns of 
+    #' `m_probs`
+    v_categories <- seq(0, (n_cat - 1))
+  }
+  
+  correction <- match.arg(correction)
+  
+  # Number of time to events to draw
+  n_samp <- nrow(m_probs)
+  
+  v_unif  <- runif(n_samp, min = 0, max = 1)
+  # matrixStats is written in C and optimized for large Matrix. 
+  v_sum_p <- matrixStats::rowCumsums(m_probs)
+  # slower alternative using base R
+  # v_sum_p <- t(apply(m_probs))
+  
+  v_time_to_event <- v_categories[max.col(v_sum_p >= v_unif, 
+                                          ties.method = "first")]
+  
+  if (correction == "uniform") {
+    v_time_to_event <- v_time_to_event + v_unif
+  }
+  return(v_time_to_event)
+}
+```
+
+## Next-event-advance clock
+
+![](figs/DEStut%20fig2.png)
+
+## Treatment and covariate effects
+
+-   time-to-event can depend on covariates or treatment
+
+-   Can model with proportional hazards assumption
+
+$$
+\lambda_{ij}(t, z_i(g(t)), tr(t)) = \lambda_{ij,0}(t \mid \theta) e^{\beta z_i(g(t)) + \gamma tr(t)}
+$$Where
+
+-    $lambda_{ij,0}(t \mid \theta)$ is a baseline hazard function
+
+-    $z_i(g(t))$ is the covariates for individual $i$ (possibly time-varying)
+
+-    $tr(t)$ is treatment indicator
+
+## Structure from DARTH tutorial
+
+![](figs/DEStut%20figS1.png)
+
+Implementation with `data.table()` r package for efficient table operations
 
 ## Logistics
 
--   Assignment 2 due 11:59 tomorrow
--   Assignment 3 available, due Fri, Oct 4
--   Assignments 0 & 1 graded, solution posted to mycourses
+-   Complete reading before next class
+-   Assignments 0 & 1 graded, solutions posted to mycourses
+-   **Assignment 2** Cohort state transition models deadline extended to Monday, Feb 2
+-   Office hours: Mondays 2:30pm to 3:30pm, room 1128

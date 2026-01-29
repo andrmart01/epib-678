@@ -409,16 +409,16 @@ Alton Russell
 <h2>R packages</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb1-2"><a href=""></a><span class="fu">library</span>(Rcpp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href=""></a><span class="fu">library</span>(data.table)</span>
+<span id="cb1-3"><a href=""></a><span class="fu">library</span>(Rcpp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="today" class="slide level2">
 <h2>Today</h2>
 <ul>
 <li><u><strong>Individual discrete time state transition simulation</strong></u></li>
-<li>Time to event modelling</li>
-<li>Discrete event simulation without capacity constraints</li>
-<li>Discrete event simulation with capacity constraints</li>
+<li>Intro to discrete event simulation</li>
+<li>Time to event modelling for DES</li>
 </ul>
 </section>
 <section id="why-simulate-a-state-transition-model" class="slide level2">
@@ -441,9 +441,9 @@ Alton Russell
 </ul>
 <p><strong>Setup</strong> (building on our CSTM notation)<strong>:</strong></p>
 <ul>
-<li><p><span class="math inline">\(M_m[i,t]\)</span> gives state of individual <span class="math inline">\(i\)</span> in cycle <span class="math inline">\(t\)</span></p></li>
-<li><p><span class="math inline">\(M_c[i,t]\)</span> gives costs accrued by individual <span class="math inline">\(i\)</span> in cycle <span class="math inline">\(t\)</span></p></li>
-<li><p><span class="math inline">\(M_q[i,t]\)</span> gives QALYs experienced by indiv. <span class="math inline">\(i\)</span> in cycle <span class="math inline">\(t\)</span></p></li>
+<li><p><span class="math inline">\(M_m[i,t\in (0,T)]\)</span> gives state of indiv. <span class="math inline">\(i\)</span> in cycle <span class="math inline">\(t\)</span></p></li>
+<li><p><span class="math inline">\(M_c[i,t\in (1,T)]\)</span> gives costs accrued by indiv. <span class="math inline">\(i\)</span> in cycle <span class="math inline">\(t\)</span></p></li>
+<li><p><span class="math inline">\(M_q[i,t\in (1,T)]\)</span> gives QALYs acrued by indiv. <span class="math inline">\(i\)</span> in cycle <span class="math inline">\(t\)</span></p></li>
 <li><p>Can make matrices for anything you wish to track over time</p></li>
 </ul>
 </section>
@@ -459,11 +459,11 @@ Alton Russell
 <h2>Sick-sicker sim, Krijkamp et. al.&nbsp;2018</h2>
 <p>Open up <code>sicksicker_microsim_B.R</code>. We will walk through it together</p>
 </section>
-<section id="recall-how-to-decide-how-many-individuals-to-sample" class="slide level2">
-<h2>Recall: how to decide how many individuals to sample?</h2>
+<section id="recall-how-many-individuals-to-sample" class="slide level2">
+<h2>Recall: how many individuals to sample?</h2>
 <ul>
-<li><p>Simulate enough patients that monte carlo simulaiton error is negligible</p></li>
-<li><p>Can assess via</p>
+<li><p>Enough that Monte Carlo simulation error is negligible</p></li>
+<li><p>To assess:</p>
 <ul>
 <li><p>Monte Carlo standard error</p></li>
 <li><p>Running multiple simulations with different seeds &amp; comparing outcomes</p></li>
@@ -480,145 +480,33 @@ Alton Russell
 <h2>Today</h2>
 <ul>
 <li>Individual discrete time state transition simulation</li>
-<li><u><strong>Time to event modelling</strong></u></li>
-<li>Discrete event simulation without capacity constraints</li>
-<li>Discrete event simulation with capacity constraints</li>
+<li><u><strong>Intro to discrete event simulation</strong></u></li>
+<li>Time to event modelling for DES</li>
 </ul>
-</section>
-<section id="intensity-hazard-functions" class="slide level2">
-<h2>Intensity (hazard) functions</h2>
-<ul>
-<li>Events (transitions) can be modeled with intensity functions</li>
-<li>Intensity function <span class="math inline">\(\lambda_{ij}(t)\)</span> gives instantaneous risk of transition from state <span class="math inline">\(i\)</span> to <span class="math inline">\(j\)</span> at time <span class="math inline">\(t\)</span></li>
-<li>Often easier to work with the cumulative intensity function:
-<ul>
-<li><span class="math inline">\(\Lambda_{ij}(t) = \int_0^t \lambda_{ij}(u) du\)</span></li>
-<li>Probability of transitioning from <span class="math inline">\(i\)</span> to <span class="math inline">\(j\)</span> between time 0 and <span class="math inline">\(t\)</span></li>
-</ul></li>
-</ul>
-</section>
-<section id="homogeneous-poisson-process" class="slide level2">
-<h2>Homogeneous Poisson process</h2>
-<ul>
-<li>Constant intensity function: <span class="math inline">\(\lambda_{ij}(t) = \lambda_{ij}\)</span></li>
-<li>Time to event is exponentially distributed</li>
-</ul>
-<p><span class="math display">\[f_{ij}(t) = \lambda_{ij} e^{-\lambda_{ij} t}\]</span></p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a><span class="co"># Example: simulate time to event from exponential distribution</span></span>
-<span id="cb2-2"><a href=""></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb2-3"><a href=""></a>n <span class="ot">=</span> <span class="dv">10</span></span>
-<span id="cb2-4"><a href=""></a>lambda <span class="ot">=</span> <span class="fl">0.2</span> <span class="co"># constant hazard</span></span>
-<span id="cb2-5"><a href=""></a>time_to_event <span class="ot">=</span> <span class="fu">rexp</span>(n, <span class="at">rate =</span> lambda)</span>
-<span id="cb2-6"><a href=""></a>time_to_event</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> [1]  4.2172863  2.8830514  6.6452743  0.1578868  0.2810549  1.5825061
- [7]  1.5711365  0.7263340 13.6311823  0.1457672</code></pre>
-</div>
-</div>
-</section>
-<section id="non-homogeneous-poisson-process" class="slide level2">
-<h2>Non-homogeneous Poisson process</h2>
-<ul>
-<li>Time-varying intensity function: <span class="math inline">\(\lambda_{ij}(t)\)</span></li>
-<li>Parametric time-to-event distributions
-<ul>
-<li>Weibull, Gompertz distributions</li>
-<li>Cumulative intensity function used to derive time to event</li>
-</ul></li>
-<li>Nonparametric time-to-event distributions
-<ul>
-<li>Life tables</li>
-</ul></li>
-</ul>
-</section>
-<section id="sampling-time-to-event-with-inversion-method" class="slide level2">
-<h2>Sampling time-to-event with inversion method</h2>
-<ol type="1">
-<li><p>Sample <span class="math inline">\(u\)</span> from Uniform(0,1)</p></li>
-<li><p>Set cumulative distribution function equal to <span class="math inline">\(u\)</span>:</p>
-<p><span class="math display">\[F_{ij}(t) = 1 - e^{-\Lambda_{ij}(t)} = u\]</span></p></li>
-<li><p>Solve for <span class="math inline">\(t\)</span> to get time to event: <span class="math display">\[t = F_{ij}^{-1}(u)\]</span></p></li>
-</ol>
-</section>
-<section id="inversion-method-examples" class="slide level2">
-<h2>Inversion method examples</h2>
-<p>Exponential CDF:</p>
-<p><span class="math display">\[F_{ij}(t) = 1 - e^{-\lambda_{ij} t}\]</span></p>
-<p>Exponential inverted CDF:</p>
-<p><span class="math display">\[t = -\frac{\log(1-u)}{\lambda_{ij}}\]</span> Weibull CDF (a is scale parameter, b is shape parameter): <span class="math display">\[F_{ij}(t) = 1 - e^{-(t/a)^{b}}\]</span></p>
-<p>Weibull inverted CDF: <span class="math display">\[ t = -a \log(1-u)^{1/b} \]</span></p>
-</section>
-<section id="inversion-method-in-r" class="slide level2">
-<h2>Inversion method in R</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a>n <span class="ot">=</span> <span class="dv">100</span>; u <span class="ot">=</span> <span class="fu">runif</span>(n)</span>
-<span id="cb4-2"><a href=""></a><span class="co">#Exponential intensity function</span></span>
-<span id="cb4-3"><a href=""></a>lambda <span class="ot">=</span> <span class="fl">0.2</span></span>
-<span id="cb4-4"><a href=""></a>time_to_event_Exponential <span class="ot">=</span> <span class="sc">-</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> u) <span class="sc">/</span> (<span class="dv">1</span><span class="sc">/</span>lambda)</span>
-<span id="cb4-5"><a href=""></a><span class="fu">summary</span>(time_to_event_Exponential)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-0.000125 0.060342 0.129466 0.201364 0.281689 1.032400 </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a><span class="co">#Weibull</span></span>
-<span id="cb6-2"><a href=""></a>shape <span class="ot">=</span> <span class="fl">1.5</span>; scale <span class="ot">=</span> <span class="dv">2</span></span>
-<span id="cb6-3"><a href=""></a>time_to_event_Weibull <span class="ot">=</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>scale <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> u)<span class="sc">^</span>(<span class="dv">1</span><span class="sc">/</span>shape)</span>
-<span id="cb6-4"><a href=""></a><span class="fu">summary</span>(time_to_event_Weibull)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-     NA      NA      NA     NaN      NA      NA     100 </code></pre>
-</div>
-</div>
-</section>
-<section id="simulate-competing-events" class="slide level2">
-<h2>Simulate competing events</h2>
-<p>If &gt;1 event can happen from the individual’s current state:</p>
-<ul>
-<li><p>Simulate time-to-event (or “dwell time”) for each</p></li>
-<li><p>Pick the shortest one and update the clock</p></li>
-</ul>
-<p>This is known as <u><strong>next-event-advance-clock</strong></u></p>
-</section>
-<section id="today-2" class="slide level2">
-<h2>Today</h2>
-<ul>
-<li>Individual discrete time state transition simulation</li>
-<li>Time to event modelling</li>
-<li><u><strong>Discrete event simulation without capacity constraints</strong></u></li>
-<li>Discrete event simulation with capacity constraints</li>
-</ul>
-</section>
-<section id="today-3" class="slide level2">
-<h2>Today</h2>
-<ul>
-<li>Individual discrete time state transition simulation</li>
-<li>Time to event modelling</li>
-<li>Discrete event simulation without capacity constraints</li>
-<li><u><strong>Discrete event simulation with capacity constraints</strong></u></li>
-</ul>
-</section>
-<section id="credit" class="slide level2">
-<h2>Credit</h2>
-<p>Much of this section is based on:</p>
-<p><a href="https://www.routledge.com/Discrete-Event-Simulation-for-Health-Technology-Assessment/Caro-Moller-Karnon-Stahl-Ishak/p/book/9780367737689"><em>Discrete Event Simulation for Health Technology Assessment (2016) by Caro et. al.</em></a></p>
 </section>
 <section id="discrete-event-simulation-strengths" class="slide level2">
 <h2>Discrete event simulation strengths</h2>
+<p><u><strong>Like individual state-transition microsimulation</strong></u></p>
 <ul>
-<li><p>Model heterogeneous population*</p></li>
-<li><p>Time-varying parameters*</p></li>
+<li><p>Model heterogeneous population</p></li>
+<li><p>Time-varying parameters</p></li>
 </ul>
-<p>*same as microsim</p>
+<p><u><strong>Unlike individual state-transition microsimulation</strong></u></p>
 <ul>
 <li><p>Represent disease as continuous process</p></li>
-<li><p>Model <u><strong>capacity-constrained</strong></u> resources</p></li>
-<li><p>Entity types interact (patient, provider, tumor, etc.)<sup>+</sup></p></li>
+<li><p>Easier to incorporate competing risk, time-varying characteritics</p></li>
+<li><p>Model <u><strong>capacity-constrained</strong></u> resources</p>
+<ul>
+<li>Limited form of interaction between patients</li>
+</ul></li>
 </ul>
-<p><sup>+</sup>In a limited way</p>
 </section>
-<section id="key-components" class="slide level2">
-<h2>Key components</h2>
+<section id="modeling-state-transitions-as-a-des" class="slide level2">
+<h2>Modeling state-transitions as a DES</h2>
+
+<img data-src="figs/DEStut%20fig1.png" class="r-stretch"></section>
+<section id="components" class="slide level2">
+<h2>Components</h2>
 <ul>
 <li><p><strong>Events:</strong> instantaneous change to entity or system</p></li>
 <li><p><strong>Entities:</strong> person or thing that experiences events</p>
@@ -646,7 +534,7 @@ Alton Russell
 </ul></li>
 <li><p>Health applications focus more on <strong>entities’</strong> state and pathway (patients)</p>
 <ul>
-<li>Often track more entity-level attributes</li>
+<li>More focus on entity-level attributes</li>
 </ul></li>
 </ul>
 </section>
@@ -667,10 +555,14 @@ Alton Russell
 <li><p>State of system updated each time an event occurs</p></li>
 <li><p>Unlike discrete time models with a constant cycle length, the “step size” varies depending on the time between events</p>
 <ul>
-<li>“Next-event-time-advance”</li>
+<li>“Next-event-advance-clock”</li>
 </ul></li>
 </ul>
 </section>
+<section id="next-event-advance-clock" class="slide level2">
+<h2>Next-event-advance clock</h2>
+
+<img data-src="figs/DEStut%20fig2.png" class="r-stretch"></section>
 <section id="attributes" class="slide level2">
 <h2>Attributes</h2>
 <ul>
@@ -707,41 +599,12 @@ Alton Russell
 <h2>Example of next-event-time-advance</h2>
 
 <img data-src="figs/des_advance_6.png" class="r-stretch"></section>
-<section id="example-time-to-competing-events" class="slide level2">
-<h2>Example: time to competing events</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a><span class="co"># Events can have different distributions</span></span>
-<span id="cb8-2"><a href=""></a>time_to_checkup <span class="ot">=</span> <span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">15</span>) <span class="co"># Always 1 year apart</span></span>
-<span id="cb8-3"><a href=""></a>time_to_polyp <span class="ot">=</span> <span class="fu">rexp</span>(<span class="at">n=</span><span class="dv">15</span>, <span class="at">rate =</span> <span class="fl">1.5</span>) <span class="co"># Sampled from distribution</span></span>
-<span id="cb8-4"><a href=""></a><span class="co"># The clock goes until the next one occurs</span></span>
-<span id="cb8-5"><a href=""></a>time <span class="ot">=</span> <span class="fu">pmin</span>(time_to_checkup, time_to_polyp)</span>
-<span id="cb8-6"><a href=""></a>event<span class="ot">=</span><span class="fu">ifelse</span>(time_to_checkup<span class="sc">&lt;</span>time_to_polyp, <span class="st">"checkup"</span>,<span class="st">"polyp developed"</span>)</span>
-<span id="cb8-7"><a href=""></a><span class="fu">cat</span>(<span class="fu">paste0</span>(<span class="st">"i: "</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">15</span>, <span class="st">"   event: "</span>, event, <span class="st">"   time: "</span>, time, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>i: 1   event: polyp developed   time: 0.113977804159125
- i: 2   event: polyp developed   time: 0.874125538365849
- i: 3   event: polyp developed   time: 0.197191305768987
- i: 4   event: polyp developed   time: 0.648286432620692
- i: 5   event: polyp developed   time: 0.616018149352876
- i: 6   event: checkup   time: 1
- i: 7   event: checkup   time: 1
- i: 8   event: checkup   time: 1
- i: 9   event: checkup   time: 1
- i: 10   event: polyp developed   time: 0.253342802015444
- i: 11   event: polyp developed   time: 0.159008644521236
- i: 12   event: polyp developed   time: 0.310991615708271
- i: 13   event: polyp developed   time: 0.0281809677059452
- i: 14   event: polyp developed   time: 0.213117932900786
- i: 15   event: polyp developed   time: 0.429073946860929</code></pre>
-</div>
-</div>
-</section>
 <section id="global-variables" class="slide level2">
 <h2>Global variables</h2>
 <ul>
 <li><p>Track the state of the <u><strong>system</strong></u></p></li>
 <li><p>Memory-efficient (vs.&nbsp;individual attributes)</p></li>
-<li><p>Some applications track only global variables</p></li>
+<li><p>Some applications track only global variables (but usually not in health)</p></li>
 </ul>
 
 <img data-src="figs/attribute-vs-global-variable.png" class="r-stretch"></section>
@@ -749,37 +612,268 @@ Alton Russell
 <h2>Global variable examples</h2>
 
 <img data-src="figs/global_variable_examples.png" class="r-stretch"></section>
-<section id="time" class="slide level2">
-<h2>Time</h2>
+<section id="today-2" class="slide level2">
+<h2>Today</h2>
 <ul>
-<li><p>Pre-specify total simulation time, run until reach</p></li>
-<li><p>Entities enter (are created) and exit at various times</p></li>
-<li><p>Capacity constrained resources are “seized” and “released” by entities</p>
+<li>Individual discrete time state transition simulation</li>
+<li>Intro to discrete event simulation</li>
+<li><u><strong>Time to event modelling for DES</strong></u></li>
+</ul>
+</section>
+<section id="time-to-event" class="slide level2">
+<h2>Time to event</h2>
 <ul>
-<li>Entities must queue if all resources are seized</li>
-<li>This is the interaction between entities!</li>
+<li><p><span class="math inline">\(T_{n}\)</span> denotes the <span class="math inline">\(n^{th}\)</span> event</p></li>
+<li><p><span class="math inline">\(\tau_{n-1}= T_n - T_{n-1}\)</span> is the <em>dwell time</em> or <em>inter-event</em> time</p></li>
+<li><p><span class="math inline">\(F(\tau)_{i,j}\)</span> is the cumulative distribution function</p>
+<ul>
+<li>Probability of transitioning from state <span class="math inline">\(i\)</span> to <span class="math inline">\(j\)</span> in time <span class="math inline">\(\tau &lt; t\)</span></li>
 </ul></li>
 </ul>
 </section>
-<section id="resource-capacity-and-availability" class="slide level2">
-<h2>Resource capacity and availability</h2>
-
-<img data-src="figs/capacity_illustration.png" class="r-stretch"></section>
-<section id="resources-for-des" class="slide level2">
-<h2>Resources for DES</h2>
+<section id="intensity-functions" class="slide level2">
+<h2>Intensity functions</h2>
 <ul>
-<li><p><a href="https://r-simmer.org/">Simmer R package</a> [<a href="https://r-hta.org/events/workshop/2021/degeling.pdf">2021 workshop Koen Degeling</a>], [<a href="http://www.trutschnig.net/Slides_simmer_Biller_Koehnke_Mayr.pdf">2019 presentation Biller et. al</a>.]</p></li>
-<li><p><a href="https://cran.r-project.org/web/packages/microsimulation/index.html">Microsimulation package</a> [<a href="https://r-hta.org/events/workshop/2021/clements.pdf">2021 workshop Mark Clements</a>]</p></li>
-<li><p><a href="https://r-hta.org/tutorial/descem/">r-hta.org tutorial using descem, Alvarez and Ribero</a></p></li>
+<li>Events (transitions) can be modeled with intensity functions
+<ul>
+<li>Hazard function in survival analysis</li>
+</ul></li>
+<li>Intensity function <span class="math inline">\(\lambda_{ij}(t)\)</span> gives instantaneous risk of transition from state <span class="math inline">\(i\)</span> to <span class="math inline">\(j\)</span> at time <span class="math inline">\(t\)</span></li>
+<li>Often, we work with the cumulative intensity function:
+<ul>
+<li><span class="math inline">\(F(\tau)_{i,j} = \Lambda_{ij}(t) = \int_0^t \lambda_{ij}(u) du\)</span></li>
+<li>Probability of transition from <span class="math inline">\(i\)</span> to <span class="math inline">\(j\)</span> between time 0 and <span class="math inline">\(t\)</span></li>
+</ul></li>
 </ul>
-<p>Dedicated software: Arena, Simul8</p>
+</section>
+<section id="homogeneous-poisson-process" class="slide level2">
+<h2>Homogeneous Poisson process</h2>
+<ul>
+<li>Constant intensity function: <span class="math inline">\(\lambda_{ij}(t) = \lambda_{ij}\)</span></li>
+<li>Time to event is exponentially distributed</li>
+</ul>
+<p><span class="math display">\[f_{ij}(t) = \lambda_{ij} e^{-\lambda_{ij} t}\]</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a><span class="co"># Example: simulate time to event from exponential distribution</span></span>
+<span id="cb2-2"><a href=""></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb2-3"><a href=""></a>n <span class="ot">=</span> <span class="dv">10</span></span>
+<span id="cb2-4"><a href=""></a>lambda <span class="ot">=</span> <span class="fl">0.2</span> <span class="co"># constant hazard</span></span>
+<span id="cb2-5"><a href=""></a>time_to_event <span class="ot">=</span> <span class="fu">rexp</span>(n, <span class="at">rate =</span> lambda)</span>
+<span id="cb2-6"><a href=""></a>time_to_event</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1]  4.2172863  2.8830514  6.6452743  0.1578868  0.2810549  1.5825061
+ [7]  1.5711365  0.7263340 13.6311823  0.1457672</code></pre>
+</div>
+</div>
+</section>
+<section id="non-homogeneous-poisson-process" class="slide level2">
+<h2>Non-homogeneous Poisson process</h2>
+<ul>
+<li>Time-varying intensity function: <span class="math inline">\(\lambda_{ij}(t)\)</span></li>
+<li>Parametric time-to-event distributions
+<ul>
+<li>Weibull, Gompertz distributions</li>
+</ul></li>
+<li>Nonparametric time-to-event distributions
+<ul>
+<li>Can model other cause mortality using a peicewise intensity function based on life tables</li>
+</ul></li>
+</ul>
+</section>
+<section id="sample-time-to-event-with-inversion-method" class="slide level2">
+<h2>Sample time-to-event with inversion method</h2>
+<ul>
+<li><p>Sample <span class="math inline">\(u\)</span> from Uniform(0,1)</p></li>
+<li><p>Set cumulative distribution function equal to <span class="math inline">\(u\)</span>:</p>
+<p><span class="math display">\[F_{ij}(t) = u\]</span></p></li>
+<li><p>Solve for <span class="math inline">\(t\)</span> to get time to event: <span class="math display">\[t = F_{ij}^{-1}(u)\]</span></p></li>
+</ul>
+</section>
+<section id="weibull-cdf-from-wikipedia" class="slide level2">
+<h2>Weibull CDF (from Wikipedia)</h2>
+
+<img data-src="figs/Weibull_CDF_wikipedia.png" class="r-stretch"></section>
+<section id="inversion-method-examples" class="slide level2">
+<h2>Inversion method examples</h2>
+<p>Exponential CDF, inverted CDF</p>
+<p><span class="math display">\[F_{ij}(t) = 1 - e^{-\lambda_{ij} t}, \qquad t = -\frac{\log(1-u)}{\lambda_{ij}}\]</span></p>
+<p>Weibull CDF, inverted CDF (a is scale parameter, b is shape parameter): <span class="math display">\[F_{ij}(t) = 1 - e^{-(t/a)^{b}}, \qquad t = a(- \log(1-u))^{1/b} \]</span></p>
+</section>
+<section id="inversion-method-in-r" class="slide level2">
+<h2>Inversion method in R</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a>n <span class="ot">=</span> <span class="dv">100</span>; u <span class="ot">=</span> <span class="fu">runif</span>(n)</span>
+<span id="cb4-2"><a href=""></a></span>
+<span id="cb4-3"><a href=""></a><span class="co">#EXPONENTIAL intensity function</span></span>
+<span id="cb4-4"><a href=""></a>lambda <span class="ot">=</span> <span class="fl">0.2</span></span>
+<span id="cb4-5"><a href=""></a>time_to_event_Exponential <span class="ot">=</span> <span class="sc">-</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> u) <span class="sc">/</span> (<span class="dv">1</span><span class="sc">/</span>lambda)</span>
+<span id="cb4-6"><a href=""></a></span>
+<span id="cb4-7"><a href=""></a><span class="fu">summary</span>(time_to_event_Exponential)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+0.000125 0.060342 0.129466 0.201364 0.281689 1.032400 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a><span class="co"># WEIBULL</span></span>
+<span id="cb6-2"><a href=""></a>shape <span class="ot">=</span> <span class="fl">1.5</span>; scale <span class="ot">=</span> <span class="fl">0.5</span></span>
+<span id="cb6-3"><a href=""></a>time_to_event_Weibull <span class="ot">=</span> scale <span class="sc">*</span> (<span class="sc">-</span><span class="dv">1</span><span class="sc">*</span><span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> u))<span class="sc">^</span>(<span class="dv">1</span><span class="sc">/</span>shape)</span>
+<span id="cb6-4"><a href=""></a></span>
+<span id="cb6-5"><a href=""></a><span class="fu">summary</span>(time_to_event_Weibull)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+0.003655 0.224873 0.374156 0.455899 0.628245 1.493420 </code></pre>
+</div>
+</div>
+</section>
+<section id="sampling-other-cause-mortality" class="slide level2">
+<h2>Sampling other cause mortality</h2>
+<ul>
+<li><p>Can use nonhomogeneous poisson point process with piecewise exponential hazard</p></li>
+<li><p>P(death) each year is exponentially distributed with rate <span class="math inline">\(\lambda_{\text{(OCM age X)}}\)</span></p></li>
+</ul>
+<p><span class="math display">\[
+\begin{align}
+F_{ij}(t) &amp;= 1 - e^{-\lambda_{ij} t}\\
+P(\text{death age x}) &amp;= 1 - e^{-\lambda_{\text{(OCM age X)}} (1 year))}\\
+\lambda_{\text{(OCM age X)}} &amp;= - \log(1-P(\text{death age x}))
+\end{align}
+\]</span></p>
+</section>
+<section id="recall-pdeath-age-x-from-life-table" class="slide level2">
+<h2>Recall: P(death age x) from life table</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a>t_other_cause_death <span class="ot">&lt;-</span> <span class="fu">fread</span>(<span class="st">"prob_death_by_age_2020_StatsCan.csv"</span>,</span>
+<span id="cb8-2"><a href=""></a>                                 <span class="at">sep=</span><span class="st">","</span>) <span class="co">#fread is data.table function for loading from CSV</span></span>
+<span id="cb8-3"><a href=""></a></span>
+<span id="cb8-4"><a href=""></a><span class="fu">str</span>(t_other_cause_death)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Classes 'data.table' and 'data.frame':  111 obs. of  2 variables:
+ $ Age       : int  0 1 2 3 4 5 6 7 8 9 ...
+ $ prob_death: num  0.00433 0.00022 0.00017 0.00013 0.0001 0.00009 0.00008 0.00007 0.00007 0.00007 ...
+ - attr(*, ".internal.selfref")=&lt;externalptr&gt; </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href=""></a><span class="fu">ggplot</span>(<span class="at">data=</span>t_other_cause_death, <span class="fu">aes</span>(<span class="at">x=</span>Age, <span class="at">y=</span>prob_death))<span class="sc">+</span></span>
+<span id="cb10-2"><a href=""></a>  <span class="fu">geom_point</span>()<span class="sc">+</span><span class="fu">geom_line</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="simulation_2_files/figure-revealjs/unnamed-chunk-4-1.png" width="960" class="r-stretch"></section>
+<section id="piecewise-nhpp-function" class="slide level2">
+<h2>Piecewise NHPP function</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href=""></a><span class="co"># SOURCE: https://github.com/LopezM-Mauricio/DES_tutorial_timedep_SickSicker/blob/main/R/DES_functions.R</span></span>
+<span id="cb11-2"><a href=""></a><span class="co"># PAPER: Garibay-Treviño DU, Jalal H, Alarid-Escudero F.</span></span>
+<span id="cb11-3"><a href=""></a><span class="co">#.   Med Decis Making. 2025 Feb;45(2):205-213. doi: 10.1177/0272989X241308768</span></span>
+<span id="cb11-4"><a href=""></a></span>
+<span id="cb11-5"><a href=""></a><span class="co">#---------------------------------------------------- #</span></span>
+<span id="cb11-6"><a href=""></a><span class="do">##  Non-parametric Sampling of Event Times        -----</span></span>
+<span id="cb11-7"><a href=""></a><span class="co">#---------------------------------------------------- #</span></span>
+<span id="cb11-8"><a href=""></a><span class="co">#' Nonparametric sampling of time to events from a discrete nonhomogeneous </span></span>
+<span id="cb11-9"><a href=""></a><span class="co">#' Poisson point process</span></span>
+<span id="cb11-10"><a href=""></a><span class="co">#'</span></span>
+<span id="cb11-11"><a href=""></a><span class="co">#' \code{nps_nhppp} samples states for multiple individuals simultaneously.</span></span>
+<span id="cb11-12"><a href=""></a><span class="co">#' </span></span>
+<span id="cb11-13"><a href=""></a><span class="co">#' The elements of each row of the matrix `m_probs` should sum up to 1. In case</span></span>
+<span id="cb11-14"><a href=""></a><span class="co">#' this does not happens, all the rows where this condition is not met will be</span></span>
+<span id="cb11-15"><a href=""></a><span class="co">#' normalized.</span></span>
+<span id="cb11-16"><a href=""></a><span class="co">#'</span></span>
+<span id="cb11-17"><a href=""></a><span class="co">#' @param m_probs matrix with probabilities for each category. Each row </span></span>
+<span id="cb11-18"><a href=""></a><span class="co">#' represents one individual and each column an specific category. </span></span>
+<span id="cb11-19"><a href=""></a><span class="co">#' @param v_categories An optional argument. It is a vector containing the name of </span></span>
+<span id="cb11-20"><a href=""></a><span class="co">#' the categories to sample from. The length of this vector must be equal to </span></span>
+<span id="cb11-21"><a href=""></a><span class="co">#' the number of columns of `m_probs`.</span></span>
+<span id="cb11-22"><a href=""></a><span class="co">#' @return A vector filled with sampled categories.</span></span>
+<span id="cb11-23"><a href=""></a><span class="co">#' @export</span></span>
+<span id="cb11-24"><a href=""></a>nps_nhppp <span class="ot">&lt;-</span> <span class="cf">function</span>(m_probs, </span>
+<span id="cb11-25"><a href=""></a>                      <span class="at">v_categories =</span> <span class="cn">NULL</span>, </span>
+<span id="cb11-26"><a href=""></a>                      <span class="at">correction =</span> <span class="fu">c</span>(<span class="st">"none"</span>, <span class="st">"uniform"</span>)) {</span>
+<span id="cb11-27"><a href=""></a>  </span>
+<span id="cb11-28"><a href=""></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.numeric</span>(m_probs)) {</span>
+<span id="cb11-29"><a href=""></a>    <span class="fu">stop</span>(<span class="st">"`m_probs` must be a matrix filled with numeric elements"</span>)</span>
+<span id="cb11-30"><a href=""></a>  }</span>
+<span id="cb11-31"><a href=""></a>  </span>
+<span id="cb11-32"><a href=""></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">isTRUE</span>(<span class="fu">all.equal</span>(<span class="at">target =</span> <span class="fu">rep</span>(<span class="dv">1</span>, <span class="fu">nrow</span>(m_probs)), </span>
+<span id="cb11-33"><a href=""></a>                        <span class="at">current =</span> <span class="fu">as.numeric</span>(<span class="fu">rowSums</span>(m_probs))))) {</span>
+<span id="cb11-34"><a href=""></a>    </span>
+<span id="cb11-35"><a href=""></a>    <span class="co">#* Find rows where the sum of their elements is not equal to 1.</span></span>
+<span id="cb11-36"><a href=""></a>    <span class="co">#* We use a very small value to check that they are equal to 1 since</span></span>
+<span id="cb11-37"><a href=""></a>    <span class="co">#* == and != sometimes do not work as desired. The value 1.5e-8</span></span>
+<span id="cb11-38"><a href=""></a>    <span class="co">#* was taken as the same level of tolerance as the `all.equal` function.</span></span>
+<span id="cb11-39"><a href=""></a>    v_rows_to_norm <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">abs</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">rowSums</span>(m_probs)) <span class="sc">&gt;</span> <span class="fl">1.5e-8</span>)</span>
+<span id="cb11-40"><a href=""></a>    </span>
+<span id="cb11-41"><a href=""></a>    <span class="fu">warning</span>(</span>
+<span id="cb11-42"><a href=""></a>      <span class="st">"The rows: "</span>, </span>
+<span id="cb11-43"><a href=""></a>      <span class="fu">paste</span>(<span class="fu">as.character</span>(v_rows_to_norm), <span class="at">collapse =</span> <span class="st">", "</span>), </span>
+<span id="cb11-44"><a href=""></a>      <span class="st">" in `m_probs` do not sum up to 1. The values within these rows will be normalized and then used in the sampling process. In case this behaviour is not desired modify the content of `m_probs`."</span>)</span>
+<span id="cb11-45"><a href=""></a>    </span>
+<span id="cb11-46"><a href=""></a>    <span class="co"># Normalize rows</span></span>
+<span id="cb11-47"><a href=""></a>    <span class="cf">if</span> (<span class="fu">length</span>(v_rows_to_norm) <span class="sc">==</span> <span class="dv">1</span>) {</span>
+<span id="cb11-48"><a href=""></a>      m_probs[v_rows_to_norm, ] <span class="ot">&lt;-</span> m_probs[v_rows_to_norm, ]<span class="sc">/</span><span class="fu">sum</span>(m_probs[v_rows_to_norm, ])</span>
+<span id="cb11-49"><a href=""></a>    }</span>
+<span id="cb11-50"><a href=""></a>    <span class="cf">if</span> (<span class="fu">length</span>(v_rows_to_norm) <span class="sc">&gt;</span> <span class="dv">1</span>) {</span>
+<span id="cb11-51"><a href=""></a>      m_probs[v_rows_to_norm, ] <span class="ot">&lt;-</span> m_probs[v_rows_to_norm, ]<span class="sc">/</span><span class="fu">rowSums</span>(m_probs[v_rows_to_norm, ])</span>
+<span id="cb11-52"><a href=""></a>    }</span>
+<span id="cb11-53"><a href=""></a>  }</span>
+<span id="cb11-54"><a href=""></a>  </span>
+<span id="cb11-55"><a href=""></a>  <span class="co"># Number of categories to sample from</span></span>
+<span id="cb11-56"><a href=""></a>  n_cat <span class="ot">&lt;-</span> <span class="fu">ncol</span>(m_probs)</span>
+<span id="cb11-57"><a href=""></a>  </span>
+<span id="cb11-58"><a href=""></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(v_categories)) {</span>
+<span id="cb11-59"><a href=""></a>    <span class="co">#' Generate the numeric categories based on the number of columns of </span></span>
+<span id="cb11-60"><a href=""></a>    <span class="co">#' `m_probs`</span></span>
+<span id="cb11-61"><a href=""></a>    v_categories <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, (n_cat <span class="sc">-</span> <span class="dv">1</span>))</span>
+<span id="cb11-62"><a href=""></a>  }</span>
+<span id="cb11-63"><a href=""></a>  </span>
+<span id="cb11-64"><a href=""></a>  correction <span class="ot">&lt;-</span> <span class="fu">match.arg</span>(correction)</span>
+<span id="cb11-65"><a href=""></a>  </span>
+<span id="cb11-66"><a href=""></a>  <span class="co"># Number of time to events to draw</span></span>
+<span id="cb11-67"><a href=""></a>  n_samp <span class="ot">&lt;-</span> <span class="fu">nrow</span>(m_probs)</span>
+<span id="cb11-68"><a href=""></a>  </span>
+<span id="cb11-69"><a href=""></a>  v_unif  <span class="ot">&lt;-</span> <span class="fu">runif</span>(n_samp, <span class="at">min =</span> <span class="dv">0</span>, <span class="at">max =</span> <span class="dv">1</span>)</span>
+<span id="cb11-70"><a href=""></a>  <span class="co"># matrixStats is written in C and optimized for large Matrix. </span></span>
+<span id="cb11-71"><a href=""></a>  v_sum_p <span class="ot">&lt;-</span> matrixStats<span class="sc">::</span><span class="fu">rowCumsums</span>(m_probs)</span>
+<span id="cb11-72"><a href=""></a>  <span class="co"># slower alternative using base R</span></span>
+<span id="cb11-73"><a href=""></a>  <span class="co"># v_sum_p &lt;- t(apply(m_probs))</span></span>
+<span id="cb11-74"><a href=""></a>  </span>
+<span id="cb11-75"><a href=""></a>  v_time_to_event <span class="ot">&lt;-</span> v_categories[<span class="fu">max.col</span>(v_sum_p <span class="sc">&gt;=</span> v_unif, </span>
+<span id="cb11-76"><a href=""></a>                                          <span class="at">ties.method =</span> <span class="st">"first"</span>)]</span>
+<span id="cb11-77"><a href=""></a>  </span>
+<span id="cb11-78"><a href=""></a>  <span class="cf">if</span> (correction <span class="sc">==</span> <span class="st">"uniform"</span>) {</span>
+<span id="cb11-79"><a href=""></a>    v_time_to_event <span class="ot">&lt;-</span> v_time_to_event <span class="sc">+</span> v_unif</span>
+<span id="cb11-80"><a href=""></a>  }</span>
+<span id="cb11-81"><a href=""></a>  <span class="fu">return</span>(v_time_to_event)</span>
+<span id="cb11-82"><a href=""></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="next-event-advance-clock-1" class="slide level2">
+<h2>Next-event-advance clock</h2>
+
+<img data-src="figs/DEStut%20fig2.png" class="r-stretch"></section>
+<section id="treatment-and-covariate-effects" class="slide level2">
+<h2>Treatment and covariate effects</h2>
+<ul>
+<li><p>time-to-event can depend on covariates or treatment</p></li>
+<li><p>Can model with proportional hazards assumption</p></li>
+</ul>
+<p><span class="math display">\[
+\lambda_{ij}(t, z_i(g(t)), tr(t)) = \lambda_{ij,0}(t \mid \theta) e^{\beta z_i(g(t)) + \gamma tr(t)}
+\]</span>Where</p>
+<ul>
+<li><p><span class="math inline">\(lambda_{ij,0}(t \mid \theta)\)</span> is a baseline hazard function</p></li>
+<li><p><span class="math inline">\(z_i(g(t))\)</span> is the covariates for individual <span class="math inline">\(i\)</span> (possibly time-varying)</p></li>
+<li><p><span class="math inline">\(tr(t)\)</span> is treatment indicator</p></li>
+</ul>
+</section>
+<section id="structure-from-darth-tutorial" class="slide level2">
+<h2>Structure from DARTH tutorial</h2>
+
+<img data-src="figs/DEStut%20figS1.png" class="r-stretch"><p>Implementation with <code>data.table()</code> r package for efficient table operations</p>
 </section>
 <section id="logistics" class="slide level2">
 <h2>Logistics</h2>
 <ul>
-<li>Assignment 2 due 11:59 tomorrow</li>
-<li>Assignment 3 available, due Fri, Oct 4</li>
-<li>Assignments 0 &amp; 1 graded, solution posted to mycourses</li>
+<li>Complete reading before next class</li>
+<li>Assignments 0 &amp; 1 graded, solutions posted to mycourses</li>
+<li><strong>Assignment 2</strong> Cohort state transition models deadline extended to Monday, Feb 2</li>
+<li>Office hours: Mondays 2:30pm to 3:30pm, room 1128</li>
 </ul>
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">
