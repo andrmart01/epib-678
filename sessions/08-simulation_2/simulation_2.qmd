@@ -13,7 +13,6 @@ editor: visual
 #| echo: true
 library(ggplot2)
 library(data.table)
-library(Rcpp)
 ```
 
 ## Today
@@ -442,11 +441,11 @@ $$
 \lambda_{ij}(t, z_i(g(t)), tr(t)) = \lambda_{ij,0}(t \mid \theta) e^{\beta z_i(g(t)) + \gamma tr(t)}
 $$Where
 
--    $lambda_{ij,0}(t \mid \theta)$ is a baseline hazard function
+-   $lambda_{ij,0}(t \mid \theta)$ is a baseline hazard function
 
--    $z_i(g(t))$ is the covariates for individual $i$ (possibly time-varying)
+-   $z_i(g(t))$ is the covariates for individual $i$ (possibly time-varying)
 
--    $tr(t)$ is treatment indicator
+-   $tr(t)$ is treatment indicator
 
 ## Structure from DARTH tutorial
 

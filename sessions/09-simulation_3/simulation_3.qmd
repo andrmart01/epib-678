@@ -1,25 +1,28 @@
 ---
-title: "Other simulation methods"
+title: "Efficient simulation & ABM"
 subtitle: "EPIB  676 session 9, McGill University"
 author: "Alton Russell"
-date: "26 Sep 2024"
+date: "3 Feb 2026"
 format: revealjs
 editor: visual
 ---
 
+## R packages
+
+```{r}
+#| echo: true
+library(ggplot2)
+library(data.table)
+library(Rcpp)
+```
+
 ## Today
 
--   **Efficient coding (general)**
+-   [**Efficient coding (general)**]{.underline}
 
 -   Efficiency techniques for simulation
 
--   Agent based model
-
-## Today: Improving efficiency
-
--   **General coding practices**
-
--   Simulation-specific methods
+-   Agent based modelling
 
 ## 5 tips for efficient R programming
 
@@ -101,9 +104,9 @@ system.time(int_est <- monte_carlo_vec(N))
 int_est
 ```
 
--   Using sum over a comparison operator with \<, \>, \<=, or \>- more efficient than for loop and if statement
+-   Using `sum` over a comparison (with \<, \>, \<=, or \>=) is more efficient than for loop + if statement
 
--   `runif`, `^`, `+` each called just 2 times on a vector, not 2N times on a single number
+-   `runif`, `^`, `+` each called 2x on a vector, not 2N times on a single number
 
 -   \~80X faster!
 
@@ -190,7 +193,7 @@ months_fac <- factor(months_string, levels = month_names)
 object.size(months_fac)
 ```
 
-## Don't optimize everything!
+## But, don't optimize everything!
 
 > "Programmers waste enormous amounts of time thinking about, or worrying about, the speed of **noncritical parts of their programs**, and these attempts at efficiency actually have a strong negative impact when debugging and maintenance are considered."
 >
@@ -229,7 +232,7 @@ monte_carlo_vec = function(N) {
   4*sum(sqrt(runif(N)^2 + runif(N)^2) <=1) / N
 }
 
-N = 500000
+N = 5000000 # 5 Million simulation runs
 A <- monte_carlo(N)
 B <- monte_carlo_vec(N)
 
@@ -242,6 +245,9 @@ If a specific part of your code is especially slow, can re-write in C++ (more in
 
 ```{r}
 #| echo: true
+
+library(Rcpp)
+
 #add numbers together
 cppFunction('int add(int x, int y, int z) {
   int sum = x + y + z;
@@ -251,11 +257,13 @@ add
 add(1, 2, 3)
 ```
 
-## Today: Improving efficiency
+## Today
 
--   General coding practices
+-   Efficient coding (general)
 
--   **Simulation-specific methods**
+-   [**Efficiency techniques for simulation**]{.underline}
+
+-   Agent based modelling
 
 ## Review: Tracking individuals in microsims
 
@@ -267,7 +275,7 @@ For each variable, use $n_i \times n_t$ (or $n_i \times (n_t+1)$) matrix where $
 
 -   $M_e[i,t]$ matrix gives the health accrued accumulated by individual $i$ during cycle $t$
 
-## Vectorization in microsimulation
+## Vectorization in individual simulation model
 
 -   Preallocate all matrices/arrays
 
@@ -275,40 +283,26 @@ For each variable, use $n_i \times n_t$ (or $n_i \times (n_t+1)$) matrix where $
 
     -   Sampling rows from data table at once
 
-    -   Generate random variables en mass with `runif(N)` not `runif(1)` (or `rgamma`, `rbeta`, etc.)
+    -   Generate random variables en masse with `runif(N)` not `runif(1)` (or `rgamma`, `rbeta`, etc.)
 
-## Vectorization in microsimulation
+## Vectorization in individual simulation model
 
--   Where possible, avoid loops and use **linear algebra** to compute calculations for the whole cohort at once
+-   Where possible, avoid loops and use **linear algebra** to compute calculations for the whole cohort (or large subsets) at once
 
     -   Multiplying, adding, subtracting, exponentiating matrices and vectors
 
--   In discrete time model, transition all individuals through each cycle simultaneously
+-   In discrete time models, transition all individuals through each cycle simultaneously
 
     -   Draw random variables for whole cohort as a vector
     -   See [Appendix D of Krijkamp et. al. tutorial](https://github.com/DARTH-git/Microsimulation-tutorial/blob/master/Appendix%20D_online_supp.R)
 
-## How many individuals to simulate?
-
--   As $N_i \rightarrow \infty$, variance in population-level estimates $\rightarrow 0$.
-
--   **Goal:** enough individuals that variance between strategies attributable to Monte Carlo variability is trivial
-
--   Depends on the model + use case
-
-Two ways to assess:
-
-1.  Check that Monte Carlo Standard Error small enough: `sd(cost_stratA - cost_stratB)/sqrt(n.i)`
-
-2.  Generate 3x $N_i$ individuals, divide into thirds, look at percent difference in outcomes
-
-## Variance reduction techniques
+## Variance reduction
 
 Different from efficient coding:
 
--   **Efficient coding** to simulate N individuals faster
+-   **Efficient coding** lets you simulate N individuals faster
 
--   **Variance reduction** to reduce N (simulate fewer individuals)
+-   **Variance reduction** to lets you simulate smaller N with less uncertainty in outcomes of interest
 
 Gains from simulating 10% fewer individuals $\approx$ simulating each individual 10% faster
 
@@ -316,7 +310,7 @@ Gains from simulating 10% fewer individuals $\approx$ simulating each individual
 
 -   Generate cohort baseline characteristics [**once**]{.underline}, then simulate those individuals under each alternative strategy
 
--   Otherwise, variance in population characteristics partly responsible for variance in outcomes between strategies
+-   Otherwise, variance in baseline population characteristics will contribute to variance in outcomes between strategies
 
 ![](figs/sim_one_cohort_all_strategies.png)
 
@@ -338,7 +332,7 @@ $$
 
 ## Antithetic variates
 
-Generate two **negatively-correlated sets** of random variables: U, original set, and V, antithetic set.
+Generate two **negatively-correlated sets** of random variables: U, original set, and V the antithetic set.
 
 -   If U\~Unif(0,1), V = 1 - U
 
@@ -358,9 +352,9 @@ Source: [Hedley (heds.nz)](https://heds.nz/posts/inverse-transform/)
 
 ## Inverse transform method in R
 
-pnorm (or pgamma, plnorm, etc) takes $x$ and gives you $p$
+`pnorm` (or `pgamma`, `plnorm`, etc) takes $x$ and gives you $p$
 
-qnorm (or qgamma, qlnorm, etc) takes $p$ and gives you $x$
+`qnorm` (or `qgamma`, `qlnorm`, etc) takes $p$ and gives you $x$
 
 ```{r}
 #| echo: true
@@ -398,15 +392,15 @@ print(c(Mean=mu,SE=SE,Lower=mu-SE,Upper=mu+SE))
 #Coin flip with antithetic variates
 unif_vec<-runif(n/2)
 
-#Normal process
+# Calculation on original variables
 x_1<- unif_vec < 0.3
 
-#Antithetic process
+# Calculation on antithetic variables
 x_2<- (1-unif_vec) < 0.3
 
-h_or_t_av <- (x_1 + x_2)/2
-mu=mean(h_or_t_av)
-SE=1.96*sd(h_or_t_av)/sqrt(n/2)
+h_or_t_antithetic <- (x_1 + x_2)/2
+mu=mean(h_or_t_antithetic)
+SE=1.96*sd(h_or_t_antithetic)/sqrt(n/2)
 print(c(Mean=mu,SE=SE,Lower=mu-SE,Upper=mu+SE))
 ```
 
@@ -414,7 +408,7 @@ Standard error reduced by \~25%
 
 ## Common random numbers
 
--   When modeling \>1 policy, using the same random variables in the same place within model improves estimation of the ***incremental*** outcomes (costs, QALYs).
+-   When modeling \>1 policy, using the same random variables in the same place within model reduces variance in estimated ***incremental*** outcomes ($\Delta$costs, $\Delta$QALYs).
 
 -   Random variables must have the same purpose in both systems (synchronized)
 
@@ -467,6 +461,28 @@ Standard error reduced by \~90%
 
 Source: [Berk Orbay](https://berkorbay.github.io/fe522/02_Monte_Carlo_Simulation.html)
 
+## Random number streams
+
+```{r}
+#| echo: true
+
+library(rstream)
+n <- 5; set.seed(123)
+
+# Create two separate streams
+stream1 <- new("rstream.mrg32k3a")
+stream2 <- new("rstream.mrg32k3a")
+
+# Sample n random variables from each stream
+rstream.sample(stream1, n)
+rstream.sample(stream2, n)
+
+# Can sample antithetic variates
+rstream.antithetic(stream1) <- TRUE
+```
+
+Source: [Rstream manuscript](https://www.iro.umontreal.ca/~lecuyer/myftp/papers/rstream.pdf)
+
 ## Challenge of rare events
 
 ![](figs/trad_monte_carlo.png)
@@ -481,13 +497,13 @@ Ease of implementation and benefits differ and can depend on context
 
 **Start with easy ones.** Often:
 
--   Simulate same cohort in all strategies, common random numbers
+-   Simulate same cohort in all strategies, common random numbers (if you can easily align them)
 
 **Consider others** if needed
 
 -   Antithetic variates, conditional Monte Carlo (if rare events are an issue)
 
-## Recap
+## Recap on efficient simulation
 
 -   Improve microsim efficiency by reducing duration of runs (efficient code) or how many runs are needed (variance reduction)
 
@@ -501,13 +517,11 @@ Ease of implementation and benefits differ and can depend on context
 
 ## Today
 
--   Discrete event simulation
+-   Efficient coding (general)
 
--   **Agent based model**
+-   Efficiency techniques for simulation
 
--   System dynamics
-
--   Choosing a model structure
+-   [**Agent based modelling**]{.underline}
 
 ## Credit
 
@@ -686,32 +700,22 @@ Fixed cycle lengths usually easier to program
 
 -   **Choosing a model structure**
 
-## Choosing model structure
-
--   Goal: capture relevant differences between strategies
-
--   "As complex as needed, as simple as possible."
-
-![](figs/model_categorization.png)
-
-## Recap
-
--   Discrete event simulation model [capacity constrained]{.underline} systems in continuous times
-
--   "Bottom up" agent based models assess how individual behavior impacts system outcomes
-
--   "Top down" system dynamic (cohort) models use feedback loops to assess system behavior
-
--   **Regardless of structure: start simple and add complexity!**
-
 ## Where we are
 
--   Have completed method lectures on model structures!
+-   9 of 16 methods lectures completed
 
--   Six more methods lectures which focus on design, parameterization, calibration, and uncertainty analysis
+-   Remaining method lectures cover:
 
--   Then, 'applied' phase where you examine many examples
+    -   One more model type (differential equations)
+
+    -   Methods for model design, parameterization, calibration, and uncertainty analysis
+
+-   Then, we enter the application phase
 
 ## Logistics
 
--   Assignment 3 due Fri, Oct 4
+-   Complete reading before next class
+-   **Assignment 3: Simulation** due Mon, Feb 16
+    -   Part 1 (simulated decision tree) available now
+    -   Part 2 (DES) will be released by Thursday
+-   Office hours: Mondays 2:30pm to 3:30pm, room 1128

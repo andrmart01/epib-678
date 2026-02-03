@@ -11,8 +11,8 @@
   <meta name="generator" content="quarto-1.5.47">
 
   <meta name="author" content="Alton Russell">
-  <meta name="dcterms.date" content="2024-09-26">
-  <title>Other simulation methods</title>
+  <meta name="dcterms.date" content="2026-02-03">
+  <title>Efficient simulation &amp; ABM</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -392,7 +392,7 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Other simulation methods</h1>
+  <h1 class="title">Efficient simulation &amp; ABM</h1>
   <p class="subtitle">EPIB 676 session 9, McGill University</p>
 
 <div class="quarto-title-authors">
@@ -403,203 +403,537 @@ Alton Russell
 </div>
 </div>
 
-  <p class="date">2024-09-26</p>
+  <p class="date">2026-02-03</p>
+</section>
+<section id="r-packages" class="slide level2">
+<h2>R packages</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-2"><a href=""></a><span class="fu">library</span>(data.table)</span>
+<span id="cb1-3"><a href=""></a><span class="fu">library</span>(Rcpp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="today" class="slide level2">
 <h2>Today</h2>
 <ul>
-<li><p><strong>Discrete event simulation</strong></p></li>
-<li><p>Agent based model</p></li>
-<li><p>System dynamics</p></li>
-<li><p>Choosing a model structure</p></li>
+<li><p><u><strong>Efficient coding (general)</strong></u></p></li>
+<li><p>Efficiency techniques for simulation</p></li>
+<li><p>Agent based modelling</p></li>
 </ul>
 </section>
-<section id="credit" class="slide level2">
-<h2>Credit</h2>
-<p>Much of this section is based on:</p>
-<p><a href="https://www.routledge.com/Discrete-Event-Simulation-for-Health-Technology-Assessment/Caro-Moller-Karnon-Stahl-Ishak/p/book/9780367737689"><em>Discrete Event Simulation for Health Technology Assessment (2016) by Caro et. al.</em></a></p>
+<section id="tips-for-efficient-r-programming" class="slide level2">
+<h2>5 tips for efficient R programming</h2>
+<p>From <a href="https://csgillespie.github.io/efficientR/">Efficient R Programming by Gillespie and Lovelace</a></p>
+<ol type="1">
+<li><p>Never grow vectors.</p></li>
+<li><p>Vectorize whenever possible.</p></li>
+<li><p>Use factors when appropriate.</p></li>
+<li><p>Cache variables to reduce unnecessary computation.</p></li>
+<li><p>‘Byte compile’ for an easy performance boost.</p></li>
+</ol>
 </section>
-<section id="discrete-event-simulation-strengths" class="slide level2">
-<h2>Discrete event simulation strengths</h2>
-<ul>
-<li><p>Model heterogeneous population*</p></li>
-<li><p>Time-varying parameters*</p></li>
-</ul>
-<p>*same as microsim</p>
-<ul>
-<li><p>Represent disease as continuous process</p></li>
-<li><p>Model <u><strong>capacity-constrained</strong></u> resources</p></li>
-<li><p>Entity types interact (patient, provider, tumor, etc.)<sup>+</sup></p></li>
-</ul>
-<p><sup>+</sup>In a limited way</p>
-</section>
-<section id="key-components" class="slide level2">
-<h2>Key components</h2>
-<ul>
-<li><p><strong>Events:</strong> instantaneous change to entity or system</p></li>
-<li><p><strong>Entities:</strong> person or thing that experiences events</p>
-<ul>
-<li>patients, providers, ambulance, etc.</li>
-</ul></li>
-<li><p><strong>Attributes:</strong> information specific to entity</p>
-<ul>
-<li>Age, health state, ‘in service’</li>
-</ul></li>
-<li><p><strong>Resources:</strong> provide service and have fixed capacity</p>
-<ul>
-<li>Providers, exam room, operating room, ventillator, etc.</li>
-</ul></li>
-<li><p><strong>Queues:</strong> lists of entities waiting for resource</p></li>
-</ul>
-</section>
-<section id="des-in-health-vs.-elsewhere" class="slide level2">
-<h2>DES in health vs.&nbsp;elsewhere</h2>
-<ul>
-<li><p>DES common for manufacturing, logistics, traffic engineering</p></li>
-<li><p>Focus usually on <strong>system-level outcomes</strong></p>
-<ul>
-<li>Production volume, wastage, resource utilization, processing time</li>
-</ul></li>
-<li><p>Health applications focus more on <strong>entities’</strong> state and pathway (patients)</p>
-<ul>
-<li>Often track more entity-level attributes</li>
-</ul></li>
-</ul>
-</section>
-<section id="examples-of-events" class="slide level2">
-<h2>Examples of events</h2>
-
-<img data-src="figs/des_event_examples.png" class="r-stretch"></section>
-<section id="event-graph" class="slide level2">
-<h2>Event graph</h2>
-
-<img data-src="figs/DES-event-graph.png" class="r-stretch"><p>Arrows show sequence of events.</p>
-</section>
-<section id="discrete-events-but-continuous-time" class="slide level2">
-<h2>Discrete events but continuous time</h2>
-<ul>
-<li><p>Events are instantaneous</p></li>
-<li><p>Time between events usually sampled from distribution</p></li>
-<li><p>State of system updated each time an event occurs</p></li>
-<li><p>Unlike discrete time models with a constant cycle length, the “step size” varies depending on the time between events</p>
-<ul>
-<li>“Next-event-time-advance”</li>
-</ul></li>
-</ul>
-</section>
-<section id="attributes" class="slide level2">
-<h2>Attributes</h2>
-<ul>
-<li><p>Some assigned at baseline and not changed (e.g., sex), others updated by events (e.g., cumulative costs, blood pressure)</p></li>
-<li><p>Probability &amp; timing of events can depend on attributes</p></li>
-</ul>
-
-<img data-src="figs/entity-attribute-example.png" class="r-stretch"></section>
-<section id="examples-of-attributes" class="slide level2">
-<h2>Examples of attributes</h2>
-
-<img data-src="figs/attribute-examples.png" class="r-stretch"></section>
-<section id="example-of-next-event-time-advance" class="slide level2">
-<h2>Example of next-event-time-advance</h2>
-
-<img data-src="figs/des_advance_1.png" class="r-stretch"></section>
-<section id="example-of-next-event-time-advance-1" class="slide level2">
-<h2>Example of next-event-time-advance</h2>
-
-<img data-src="figs/des_advance_2.png" class="r-stretch"></section>
-<section id="example-of-next-event-time-advance-2" class="slide level2">
-<h2>Example of next-event-time-advance</h2>
-
-<img data-src="figs/des_advance_3.png" class="r-stretch"></section>
-<section id="example-of-next-event-time-advance-3" class="slide level2">
-<h2>Example of next-event-time-advance</h2>
-
-<img data-src="figs/des_advance_4.png" class="r-stretch"></section>
-<section id="example-of-next-event-time-advance-4" class="slide level2">
-<h2>Example of next-event-time-advance</h2>
-
-<img data-src="figs/des_advance_5.png" class="r-stretch"></section>
-<section id="example-of-next-event-time-advance-5" class="slide level2">
-<h2>Example of next-event-time-advance</h2>
-
-<img data-src="figs/des_advance_6.png" class="r-stretch"></section>
-<section id="example-time-to-competing-events" class="slide level2">
-<h2>Example: time to competing events</h2>
+<section id="pre-allocate-vectors-matrices-arrays" class="slide level2">
+<h2>Pre-allocate vectors, matrices, arrays</h2>
+<p>Make a proper-sized object (all NAs or 0s) to store output before looping</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="co"># Events can have different distributions</span></span>
-<span id="cb1-2"><a href=""></a>time_to_checkup <span class="ot">=</span> <span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">15</span>) <span class="co"># Always 1 year apart</span></span>
-<span id="cb1-3"><a href=""></a>time_to_polyp <span class="ot">=</span> <span class="fu">rexp</span>(<span class="at">n=</span><span class="dv">15</span>, <span class="at">rate =</span> <span class="fl">1.5</span>) <span class="co"># Sampled from distribution</span></span>
-<span id="cb1-4"><a href=""></a><span class="co"># The clock goes until the next one occurs</span></span>
-<span id="cb1-5"><a href=""></a>time <span class="ot">=</span> <span class="fu">pmin</span>(time_to_checkup, time_to_polyp)</span>
-<span id="cb1-6"><a href=""></a>event<span class="ot">=</span><span class="fu">ifelse</span>(time_to_checkup<span class="sc">&lt;</span>time_to_polyp, <span class="st">"checkup"</span>,<span class="st">"polyp developed"</span>)</span>
-<span id="cb1-7"><a href=""></a><span class="fu">cat</span>(<span class="fu">paste0</span>(<span class="st">"i: "</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">15</span>, <span class="st">"   event: "</span>, event, <span class="st">"   time: "</span>, time, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a><span class="co">#No pre-allocation; growing a vector</span></span>
+<span id="cb2-2"><a href=""></a><span class="fu">system.time</span>({</span>
+<span id="cb2-3"><a href=""></a>  v <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb2-4"><a href=""></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">100000</span>) {v[i] <span class="ot">&lt;-</span> i;}</span>
+<span id="cb2-5"><a href=""></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>i: 1   event: polyp developed   time: 0.234440769379338
- i: 2   event: polyp developed   time: 0.87620646379571
- i: 3   event: polyp developed   time: 0.111216503481538
- i: 4   event: polyp developed   time: 0.296262541371941
- i: 5   event: polyp developed   time: 0.71072904638629
- i: 6   event: checkup   time: 1
- i: 7   event: polyp developed   time: 0.167558185890643
- i: 8   event: polyp developed   time: 0.117159810848534
- i: 9   event: polyp developed   time: 0.584617621553108
- i: 10   event: polyp developed   time: 0.313791689012049
- i: 11   event: polyp developed   time: 0.922716410802611
- i: 12   event: polyp developed   time: 0.136260743563374
- i: 13   event: checkup   time: 1
- i: 14   event: polyp developed   time: 0.070443971393009
- i: 15   event: polyp developed   time: 0.287799868666174</code></pre>
+<pre><code>   user  system elapsed 
+  0.012   0.002   0.013 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a><span class="co"># With  pre-allocation</span></span>
+<span id="cb4-2"><a href=""></a><span class="fu">system.time</span>({</span>
+<span id="cb4-3"><a href=""></a>  v2 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="cn">NA</span>)</span>
+<span id="cb4-4"><a href=""></a>  <span class="fu">length</span>(v2) <span class="ot">&lt;-</span> <span class="dv">100000</span></span>
+<span id="cb4-5"><a href=""></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">100000</span>) {v2[i] <span class="ot">&lt;-</span> i;}</span>
+<span id="cb4-6"><a href=""></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   user  system elapsed 
+  0.003   0.000   0.003 </code></pre>
 </div>
 </div>
 </section>
-<section id="global-variables" class="slide level2">
-<h2>Global variables</h2>
+<section id="monte-carlo-to-estimate-pi" class="slide level2">
+<h2>Monte Carlo to estimate <span class="math inline">\(\pi\)</span></h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><img data-src="figs/pi_monte_carlo1_berkorbay.png"></p>
+</div><div class="column" style="width:50%;">
+<p><img data-src="figs/pi_monte_carlo2_berkorbay.png"></p>
+</div></div>
+<p>Source: <a href="https://berkorbay.github.io/fe522/02_Monte_Carlo_Simulation.html">Berk Orbay</a></p>
+</section>
+<section id="unvectorized-example" class="slide level2">
+<h2>Unvectorized example</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a>monte_carlo <span class="ot">=</span> <span class="cf">function</span>(N) {</span>
+<span id="cb6-2"><a href=""></a>  hits <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb6-3"><a href=""></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(N)) {</span>
+<span id="cb6-4"><a href=""></a>    u1 <span class="ot">=</span> <span class="fu">runif</span>(<span class="dv">1</span>)</span>
+<span id="cb6-5"><a href=""></a>    u2 <span class="ot">=</span> <span class="fu">runif</span>(<span class="dv">1</span>)</span>
+<span id="cb6-6"><a href=""></a>    <span class="cf">if</span> (<span class="fu">sqrt</span>(u1<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> u2<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&lt;=</span><span class="dv">1</span> ){</span>
+<span id="cb6-7"><a href=""></a>      hits <span class="ot">=</span> hits <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb6-8"><a href=""></a>    }</span>
+<span id="cb6-9"><a href=""></a>  }</span>
+<span id="cb6-10"><a href=""></a>  <span class="fu">return</span>(<span class="dv">4</span><span class="sc">*</span>hits <span class="sc">/</span> N)</span>
+<span id="cb6-11"><a href=""></a>}</span>
+<span id="cb6-12"><a href=""></a>N <span class="ot">=</span> <span class="dv">500000</span></span>
+<span id="cb6-13"><a href=""></a><span class="fu">system.time</span>(int_est <span class="ot">&lt;-</span> <span class="fu">monte_carlo</span>(N))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   user  system elapsed 
+  0.460   0.005   0.468 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a>int_est</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.13788</code></pre>
+</div>
+</div>
+</section>
+<section id="vectorized-example" class="slide level2">
+<h2>Vectorized example</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href=""></a>monte_carlo_vec <span class="ot">=</span> <span class="cf">function</span>(N) {</span>
+<span id="cb10-2"><a href=""></a>  <span class="dv">4</span><span class="sc">*</span><span class="fu">sum</span>(<span class="fu">sqrt</span>(<span class="fu">runif</span>(N)<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">runif</span>(N)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&lt;=</span><span class="dv">1</span>) <span class="sc">/</span> N</span>
+<span id="cb10-3"><a href=""></a>}</span>
+<span id="cb10-4"><a href=""></a><span class="fu">system.time</span>(int_est <span class="ot">&lt;-</span> <span class="fu">monte_carlo_vec</span>(N))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   user  system elapsed 
+  0.008   0.001   0.009 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href=""></a>int_est</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.142712</code></pre>
+</div>
+</div>
 <ul>
-<li><p>Track the state of the <u><strong>system</strong></u></p></li>
-<li><p>Memory-efficient (vs.&nbsp;individual attributes)</p></li>
-<li><p>Some applications track only global variables</p></li>
-</ul>
-
-<img data-src="figs/attribute-vs-global-variable.png" class="r-stretch"></section>
-<section id="global-variable-examples" class="slide level2">
-<h2>Global variable examples</h2>
-
-<img data-src="figs/global_variable_examples.png" class="r-stretch"></section>
-<section id="time" class="slide level2">
-<h2>Time</h2>
-<ul>
-<li><p>Pre-specify total simulation time, run until reach</p></li>
-<li><p>Entities enter (are created) and exit at various times</p></li>
-<li><p>Capacity constrained resources are “seized” and “released” by entities</p>
-<ul>
-<li>Entities must queue if all resources are seized</li>
-<li>This is the interaction between entities!</li>
-</ul></li>
+<li><p>Using <code>sum</code> over a comparison (with &lt;, &gt;, &lt;=, or &gt;=) is more efficient than for loop + if statement</p></li>
+<li><p><code>runif</code>, <code>^</code>, <code>+</code> each called 2x on a vector, not 2N times on a single number</p></li>
+<li><p>~80X faster!</p></li>
 </ul>
 </section>
-<section id="resource-capacity-and-availability" class="slide level2">
-<h2>Resource capacity and availability</h2>
-
-<img data-src="figs/capacity_illustration.png" class="r-stretch"></section>
-<section id="resources-for-des" class="slide level2">
-<h2>Resources for DES</h2>
+<section id="apply-family-of-functions" class="slide level2">
+<h2>Apply() family of functions</h2>
+<p>Use when performing same operation on:</p>
 <ul>
-<li><p><a href="https://r-simmer.org/">Simmer R package</a> [<a href="https://r-hta.org/events/workshop/2021/degeling.pdf">2021 workshop Koen Degeling</a>], [<a href="http://www.trutschnig.net/Slides_simmer_Biller_Koehnke_Mayr.pdf">2019 presentation Biller et. al</a>.]</p></li>
-<li><p><a href="https://cran.r-project.org/web/packages/microsimulation/index.html">Microsimulation package</a> [<a href="https://r-hta.org/events/workshop/2021/clements.pdf">2021 workshop Mark Clements</a>]</p></li>
-<li><p><a href="https://r-hta.org/tutorial/descem/">r-hta.org tutorial using descem, Alvarez and Ribero</a></p></li>
+<li><p>all entry in vector</p></li>
+<li><p>all rows or all columns of matrix (or array)</p></li>
+<li><p>all elements in list</p></li>
+<li><p>Multiple columns of dataframe</p></li>
 </ul>
-<p>Dedicated software: Arena, Simul8</p>
+</section>
+<section id="apply-visualized" class="slide level2">
+<h2>Apply() visualized</h2>
+
+<img data-src="figs/apply_visualized_datacamp.png" class="r-stretch"><p>Source: <a href="https://www.datacamp.com/tutorial/r-tutorial-apply-family">Datacamp</a></p>
+</section>
+<section id="other-apply-like-functions" class="slide level2">
+<h2>Other apply-like functions</h2>
+<ul>
+<li><p>lapply()</p></li>
+<li><p>larray()</p></li>
+<li><p>tapply()</p></li>
+<li><p>convenience functions sweep() and aggregate().</p></li>
+</ul>
+</section>
+<section id="caching-variables" class="slide level2">
+<h2>Caching variables</h2>
+<p>If you will re-use the same value over and over, save to a variable instead of re-calculating each time.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href=""></a>x <span class="ot">=</span> <span class="fu">matrix</span>(<span class="fu">runif</span>(<span class="at">n=</span><span class="dv">90</span><span class="sc">^</span><span class="dv">2</span>), <span class="at">nrow =</span> <span class="dv">90</span>)</span>
+<span id="cb14-2"><a href=""></a></span>
+<span id="cb14-3"><a href=""></a><span class="fu">system.time</span>(</span>
+<span id="cb14-4"><a href=""></a>  <span class="fu">apply</span>(x, <span class="dv">2</span>, <span class="cf">function</span>(i) <span class="fu">mean</span>(i) <span class="sc">/</span> <span class="fu">sd</span>(x))</span>
+<span id="cb14-5"><a href=""></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   user  system elapsed 
+  0.004   0.000   0.005 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href=""></a><span class="fu">system.time</span>({</span>
+<span id="cb16-2"><a href=""></a>  sd_x <span class="ot">=</span> <span class="fu">sd</span>(x)</span>
+<span id="cb16-3"><a href=""></a>  <span class="fu">apply</span>(x, <span class="dv">2</span>, <span class="cf">function</span>(i) <span class="fu">mean</span>(i) <span class="sc">/</span> sd_x)</span>
+<span id="cb16-4"><a href=""></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   user  system elapsed 
+  0.001   0.000   0.000 </code></pre>
+</div>
+</div>
+<p>~4x faster!</p>
+</section>
+<section id="use-rs-byte-compiler" class="slide level2">
+<h2>Use R’s byte compiler</h2>
+<p>Don’t need to understand <a href="https://homepage.cs.uiowa.edu/~luke/R/compiler/compiler.pdf">technical details</a> to use. Makes code faster, particularly with loops</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href=""></a><span class="co"># uncompiled function</span></span>
+<span id="cb18-2"><a href=""></a>mean_r <span class="ot">=</span> <span class="cf">function</span>(x) {</span>
+<span id="cb18-3"><a href=""></a>  m <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb18-4"><a href=""></a>  n <span class="ot">=</span> <span class="fu">length</span>(x)</span>
+<span id="cb18-5"><a href=""></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(n)) {m <span class="ot">=</span> m <span class="sc">+</span> x[i] <span class="sc">/</span> n}</span>
+<span id="cb18-6"><a href=""></a>  m</span>
+<span id="cb18-7"><a href=""></a>}</span>
+<span id="cb18-8"><a href=""></a><span class="fu">system.time</span>(<span class="fu">mean_r</span>(x))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   user  system elapsed 
+  0.001   0.000   0.002 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href=""></a><span class="fu">library</span>(<span class="st">"compiler"</span>) <span class="co">#comes with R</span></span>
+<span id="cb20-2"><a href=""></a>cmp_mean_r <span class="ot">=</span> <span class="fu">cmpfun</span>(mean_r) <span class="co">#byte compiled version</span></span>
+<span id="cb20-3"><a href=""></a><span class="fu">system.time</span>(<span class="fu">cmp_mean_r</span>(x))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   user  system elapsed 
+  0.000   0.000   0.001 </code></pre>
+</div>
+</div>
+</section>
+<section id="use-factors-when-appropriate" class="slide level2">
+<h2>Use factors when appropriate</h2>
+<p>Character-type data can be stored as strings or factors. If you have many examples from a <strong>limited set of values</strong>, factor is more memory efficient.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href=""></a>month_names <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Jan"</span>, <span class="st">"Feb"</span>,<span class="st">"Mar"</span>,<span class="st">"Apr"</span>, <span class="st">"May"</span>, <span class="st">"June"</span>)</span>
+<span id="cb22-2"><a href=""></a>months_string <span class="ot">&lt;-</span> <span class="fu">sample</span>(month_names, <span class="at">size =</span> <span class="dv">5000</span>, <span class="at">replace =</span> T)</span>
+<span id="cb22-3"><a href=""></a><span class="fu">object.size</span>(months_string)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>40384 bytes</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href=""></a>months_fac <span class="ot">&lt;-</span> <span class="fu">factor</span>(months_string, <span class="at">levels =</span> month_names)</span>
+<span id="cb24-2"><a href=""></a><span class="fu">object.size</span>(months_fac)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>20816 bytes</code></pre>
+</div>
+</div>
+</section>
+<section id="but-dont-optimize-everything" class="slide level2">
+<h2>But, don’t optimize everything!</h2>
+<blockquote>
+<p>“Programmers waste enormous amounts of time thinking about, or worrying about, the speed of <strong>noncritical parts of their programs</strong>, and these attempts at efficiency actually have a strong negative impact when debugging and maintenance are considered.”</p>
+<p>— Donald Knuth.</p>
+</blockquote>
+<ul>
+<li><p>Readability &gt; efficiency 90% of the time</p></li>
+<li><p>Decide what to make efficient with <strong>profiling</strong></p></li>
+</ul>
+</section>
+<section id="profiling-code-with-profvis" class="slide level2">
+<h2>Profiling code with Profvis</h2>
+<p><a href="http://rstudio.github.io/profvis/index.html" class="uri">http://rstudio.github.io/profvis/index.html</a></p>
+<p>Must be run in RStudio</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href=""></a><span class="fu">library</span>(profvis)</span>
+<span id="cb26-2"><a href=""></a><span class="fu">library</span>(<span class="st">"compiler"</span>) <span class="co">#comes with R</span></span>
+<span id="cb26-3"><a href=""></a></span>
+<span id="cb26-4"><a href=""></a><span class="fu">profvis</span>({</span>
+<span id="cb26-5"><a href=""></a>monte_carlo <span class="ot">=</span> <span class="cf">function</span>(N) {</span>
+<span id="cb26-6"><a href=""></a>  hits <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb26-7"><a href=""></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(N)) {</span>
+<span id="cb26-8"><a href=""></a>    u1 <span class="ot">=</span> <span class="fu">runif</span>(<span class="dv">1</span>)</span>
+<span id="cb26-9"><a href=""></a>    u2 <span class="ot">=</span> <span class="fu">runif</span>(<span class="dv">1</span>)</span>
+<span id="cb26-10"><a href=""></a>    <span class="cf">if</span> (<span class="fu">sqrt</span>(u1<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> u2<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&lt;=</span><span class="dv">1</span> ){</span>
+<span id="cb26-11"><a href=""></a>      hits <span class="ot">=</span> hits <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb26-12"><a href=""></a>    }</span>
+<span id="cb26-13"><a href=""></a>  }</span>
+<span id="cb26-14"><a href=""></a>  <span class="fu">return</span>(<span class="dv">4</span><span class="sc">*</span>hits <span class="sc">/</span> N)</span>
+<span id="cb26-15"><a href=""></a>}</span>
+<span id="cb26-16"><a href=""></a></span>
+<span id="cb26-17"><a href=""></a>monte_carlo_vec <span class="ot">=</span> <span class="cf">function</span>(N) {</span>
+<span id="cb26-18"><a href=""></a>  <span class="dv">4</span><span class="sc">*</span><span class="fu">sum</span>(<span class="fu">sqrt</span>(<span class="fu">runif</span>(N)<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">runif</span>(N)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&lt;=</span><span class="dv">1</span>) <span class="sc">/</span> N</span>
+<span id="cb26-19"><a href=""></a>}</span>
+<span id="cb26-20"><a href=""></a></span>
+<span id="cb26-21"><a href=""></a>N <span class="ot">=</span> <span class="dv">5000000</span> <span class="co"># 5 Million simulation runs</span></span>
+<span id="cb26-22"><a href=""></a>A <span class="ot">&lt;-</span> <span class="fu">monte_carlo</span>(N)</span>
+<span id="cb26-23"><a href=""></a>B <span class="ot">&lt;-</span> <span class="fu">monte_carlo_vec</span>(N)</span>
+<span id="cb26-24"><a href=""></a></span>
+<span id="cb26-25"><a href=""></a>}) <span class="co">#end profvis</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="rccp-for-c-code" class="slide level2">
+<h2>RCCP for C++ code</h2>
+<p>If a specific part of your code is especially slow, can re-write in C++ (more info in <a href="http://adv-r.had.co.nz/Rcpp.html">Advanced R by Hadley Wickham</a>)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href=""></a><span class="fu">library</span>(Rcpp)</span>
+<span id="cb27-2"><a href=""></a></span>
+<span id="cb27-3"><a href=""></a><span class="co">#add numbers together</span></span>
+<span id="cb27-4"><a href=""></a><span class="fu">cppFunction</span>(<span class="st">'int add(int x, int y, int z) {</span></span>
+<span id="cb27-5"><a href=""></a><span class="st">  int sum = x + y + z;</span></span>
+<span id="cb27-6"><a href=""></a><span class="st">  return sum;</span></span>
+<span id="cb27-7"><a href=""></a><span class="st">}'</span>)</span>
+<span id="cb27-8"><a href=""></a>add</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>function (x, y, z) 
+.Call(&lt;pointer: 0x103059d40&gt;, x, y, z)</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href=""></a><span class="fu">add</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 6</code></pre>
+</div>
+</div>
 </section>
 <section id="today-1" class="slide level2">
 <h2>Today</h2>
 <ul>
-<li><p>Discrete event simulation</p></li>
-<li><p><strong>Agent based model</strong></p></li>
-<li><p>System dynamics</p></li>
-<li><p>Choosing a model structure</p></li>
+<li><p>Efficient coding (general)</p></li>
+<li><p><u><strong>Efficiency techniques for simulation</strong></u></p></li>
+<li><p>Agent based modelling</p></li>
 </ul>
 </section>
-<section id="credit-1" class="slide level2">
+<section id="review-tracking-individuals-in-microsims" class="slide level2">
+<h2>Review: Tracking individuals in microsims</h2>
+<p>For each variable, use <span class="math inline">\(n_i \times n_t\)</span> (or <span class="math inline">\(n_i \times (n_t+1)\)</span>) matrix where <span class="math inline">\(n_i\)</span> is the number of individuals and <span class="math inline">\(n_t\)</span> is the number of cycles.</p>
+<ul>
+<li><p><span class="math inline">\(M_m[i,t]\)</span> matrix gives state of individual <span class="math inline">\(i\)</span> after cycle <span class="math inline">\(t\)</span></p></li>
+<li><p><span class="math inline">\(M_c[i,t]\)</span> matrix gives costs accrued by individual <span class="math inline">\(i\)</span> during cycle <span class="math inline">\(t\)</span></p></li>
+<li><p><span class="math inline">\(M_e[i,t]\)</span> matrix gives the health accrued accumulated by individual <span class="math inline">\(i\)</span> during cycle <span class="math inline">\(t\)</span></p></li>
+</ul>
+</section>
+<section id="vectorization-in-individual-simulation-model" class="slide level2">
+<h2>Vectorization in individual simulation model</h2>
+<ul>
+<li><p>Preallocate all matrices/arrays</p></li>
+<li><p>Generate baseline characteristics for everyone at once</p>
+<ul>
+<li><p>Sampling rows from data table at once</p></li>
+<li><p>Generate random variables en masse with <code>runif(N)</code> not <code>runif(1)</code> (or <code>rgamma</code>, <code>rbeta</code>, etc.)</p></li>
+</ul></li>
+</ul>
+</section>
+<section id="vectorization-in-individual-simulation-model-1" class="slide level2">
+<h2>Vectorization in individual simulation model</h2>
+<ul>
+<li><p>Where possible, avoid loops and use <strong>linear algebra</strong> to compute calculations for the whole cohort (or large subsets) at once</p>
+<ul>
+<li>Multiplying, adding, subtracting, exponentiating matrices and vectors</li>
+</ul></li>
+<li><p>In discrete time models, transition all individuals through each cycle simultaneously</p>
+<ul>
+<li>Draw random variables for whole cohort as a vector</li>
+<li>See <a href="https://github.com/DARTH-git/Microsimulation-tutorial/blob/master/Appendix%20D_online_supp.R">Appendix D of Krijkamp et. al.&nbsp;tutorial</a></li>
+</ul></li>
+</ul>
+</section>
+<section id="variance-reduction" class="slide level2">
+<h2>Variance reduction</h2>
+<p>Different from efficient coding:</p>
+<ul>
+<li><p><strong>Efficient coding</strong> lets you simulate N individuals faster</p></li>
+<li><p><strong>Variance reduction</strong> to lets you simulate smaller N with less uncertainty in outcomes of interest</p></li>
+</ul>
+<p>Gains from simulating 10% fewer individuals <span class="math inline">\(\approx\)</span> simulating each individual 10% faster</p>
+</section>
+<section id="simulate-same-cohort-in-all-strategies" class="slide level2">
+<h2>Simulate same cohort in all strategies</h2>
+<ul>
+<li><p>Generate cohort baseline characteristics <u><strong>once</strong></u>, then simulate those individuals under each alternative strategy</p></li>
+<li><p>Otherwise, variance in baseline population characteristics will contribute to variance in outcomes between strategies</p></li>
+</ul>
+
+<img data-src="figs/sim_one_cohort_all_strategies.png" class="r-stretch"></section>
+<section id="antithetic-variates" class="slide level2">
+<h2>Antithetic variates</h2>
+<p><u><strong>Suppose</strong></u>: want to estimate <span class="math inline">\(\mu=E[X]\)</span> using two samples drawn from <span class="math inline">\(X: X_1 \text{ and } X_2\)</span>. Estimate would be:</p>
+<p><span class="math display">\[
+\hat{\mu}=(E[X_1]+E[X_2])/2
+\]</span></p>
+<p>From the definition of variance:</p>
+<p><span class="math display">\[
+Var[\hat{\mu}] = \frac{Var[X_1] + Var[X_2] + 2Cov[X_1,X_2]}{4}
+\]</span></p>
+<p><strong><em>Observe</em></strong>: smaller <span class="math inline">\(Cov[X_1,X_2]\)</span>, means smaller <span class="math inline">\(Var[\hat{\mu}]\)</span>.</p>
+</section>
+<section id="antithetic-variates-1" class="slide level2">
+<h2>Antithetic variates</h2>
+<p>Generate two <strong>negatively-correlated sets</strong> of random variables: U, original set, and V the antithetic set.</p>
+<ul>
+<li><p>If U~Unif(0,1), V = 1 - U</p></li>
+<li><p>If U~Norm(0,1), V = - U</p></li>
+<li><p>For other distributions, can use the <strong>inversion method</strong> to generate antithetic variates (if inverse of CDF exists)</p></li>
+</ul>
+</section>
+<section id="inversion-transform-cdf-in-reverse" class="slide level2">
+<h2>Inversion transform: CDF in reverse</h2>
+
+<img data-src="figs/norm_cdf_heds.png" class="r-stretch"><p><span class="math display">\[
+F_X(x) = P(X \leq x) = p \qquad \qquad F^{-1}_X(p) = x
+\]</span></p>
+<p>Source: <a href="https://heds.nz/posts/inverse-transform/">Hedley (heds.nz)</a></p>
+</section>
+<section id="inverse-transform-method-in-r" class="slide level2">
+<h2>Inverse transform method in R</h2>
+<p><code>pnorm</code> (or <code>pgamma</code>, <code>plnorm</code>, etc) takes <span class="math inline">\(x\)</span> and gives you <span class="math inline">\(p\)</span></p>
+<p><code>qnorm</code> (or <code>qgamma</code>, <code>qlnorm</code>, etc) takes <span class="math inline">\(p\)</span> and gives you <span class="math inline">\(x\)</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href=""></a>n<span class="ot">=</span><span class="dv">10000</span></span>
+<span id="cb31-2"><a href=""></a>x_rgamma <span class="ot">&lt;-</span> <span class="fu">rgamma</span>(n, <span class="at">shape =</span> <span class="dv">5</span>)</span>
+<span id="cb31-3"><a href=""></a>x_inverse <span class="ot">&lt;-</span> <span class="fu">qgamma</span>(<span class="fu">runif</span>(n), <span class="at">shape =</span> <span class="dv">5</span>)</span>
+<span id="cb31-4"><a href=""></a></span>
+<span id="cb31-5"><a href=""></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">method =</span><span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"rgamma"</span>, <span class="st">"inverse"</span>), <span class="at">each=</span>n),</span>
+<span id="cb31-6"><a href=""></a>           <span class="at">value =</span> <span class="fu">c</span>(x_rgamma, x_inverse))</span>
+<span id="cb31-7"><a href=""></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x=</span>value, <span class="at">fill =</span> method))<span class="sc">+</span><span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="simulation_3_files/figure-revealjs/unnamed-chunk-10-1.png" width="960" class="r-stretch"></section>
+<section id="ex-without-antithetic-variates" class="slide level2">
+<h2>Ex: Without antithetic variates</h2>
+<p>Simulating heads or tails for a biased coin flip, calculating standard error</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href=""></a>n<span class="ot">&lt;-</span><span class="dv">5000</span> <span class="co">#number of instances</span></span>
+<span id="cb32-2"><a href=""></a></span>
+<span id="cb32-3"><a href=""></a><span class="co">#Naive calculation</span></span>
+<span id="cb32-4"><a href=""></a>h_or_t_naive <span class="ot">&lt;-</span> <span class="fu">runif</span>(n) <span class="sc">&lt;</span> <span class="fl">0.3</span></span>
+<span id="cb32-5"><a href=""></a>mu<span class="ot">=</span><span class="fu">mean</span>(h_or_t_naive)</span>
+<span id="cb32-6"><a href=""></a>SE<span class="ot">=</span><span class="fl">1.96</span><span class="sc">*</span><span class="fu">sd</span>(h_or_t_naive)<span class="sc">/</span><span class="fu">sqrt</span>(n)</span>
+<span id="cb32-7"><a href=""></a></span>
+<span id="cb32-8"><a href=""></a><span class="fu">print</span>(<span class="fu">c</span>(<span class="at">Mean=</span>mu,<span class="at">SE=</span>SE,<span class="at">Lower=</span>mu<span class="sc">-</span>SE,<span class="at">Upper=</span>mu<span class="sc">+</span>SE))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      Mean         SE      Lower      Upper 
+0.30780000 0.01279572 0.29500428 0.32059572 </code></pre>
+</div>
+</div>
+</section>
+<section id="ex-with-antithetic-variates" class="slide level2">
+<h2>Ex: With antithetic variates</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href=""></a><span class="co">#Coin flip with antithetic variates</span></span>
+<span id="cb34-2"><a href=""></a>unif_vec<span class="ot">&lt;-</span><span class="fu">runif</span>(n<span class="sc">/</span><span class="dv">2</span>)</span>
+<span id="cb34-3"><a href=""></a></span>
+<span id="cb34-4"><a href=""></a><span class="co"># Calculation on original variables</span></span>
+<span id="cb34-5"><a href=""></a>x_1<span class="ot">&lt;-</span> unif_vec <span class="sc">&lt;</span> <span class="fl">0.3</span></span>
+<span id="cb34-6"><a href=""></a></span>
+<span id="cb34-7"><a href=""></a><span class="co"># Calculation on antithetic variables</span></span>
+<span id="cb34-8"><a href=""></a>x_2<span class="ot">&lt;-</span> (<span class="dv">1</span><span class="sc">-</span>unif_vec) <span class="sc">&lt;</span> <span class="fl">0.3</span></span>
+<span id="cb34-9"><a href=""></a></span>
+<span id="cb34-10"><a href=""></a>h_or_t_antithetic <span class="ot">&lt;-</span> (x_1 <span class="sc">+</span> x_2)<span class="sc">/</span><span class="dv">2</span></span>
+<span id="cb34-11"><a href=""></a>mu<span class="ot">=</span><span class="fu">mean</span>(h_or_t_antithetic)</span>
+<span id="cb34-12"><a href=""></a>SE<span class="ot">=</span><span class="fl">1.96</span><span class="sc">*</span><span class="fu">sd</span>(h_or_t_antithetic)<span class="sc">/</span><span class="fu">sqrt</span>(n<span class="sc">/</span><span class="dv">2</span>)</span>
+<span id="cb34-13"><a href=""></a><span class="fu">print</span>(<span class="fu">c</span>(<span class="at">Mean=</span>mu,<span class="at">SE=</span>SE,<span class="at">Lower=</span>mu<span class="sc">-</span>SE,<span class="at">Upper=</span>mu<span class="sc">+</span>SE))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Mean          SE       Lower       Upper 
+0.298000000 0.009619594 0.288380406 0.307619594 </code></pre>
+</div>
+</div>
+<p>Standard error reduced by ~25%</p>
+</section>
+<section id="common-random-numbers" class="slide level2">
+<h2>Common random numbers</h2>
+<ul>
+<li><p>When modeling &gt;1 policy, using the same random variables in the same place within model reduces variance in estimated <strong><em>incremental</em></strong> outcomes (<span class="math inline">\(\Delta\)</span>costs, <span class="math inline">\(\Delta\)</span>QALYs).</p></li>
+<li><p>Random variables must have the same purpose in both systems (synchronized)</p></li>
+<li><p>Reduces variance in the difference between two random variables by maximizing the covariance:</p></li>
+</ul>
+<p><span class="math display">\[
+Var[X_2 - X_1] = Var[X_1] + Var[X_2] - 2Cov[X_1,X_2]
+\]</span></p>
+</section>
+<section id="ex-without-common-random-numbers" class="slide level2">
+<h2>Ex: without common random numbers</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href=""></a><span class="co"># Choosing stock options to buy based on expected payoff</span></span>
+<span id="cb36-2"><a href=""></a><span class="co">#Same EC function that returns payoff vector</span></span>
+<span id="cb36-3"><a href=""></a>payoff_EC<span class="ot">&lt;-</span><span class="cf">function</span>(<span class="at">S_0=</span><span class="dv">100</span>,<span class="at">K=</span><span class="dv">100</span>,<span class="at">vol=</span><span class="fl">0.25</span>,<span class="at">T_years=</span><span class="dv">1</span>,<span class="at">r=</span><span class="fl">0.02</span>,z_val){</span>
+<span id="cb36-4"><a href=""></a>    <span class="fu">return</span>(<span class="fu">pmax</span>(S_0<span class="sc">*</span><span class="fu">exp</span>((r<span class="fl">-0.5</span><span class="sc">*</span>vol<span class="sc">^</span><span class="dv">2</span>)<span class="sc">*</span>T_years <span class="sc">+</span> vol<span class="sc">*</span>z_val<span class="sc">*</span><span class="fu">sqrt</span>(T))<span class="sc">-</span>K,<span class="dv">0</span>)<span class="sc">*</span><span class="fu">exp</span>(<span class="sc">-</span>r<span class="sc">*</span>T_years))</span>
+<span id="cb36-5"><a href=""></a>}</span>
+<span id="cb36-6"><a href=""></a></span>
+<span id="cb36-7"><a href=""></a>n<span class="ot">&lt;-</span><span class="dv">10</span><span class="sc">^</span><span class="dv">4</span> <span class="co">#Number of instances</span></span>
+<span id="cb36-8"><a href=""></a></span>
+<span id="cb36-9"><a href=""></a>payoff_1<span class="ot">&lt;-</span><span class="fu">payoff_EC</span>(<span class="at">r=</span><span class="fl">0.01</span>,<span class="at">z_val=</span><span class="fu">rnorm</span>(n))</span>
+<span id="cb36-10"><a href=""></a>payoff_2<span class="ot">&lt;-</span><span class="fu">payoff_EC</span>(<span class="at">r=</span><span class="fl">0.06</span>,<span class="at">z_val=</span><span class="fu">rnorm</span>(n))</span>
+<span id="cb36-11"><a href=""></a>diff_vec<span class="ot">&lt;-</span>payoff_1 <span class="sc">-</span> payoff_2</span>
+<span id="cb36-12"><a href=""></a>mu_diff<span class="ot">&lt;-</span><span class="fu">mean</span>(diff_vec)</span>
+<span id="cb36-13"><a href=""></a>SE<span class="ot">=</span><span class="fl">1.96</span><span class="sc">*</span><span class="fu">sd</span>(diff_vec)<span class="sc">/</span><span class="fu">sqrt</span>(n)</span>
+<span id="cb36-14"><a href=""></a><span class="fu">print</span>(<span class="fu">c</span>(<span class="at">Diff=</span>mu_diff,<span class="at">SE=</span>SE,<span class="at">Lower=</span>mu_diff<span class="sc">-</span>SE,<span class="at">Upper=</span>mu_diff<span class="sc">+</span>SE))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      Diff         SE      Lower      Upper 
+-2.8256952  0.5030338 -3.3287289 -2.3226614 </code></pre>
+</div>
+</div>
+<p>Source: <a href="https://berkorbay.github.io/fe522/02_Monte_Carlo_Simulation.html">Berk Orbay</a></p>
+</section>
+<section id="ex-with-common-random-numbers" class="slide level2">
+<h2>Ex: with common random numbers</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href=""></a><span class="co">#CRN Method</span></span>
+<span id="cb38-2"><a href=""></a>z_val<span class="ot">&lt;-</span><span class="fu">rnorm</span>(n)</span>
+<span id="cb38-3"><a href=""></a>payoff_1<span class="ot">&lt;-</span><span class="fu">payoff_EC</span>(<span class="at">r=</span><span class="fl">0.01</span>,<span class="at">z_val=</span>z_val)</span>
+<span id="cb38-4"><a href=""></a>payoff_2<span class="ot">&lt;-</span><span class="fu">payoff_EC</span>(<span class="at">r=</span><span class="fl">0.06</span>,<span class="at">z_val=</span>z_val)</span>
+<span id="cb38-5"><a href=""></a>diff_vec<span class="ot">&lt;-</span>payoff_1 <span class="sc">-</span> payoff_2</span>
+<span id="cb38-6"><a href=""></a>mu_diff<span class="ot">&lt;-</span><span class="fu">mean</span>(diff_vec)</span>
+<span id="cb38-7"><a href=""></a>SE<span class="ot">=</span><span class="fl">1.96</span><span class="sc">*</span><span class="fu">sd</span>(diff_vec)<span class="sc">/</span><span class="fu">sqrt</span>(n)</span>
+<span id="cb38-8"><a href=""></a><span class="fu">print</span>(<span class="fu">c</span>(<span class="at">Diff=</span>mu_diff,<span class="at">SE=</span>SE,<span class="at">Lower=</span>mu_diff<span class="sc">-</span>SE,<span class="at">Upper=</span>mu_diff<span class="sc">+</span>SE))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Diff          SE       Lower       Upper 
+-2.45708059  0.04596918 -2.50304977 -2.41111141 </code></pre>
+</div>
+</div>
+<p>Standard error reduced by ~90%</p>
+<p><br></p>
+<p>Source: <a href="https://berkorbay.github.io/fe522/02_Monte_Carlo_Simulation.html">Berk Orbay</a></p>
+</section>
+<section id="random-number-streams" class="slide level2">
+<h2>Random number streams</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href=""></a><span class="fu">library</span>(rstream)</span>
+<span id="cb40-2"><a href=""></a>n <span class="ot">&lt;-</span> <span class="dv">5</span>; <span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb40-3"><a href=""></a></span>
+<span id="cb40-4"><a href=""></a><span class="co"># Create two separate streams</span></span>
+<span id="cb40-5"><a href=""></a>stream1 <span class="ot">&lt;-</span> <span class="fu">new</span>(<span class="st">"rstream.mrg32k3a"</span>)</span>
+<span id="cb40-6"><a href=""></a>stream2 <span class="ot">&lt;-</span> <span class="fu">new</span>(<span class="st">"rstream.mrg32k3a"</span>)</span>
+<span id="cb40-7"><a href=""></a></span>
+<span id="cb40-8"><a href=""></a><span class="co"># Sample n random variables from each stream</span></span>
+<span id="cb40-9"><a href=""></a><span class="fu">rstream.sample</span>(stream1, n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.2603618 0.2112419 0.7165200 0.5964879 0.4512307</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href=""></a><span class="fu">rstream.sample</span>(stream2, n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.2896961 0.1802865 0.1595497 0.5389636 0.1223685</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href=""></a><span class="co"># Can sample antithetic variates</span></span>
+<span id="cb44-2"><a href=""></a><span class="fu">rstream.antithetic</span>(stream1) <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Source: <a href="https://www.iro.umontreal.ca/~lecuyer/myftp/papers/rstream.pdf">Rstream manuscript</a></p>
+</section>
+<section id="challenge-of-rare-events" class="slide level2">
+<h2>Challenge of rare events</h2>
+
+<img data-src="figs/trad_monte_carlo.png" class="r-stretch"></section>
+<section id="conditional-monte-carlo" class="slide level2">
+<h2>Conditional Monte Carlo</h2>
+
+<img data-src="figs/conditional_monte_carlo.png" class="r-stretch"></section>
+<section id="should-i-use-variance-reduction" class="slide level2">
+<h2>Should I use variance reduction?</h2>
+<p>Ease of implementation and benefits differ and can depend on context</p>
+<p><strong>Start with easy ones.</strong> Often:</p>
+<ul>
+<li>Simulate same cohort in all strategies, common random numbers (if you can easily align them)</li>
+</ul>
+<p><strong>Consider others</strong> if needed</p>
+<ul>
+<li>Antithetic variates, conditional Monte Carlo (if rare events are an issue)</li>
+</ul>
+</section>
+<section id="recap-on-efficient-simulation" class="slide level2">
+<h2>Recap on efficient simulation</h2>
+<ul>
+<li><p>Improve microsim efficiency by reducing duration of runs (efficient code) or how many runs are needed (variance reduction)</p></li>
+<li><p>Your time value &gt;&gt;&gt;&gt; computer time value!</p></li>
+<li><p>Get a working model before optimizing efficiency! Then, if needed:</p>
+<ul>
+<li><p>use <code>profvis()</code> to profile code &amp; find efficiency improvement opportunities</p></li>
+<li><p>Consider variance reduction techniques</p></li>
+</ul></li>
+</ul>
+</section>
+<section id="today-2" class="slide level2">
+<h2>Today</h2>
+<ul>
+<li><p>Efficient coding (general)</p></li>
+<li><p>Efficiency techniques for simulation</p></li>
+<li><p><u><strong>Agent based modelling</strong></u></p></li>
+</ul>
+</section>
+<section id="credit" class="slide level2">
 <h2>Credit</h2>
 <p>Much of this section based on</p>
 <p><a href="https://doi.org/10.1007/s40273-015-0254-2"><em>Chhatwal &amp; He (2015). Economic evaluations with agent-based modelling: An introduction.</em></a></p>
@@ -762,78 +1096,6 @@ Alton Russell
 <li><p><a href="https://doi.org/10.18637/jss.v084.i08">EpiModel R package</a> (has compartmental and network models)</p></li>
 </ul>
 </section>
-<section id="today-2" class="slide level2">
-<h2>Today</h2>
-<ul>
-<li><p>Discrete event simulation</p></li>
-<li><p>Agent based model</p></li>
-<li><p><strong>System dynamics</strong></p></li>
-<li><p>Choosing a model structure</p></li>
-</ul>
-</section>
-<section id="credit-2" class="slide level2">
-<h2>Credit</h2>
-<p>Much of this section based on</p>
-<ul>
-<li><a href="https://link-springer-com.proxy3.library.mcgill.ca/book/10.1007/978-3-319-34043-2">System Dynamics Modeling with R</a> (2016) by Jim Duggan</li>
-</ul>
-</section>
-<section id="system-dynamics-philosophy" class="slide level2">
-<h2>System dynamics philosophy</h2>
-<p>Actions can have consequences through complex, non-linear feedback loops</p>
-
-<img data-src="figs/SD-domino-guy.png" class="r-stretch"></section>
-<section id="stocks-and-flows" class="slide level2">
-<h2>Stocks and flows</h2>
-<ul>
-<li><p>Stocks = compartment/state; Flows = transitions</p></li>
-<li><p>Analogy: faucet, bathtub, drain</p></li>
-</ul>
-
-<img data-src="figs/SD_disease_stock_flow.png" class="r-stretch"></section>
-<section id="more-stocks-and-flows" class="slide level2">
-<h2>More stocks and flows</h2>
-
-<img data-src="figs/SD-stock-flows-more.png" class="r-stretch"></section>
-<section id="feedback-loops" class="slide level2">
-<h2>Feedback loops</h2>
-<blockquote>
-<p>A closed chain of causal connections from a stock, through a set of decisions or rules or physical laws or actions that are dependent on the level of the stock, and back again through a flow to change the stock -Meadows (2008)</p>
-</blockquote>
-<p>What separate SD models from traditional differential equations models</p>
-<p>2 types:</p>
-<ul>
-<li><p><strong>Balancing:</strong> negtaive feedback, “goal-seeking”</p></li>
-<li><p><strong>Reinforcing:</strong> positive feedback, “run-away”</p></li>
-</ul>
-</section>
-<section id="heating-a-room-balancing-loop-negative-feedback" class="slide level2">
-<h2>Heating a room: balancing loop (negative feedback)</h2>
-
-<img data-src="figs/SD_feedback_room_heat.png" class="r-stretch"></section>
-<section id="capital-investment-reinforcing-loop-positive-feedback" class="slide level2">
-<h2>Capital investment: reinforcing loop (positive feedback)</h2>
-
-<img data-src="figs/SD_feedback_capital_growth.png" class="r-stretch"></section>
-<section id="ex-opioid-misuse-and-use-disorder" class="slide level2">
-<h2>Ex: Opioid misuse and use disorder</h2>
-
-<img data-src="figs/SD-opioid-schematic.svg" class="r-stretch"></section>
-<section id="feedback-loops-in-opioid-example" class="slide level2">
-<h2>Feedback loops in opioid example</h2>
-
-<img data-src="figs/SD-opioid-feedbacks.png" class="r-stretch"><p><a href="https://pubmed.ncbi.nlm.nih.gov/35749492/">Stringfellow et. al.&nbsp;2022</a></p>
-<p><a href="www.doi.org/10.1073/pnas.2115714119">Lim et. al.&nbsp;2022</a></p>
-</section>
-<section id="resources-for-sd-modeling" class="slide level2">
-<h2>Resources for SD modeling</h2>
-<ul>
-<li><p><a href="https://doi.org/10.1146/annurev-publhealth-040617-014317">Tracy et. al.&nbsp;2018. “ABM in Public Health” Annual Review of Public Health</a></p></li>
-<li><p><a href="https://rpubs.com/rsmard05/sysDynR">SD in R intro</a>, Cpt. Rick Mard</p></li>
-<li><p><a href="https://link-springer-com.proxy3.library.mcgill.ca/book/10.1007/978-3-319-34043-2">System Dynamics Modeling with R</a> by Jim Duggan</p></li>
-<li><p><a href="https://vensim.com/free-download/">Vensim software</a></p></li>
-</ul>
-</section>
 <section id="today-3" class="slide level2">
 <h2>Today</h2>
 <ul>
@@ -843,35 +1105,28 @@ Alton Russell
 <li><p><strong>Choosing a model structure</strong></p></li>
 </ul>
 </section>
-<section id="choosing-model-structure" class="slide level2">
-<h2>Choosing model structure</h2>
-<ul>
-<li><p>Goal: capture relevant differences between strategies</p></li>
-<li><p>“As complex as needed, as simple as possible.”</p></li>
-</ul>
-
-<img data-src="figs/model_categorization.png" class="r-stretch"></section>
-<section id="recap" class="slide level2">
-<h2>Recap</h2>
-<ul>
-<li><p>Discrete event simulation model <u>capacity constrained</u> systems in continuous times</p></li>
-<li><p>“Bottom up” agent based models assess how individual behavior impacts system outcomes</p></li>
-<li><p>“Top down” system dynamic (cohort) models use feedback loops to assess system behavior</p></li>
-<li><p><strong>Regardless of structure: start simple and add complexity!</strong></p></li>
-</ul>
-</section>
 <section id="where-we-are" class="slide level2">
 <h2>Where we are</h2>
 <ul>
-<li><p>Have completed method lectures on model structures!</p></li>
-<li><p>Six more methods lectures which focus on design, parameterization, calibration, and uncertainty analysis</p></li>
-<li><p>Then, ‘applied’ phase where you examine many examples</p></li>
+<li><p>9 of 16 methods lectures completed</p></li>
+<li><p>Remaining method lectures cover:</p>
+<ul>
+<li><p>One more model type (differential equations)</p></li>
+<li><p>Methods for model design, parameterization, calibration, and uncertainty analysis</p></li>
+</ul></li>
+<li><p>Then, we enter the application phase</p></li>
 </ul>
 </section>
 <section id="logistics" class="slide level2">
 <h2>Logistics</h2>
 <ul>
-<li>Assignment 3 due Fri, Oct 4</li>
+<li>Complete reading before next class</li>
+<li><strong>Assignment 3: Simulation</strong> due Mon, Feb 16
+<ul>
+<li>Part 1 (simulated decision tree) available now</li>
+<li>Part 2 (DES) will be released by Thursday</li>
+</ul></li>
+<li>Office hours: Mondays 2:30pm to 3:30pm, room 1128</li>
 </ul>
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">
