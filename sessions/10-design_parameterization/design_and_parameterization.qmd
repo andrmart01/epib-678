@@ -1,8 +1,8 @@
 ---
-title: "Design and parameterization of analyses"
-subtitle: "EPIB  676 session 10, McGill University"
+title: "Designing and parameterizing model-based decision analyses"
+subtitle: "EPIB  678 session 10, McGill University"
 author: "Alton Russell"
-date: "1 Oct 2024"
+date: "5 Feb 2026"
 format: revealjs
 editor: visual
 ---
@@ -16,13 +16,190 @@ library(dplyr)
 
 ## Today
 
--   **Well-framed, simple models**
+-   [**Agent based modelling**]{.underline}
 
 -   Conceptualizing a model/analysis
 
 -   Parameterizing a model
 
--   Discuss course project
+-   Well-framed, simple models
+
+## Credit
+
+Much of this section based on
+
+[*Chhatwal & He (2015). Economic evaluations with agent-based modelling: An introduction.*](https://doi.org/10.1007/s40273-015-0254-2)
+
+## Why agent based models?
+
+-   Model autonomous agents interacting with each other and their environment
+
+Combines benefits of:
+
+-   Differential equations model
+
+    -   model 'infectiousness' of disease or behavior
+
+-   Microsimulation/discrete event simulation
+
+    -   flexible, individual-level, easier to instantiate heterogeneity
+
+## Schematic
+
+![Chhatwal et. a. 2015](figs/agent_based_transmission.png)
+
+## Agents and environments
+
+-   **Agents**: usually people, could be animals, vehicles, companies, molecules, cells etc.
+
+-   **Environment**: country, city, hospital, school, prison, twitter, airplane, body, organ, etc.
+
+## Agents
+
+-   Respond to environment and other agents as programmed
+
+    -   Behavior can vary by characteristics and history (memory)
+    -   Not centrally controlled
+
+-   Allows estimation of "network effects"
+
+    -   Benefit of intervention depends on others' behavior
+
+    -   e.g., vaccination, sexually transmitted disease test and treat, behavior/social conditioning
+
+## "Bottom up" system modeling
+
+-   Behavior programmed at the individual level
+
+-   System dynamics observed, not imposed
+
+-   Individual behavior $\rightarrow$ system dynamics:
+
+    -   Sex practices $\rightarrow$ HIV epidemic size
+
+    -   quarantine adherence $\rightarrow$ Ebola control
+
+    -   Vaccination + mixing while sick $\rightarrow$ flu season peak
+
+## Network topology
+
+::::: columns
+::: {.column width="50%"}
+![](figs/networkA.png)
+:::
+
+::: {.column width="50%"}
+![](figs/networkB.png)
+:::
+:::::
+
+## Network structure matters
+
+-   Homogeneous mixing usually unrealistic
+
+    -   Some have many connections ("high degree") others have few
+
+    -   Some networks are dense, others are sparse
+
+-   Create networks by:
+
+    -   Empirically estimating or calibrating from data
+
+    -   Algorithmically create via sampling rules
+
+-   Network often [**dynamic**]{.underline} (connections dissolve and re-form)
+
+## Discrete or continuous?
+
+-   Two options:
+
+    -   Fixed cycle lengths (like cohort models)
+
+    -   Continuous time discrete event approach (like discrete event model)
+
+Fixed cycle lengths usually easier to program
+
+## Downside: compute
+
+-   Often most computationally intensive models
+
+-   Microsimulation variance reduction techniques hard to apply
+
+    -   e.g., common random numbers less useful when one interaction can change everyone's trajectory
+
+-   Due to complexity, R may not be language of choice (Matlab, C++, Julia likely faster)
+
+## Ex: PrEP for people who inject drugs[^1]
+
+[^1]: Published in [Fu, Owens and Brandeau 2019](https://doi.org/10.1097%2FQAD.0000000000001747). Material adapted from MS&E 292 by Margaret Brandeau
+
+**Objective:** Evaluate the cost-effectiveness of PrEP for PWID under different targeting strategies (Assume PrEP+Screen+ART and 25% coverage)
+
+**Strategies:**
+
+::::: columns
+::: {.column width="50%"}
+-   No Targeting
+
+-   Enroll Partners
+:::
+
+::: {.column width="50%"}
+-   Target Most Partners
+
+-   Target Most Infected Partners
+:::
+:::::
+
+## PrEP model
+
+-   Network model
+
+-   Sexual and needlesharing HIV transmission
+
+-   4 HIV stages (acute infection, ..., AIDS)
+
+-   Calibrated to data from a large PWID network in Chicago
+
+-   Track costs, QALYs, HIV infections averted
+
+-   Programmed in Matlab
+
+-   Health system perspective
+
+## Model Schematic
+
+![](figs/PrEP_network_schematic.png)
+
+## PrEP CEA results
+
+::::: columns
+::: {.column width="70%"}
+![](figs/PrEP_CEA_results.png)
+:::
+
+::: {.column width="30%"}
+"US style" efficiency frontier plots have costs on X axis, QALYs on Y axis.
+:::
+:::::
+
+## Resources for ABM
+
+-   [RNetLogo package](http://rnetlogo.r-forge.r-project.org/) \[[blog](https://www.r-bloggers.com/2014/07/agent-based-models-and-rnetlogo/)\]
+
+-   [Agent-based modeling chapter](https://bookdown.org/f_lennert/book-toolbox_css/agent-based-modeling.html) from "Toolbox CSS" by Felix Lennert
+
+-   [EpiModel R package](https://doi.org/10.18637/jss.v084.i08) (has compartmental and network models)
+
+## Today
+
+-   Agent based modelling
+
+-   [**Conceptualizing a model/analysis**]{.underline}
+
+-   Parameterizing a model
+
+-   Well-framed, simple models
 
 ## Decision analysis is science + art
 
@@ -50,13 +227,278 @@ library(dplyr)
 
 7.  Interpret the results
 
-## Capturing what matters
+## Designing a decision analysis
 
--   A 'standard' cost-utility analysis (cost per QALY) is often warranted
+-   Objectives
 
--   But creatively tailoring how an analysis is framed to the decision context can yield valuable insights
+-   Research question
 
--   Simple models sometimes more effective than complex models
+-   Perspective(s)
+
+-   Intervention(s)/comparators
+
+-   Target population
+
+-   Scope
+
+-   Time horizon
+
+-   Analysis plan
+
+## Defining objectives
+
+If the goal is to inform policy, analysis must
+
+-   Consider the policy context and controversies
+
+-   Use perspective(s) relevant to the audience(s)
+
+Health policy is a collaborative process with many stakeholders. Need to identify the target audience and understand the evaluation criteria they care about.
+
+## What is? vs. what if?
+
+**What is? studies**
+
+-   Inform choice between existing options for current context
+
+-   Data on cost and effectiveness available or readily estimated
+
+**What if? studies**
+
+-   Inform choice between potential options for future contexts, often with incomplete information
+
+    -   How cheap does drug need to be?
+
+    -   How much potential benefit from developing improved technology?
+
+## Choosing analytic framework
+
+::::: columns
+::: {.column width="50%"}
+-   Informed by audience, objective, what's (un)known
+
+-   Multiple results can and should be reported i.e. -- a good CEA reports costs and consequences as well!
+
+-   Preliminary results can also inform what additional analysis is needed
+:::
+
+::: {.column width="50%"}
+![](figs/flowchart.png)
+:::
+:::::
+
+## Defining alternatives
+
+-   Many variations often possible
+
+    -   Example: Breast cancer surveillance: Self-exam? Clinical exam? Mammography? Combinations? Every year? Every 2 years? 4 years? Vary frequency or modality by age?
+
+-   All interventions that would be realistically considered should be included
+
+-   In practice, a limited set of interventions are sometimes used for feasibility
+
+-   "Do nothing" or "status quo" should always be included!
+
+## Including all alternatives
+
+Willingness-to-pay = \$100,000
+
+![](figs/include_all_alternatives.png)
+
+## Define target population
+
+-   Often defined by age, sex, geography, disease status, risk profile, etc.
+
+-   Examples:
+
+    -   40-year-old patient presenting for the first time with an adenomatous rectal polyp \>2 cm in diameter
+
+    -   All blood transfusion recipients in the 50 United States
+
+    -   People who inject drugs between the ages of 12 and 40
+
+-   May wish to report results for \>1 subgroup
+
+## What is in scope?
+
+-   Theoretical impact of alternatives nearly endless
+
+    -   Chemo vs. drug: staff time, environmental impact of production, medical waste, replacing out-of-work patient, "domino" effect of replacing the replacement....
+
+    -   Cannot model everything!
+
+-   Simulate processes and estimate outcomes which:
+
+    -   Likely to have a non-trivial impact on ***incremental*** outcomes of strategies
+
+    -   Are important to the target audience ("face validity")
+
+## Time horizon
+
+-   Long enough to capture the relevant differences in costs and effects
+
+-   Patient lifetime often needed when policies influence when patients die
+
+-   Often, the intervention is 'active' for a short period, but longer time horizon used to sum costs and effects
+
+    -   "We estimated the costs and effects of transfusion-transmitted Zika over the **lifetime of infected transfusion recipients** that resulted from **one year of screening** under each policy"
+
+## Today
+
+-   Agent based modelling
+
+-   Conceptualizing a model/analysis
+
+-   [**Parameterizing a model**]{.underline}
+
+-   Well-framed, simple models
+
+## Parameters are critical
+
+"Garbage in garbage out" applies to decision models
+
+<br>
+
+Should we make models without "enough" data?
+
+-   Yes, at least in some cases
+
+-   Decision must be made regardless
+
+-   Model with poor data can help elucidate trade-offs, (un)importance of knowledge gaps (guide research/data collection)
+
+-   Uncertainty analysis & foregrounding limitations is critical!
+
+## Quantitative data sources
+
+-   A single large, rigorous randomized controlled trial (RCT) collects all relevant cost and effectiveness (QALY) data on all relevant interventions to enable a CEA **(Rare)**
+
+-   A single large, rigorous RCT or a well-done meta-analysis estimates effectiveness for relevant interventions, but costs & utility must be estimated from other sources **(More common)**
+
+-   No head-to-head trial comparing all alternatives; many sources that inform different parameter values under different alternatives **(Most common)**
+
+## Quantitative data sources
+
+-   **Cohrane reports** synthesize data from many studies on policy relevant topics
+
+-   **Google Scholar and Pubmed**
+
+    -   Most relevant English-language publications in both
+
+    -   Good to search both
+
+-   **Tufts CEVR Cost Effectiveness Registry**
+
+    -   Most \$/QALY analyses indexed
+
+    -   Find prior CEAs
+
+    -   Search for ICERS and utilities
+
+## Imperfect hierarchy of evidence
+
+"Traditional" hierarchy (best to worst):
+
+-   Well conducted systematic review
+
+-   Single best study
+
+-   Subjective estimate
+
+Murky in practice
+
+-   How comparable are studies in systematic reviews?
+
+-   How well do they map to your target population?
+
+-   Sometimes, need to develop your own mini-systematic review
+
+## Population Intervention Comparison Outcome
+
+Librarians can help!
+
+![](figs/pico_example.png)
+
+From [Hunink et. al. Decision Making in Health and Medicine](https://www.cambridge.org/core/books/decision-making-in-health-and-medicine/finding-and-summarizing-the-evidence/8C72D78A03DEF4FBF7BEE6E01DD1F312) 2024 Ch. 8
+
+## Mini meta-analysis for key parameters
+
+![](figs/meta_analysis.png)
+
+Screening for colorectal cancer with faecal occult blood test, [Hewitson et. al. 2007](https://doi.org/10.1002/14651858.cd001216.pub2)
+
+## Mini meta-analysis for key parameters
+
+![](figs/pooling_studies.png)
+
+Supplement of [Russell et. al. 2022](https://doi.org/10.1111/trf.16704)
+
+## Sourcing parameters from modeling studies
+
+-   Recent model of same health condition in same population are useful resources
+
+-   Can borrow methods, parameterize similarly (with citation)
+
+-   **BUT**, find and cite the original, empirical source of parameters where possible
+
+    -   Avoid propagating errors
+    -   Can cite both modeling study and underlying data source
+
+-   Also check for more recent data
+
+## Expert opinion
+
+-   Informal methods (e.g., ask clinical collaborator) common
+
+-   When eliciting, must clarify difference between first order and second order uncertainty
+
+    -   Largest plausible ***average*** cost \<\< largest plausible ***patient*** cost
+
+-   Formal elicitation sometimes warranted
+
+    -   Semi-Delphi processes popular
+
+    -   See "Use (and abuse) of expert elicitation in support of decision making for public policy," [Morgan (2013) *PNAS*](https://www.pnas.org/doi/full/10.1073/pnas.1319946111)
+
+## Collaborators can help
+
+Ideally, students doing applied decision analysis have
+
+-   $\geq 1$ mentor/collaborator with experience in decision-analytic modeling
+
+-   $\geq 1$ mentor/collaborator with domain area expertise
+
+## Iterative process
+
+::::: columns
+::: {.column width="65%"}
+-   Develop analysis framework (states, time horizon, consequences, etc)
+
+-   Search for data to instantiate
+
+-   Change model structure because data are formatted differently
+
+-   Add a new policy you did not initially know about
+
+-   Remove an intervention no longer recommended
+
+-   ...
+:::
+
+::: {.column width="35%"}
+**Start simple and focus on what's important! A model should capture important tradeoffs, not perfectly mirror reality**
+:::
+:::::
+
+## Today
+
+-   Agent based modelling
+
+-   Conceptualizing a model/analysis
+
+-   Parameterizing a model
+
+-   [**Well-framed, simple models**]{.underline}
 
 ## Free condoms at school?
 
@@ -126,10 +568,9 @@ t_twoway <- tibble(
 t_twoway
 ```
 
-
 ## Scratch COVID-19 models
 
-![](kaplan_scratch_model_paper.png)
+![](figs/kaplan_scratch_model_paper.png)
 
 [Kaplan 2020, *MSOM*](https://doi.org/10.1287/msom.2020.0891)
 
@@ -137,302 +578,31 @@ t_twoway
 
 Will show 13:08 to 26:40
 
-## Today
+## Where we are
 
--   Well-framed, simple models
+-   Finishing methods phase
 
--   **Conceptualizing a model/analysis**
+    -   Six more methods lectures (differential equation models, calibration, validation, uncertainty analysis, equity considerations)
 
--   Parameterizing a model
+        -   Two more programming assignments
 
--   Discuss course project
+-   Then, we enter the application phase
 
-## Designing a decision analysis
+    -   Eight applied guest lectures
 
--   Objectives
+    -   Two presentations by you
 
--   Research question
+        -   Open source model
 
--   Perspective(s)
+        -   Your project
 
--   Intervention(s)/comparators
+## Project proposal
 
--   Target population
+-   Due Friday, February 27
 
--   Scope
+-   [Details in "Info on non-programming assignments" in syllabus folder](https://htmlpreview.github.io/?https://github.com/altonrus/epib-678/blob/main/syllabus/info_assignments_nonprogramming.html)
 
--   Time horizon
-
--   Analysis plan
-
-## Defining objectives
-
-If the goal is to inform policy, analysis must
-
--   Consider the policy context and controversies
-
--   Use perspective(s) relevant to the audience(s)
-
-Health policy is a collaborative process with many stakeholders. Need to identify the target audience and understand the evaluation criteria they care about.
-
-## What is? vs. what if?
-
-**What is? studies**
-
--   Inform choice between existing options for current context
-
--   Data on cost and effectiveness available or readily estimated
-
-**What if? studies**
-
--   Inform choice between potential options for future contexts, often with incomplete information
-
-    -   How cheap does drug need to be?
-
-    -   How much potential benefit from developing improved technology?
-
-## Choosing analytic framework
-
-::::: columns
-::: {.column width="50%"}
--   Informed by audience, objective, what's (un)known
-
--   Multiple results can and should be reported i.e. -- a good CEA reports costs and consequences as well!
-
--   Preliminary results can also inform what additional analysis is needed
-:::
-
-::: {.column width="50%"}
-![](flowchart.png)
-:::
-:::::
-
-## Defining alternatives
-
--   Many variations often possible
-
-    -   Example: Breast cancer surveillance: Self-exam? Clinical exam? Mammography? Combinations? Every year? Every 2 years? 4 years? Vary frequency or modality by age?
-
--   All interventions that would be realistically considered should be included
-
--   In practice, a limited set of interventions are sometimes used for feasibility
-
--   "Do nothing" or "status quo" should always be included!
-
-## Including all alternatives
-
-Willingness-to-pay = \$100,000
-
-![](include_all_alternatives.png)
-
-## Define target population
-
--   Often defined by age, sex, geography, disease status, risk profile, etc.
-
--   Examples:
-
-    -   40-year-old patient presenting for the first time with an adenomatous rectal polyp \>2 cm in diameter
-
-    -   All blood transfusion recipients in the 50 United States
-
-    -   People who inject drugs between the ages of 12 and 40
-
--   May wish to report results for \>1 subgroup
-
-## What's in scope?
-
--   Theoretical impact of alternatives nearly endless
-
-    -   Chemo vs. drug: staff time, environmental impact of production, medical waste, replacing out-of-work patient, "domino" effect of replacing the replacement....
-
-    -   Cannot model everything!
-
--   Model processes and outcomes that
-
-    -   Make substantial contribution to ***incremental*** impact of alternatives
-
-    -   Target audience cares about ("face validity")
-
-## Time horizon
-
--   Long enough to capture the relevant differences in costs and effects
-
--   Patient lifetime often needed when policies influence when patients die
-
--   Often, the intervention is 'active' for a short period, but longer time horizon used to sum costs and effects
-
-    -   "We estimated the costs and effects of transfusion-transmitted Zika over the **lifetime of infected transfusion recipients** that resulted from **one year of screening** under each policy"
-
-## Today
-
--   Well-framed, simple models
-
--   Conceptualizing a model/analysis
-
--   **Parameterizing a model**
-
--   Discuss course project
-
-## Parameters are critical
-
-"Garbage in garbage out" applies to decision models
-
-<br>
-
-Should we make models without "enough" data?
-
--   Probably, in some cases
-
--   Decision must be made regardless
-
--   Model with poor data can help elucidate trade-offs, (un)importance of knowledge gaps (guide research/data collection)
-
--   Uncertainty analysis & foregrounding limitations is critical!
-
-## Quantitative data sources
-
--   A single large, rigorous randomized controlled trial (RCT) collects all relevant cost and effectiveness (QALY) data on all relevant interventions to enable a CEA **(Rare)**
-
--   A single large, rigorous RCT or a well-done meta-analysis estimates effectiveness for relevant interventions, but costs & utility must be estimated from other sources. **(More common)**
-
--   No head-to-head trial comparing all alternatives; many sources that inform different parameter values under different alternatives **(Most common)**
-
-## Quantitative data sources
-
--   **Cohrane reports** synthesize data from many studies on policy relevant topics
-
--   **Google Scholar and Pubmed**
-
-    -   Most relevant English-language publications in both
-
-    -   Good to search both
-
--   **Tufts CEVR Cost Effectiveness Registry**
-
-    -   Most \$/QALY analyses indexed
-
-    -   Find prior CEAs
-
-    -   Search for ICERS and utilities
-
-## Imperfect hierarchy of evidence
-
-"Traditional" hierarchy (best to worst):
-
--   Well conducted systematic review
-
--   Single best study
-
--   Subjective estimate
-
-Murky in practice
-
--   How comparable are studies in systematic reviews?
-
--   How well do they map to your target population?
-
--   Sometimes, need to develop your own mini-systematic review
-
-## Population Intervention Comparison Outcome
-
-Librarians can help!
-
-![](images/pico_example.png)
-
-From [Hunink et. al. Decision Making in Health and Medicine](https://www.cambridge.org/core/books/decision-making-in-health-and-medicine/finding-and-summarizing-the-evidence/8C72D78A03DEF4FBF7BEE6E01DD1F312) 2024 Ch. 8
-
-## Mini meta-analysis for key parameters
-
-![](meta_analysis.png)
-
-Screening for colorectal cancer with faecal occult blood test, [Hewitson et. al. 2007](https://doi.org/10.1002/14651858.cd001216.pub2)
-
-## Mini meta-analysis for key parameters
-
-![](pooling_studies.png)
-
-Supplement of [Russell et. al. 2022](https://doi.org/10.1111/trf.16704)
-
-## Sourcing parameters from modeling studies
-
--   Recent model of same health condition in same population is a great source
-
--   Can borrow methods (with citation)
-
--   **BUT**, find and site original empirical paper
-
-    -   Avoid propagating errors
-    -   Can site modeling study and underlying data source
-
--   Also check for more recent data
-
-## Expert opinion
-
--   Informal methods (e.g., ask clinical collaborator) common
-
--   Clarify difference between first order and second order uncertainty
-
-    -   Largest plausible ***average*** cost \<\< largest plausible ***patient*** cost
-
--   Formal elicitation sometimes warranted
-
-    -   Semi-Delphi processes popular
-
-    -   See "Use (and abuse) of expert elicitation in support of decision making for public policy," [Morgan (2013) *PNAS*](https://www.pnas.org/doi/full/10.1073/pnas.1319946111)
-
-## Collaborators can help
-
-Ideally, students doing applied decision analysis have
-
--   $\geq 1$ mentor/collaborator with experience in decision-analytic modeling
-
--   $\geq 1$ mentor/collaborator with domain area expertise
-
-## Iterative process
-
-::::: columns
-::: {.column width="65%"}
--   Develop analysis framework (states, time horizon, consequences, etc)
-
--   Search for data to instantiate
-
--   Change model structure because data are formatted differently
-
--   Add a new policy you did not initially know about
-
--   Remove an intervention no longer recommended
-
--   ...
-:::
-
-::: {.column width="35%"}
-**Start simple and focus on what's important! A model should capture important tradeoffs, not perfectly mirror reality**
-:::
-:::::
-
-## Today
-
--   Well-framed, simple models
-
--   Conceptualizing a model/analysis
-
--   Parameterizing a model
-
--   **Discuss course project**
-
-## Applied assignments
-
--   Present an assessment of open-source modeling study in class on Nov 5
-
--   Develop your own (simplified) applied decision analysis
-
-    -   Proposal due Nov 1
-
-    -   Presentation Dec 3
-
-    -   Report due Dec 10
-
-For detailed expectations and assessment criteria, see [Info for non-programming assignments](https://htmlpreview.github.io/?https://github.com/altonrus/epib-676/blob/main/syllabus/info_assignments_nonprogramming.html) in syllabus folder on Github
+-   You are encouraged to discuss with me in office hours
 
 ## Recap
 
@@ -444,8 +614,14 @@ For detailed expectations and assessment criteria, see [Info for non-programming
 
 ## Logistics
 
--   Assignment 3 due Fri, Oct 4
+-   Complete reading before next class
 
--   Project proposal due Fri, Nov 1
+-   **Assignment 3: Simulation** due Mon, Feb 16
 
-    -   Strongly recommended to discuss with me before
+    -   Will release part 2 by end of today
+
+-   **Project proposal** due Fri, February 27
+
+-   Student presentations of open source model in class on Thurs, March 12
+
+-   Office hours: Mondays 2:30pm to 3:30pm, room 1128

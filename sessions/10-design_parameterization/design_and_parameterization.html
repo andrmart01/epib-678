@@ -11,8 +11,8 @@
   <meta name="generator" content="quarto-1.5.47">
 
   <meta name="author" content="Alton Russell">
-  <meta name="dcterms.date" content="2024-10-01">
-  <title>Design and parameterization of analyses</title>
+  <meta name="dcterms.date" content="2026-02-05">
+  <title>Designing and parameterizing model-based decision analyses</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -392,8 +392,8 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Design and parameterization of analyses</h1>
-  <p class="subtitle">EPIB 676 session 10, McGill University</p>
+  <h1 class="title">Designing and parameterizing model-based decision analyses</h1>
+  <p class="subtitle">EPIB 678 session 10, McGill University</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -403,7 +403,7 @@ Alton Russell
 </div>
 </div>
 
-  <p class="date">2024-10-01</p>
+  <p class="date">2026-02-05</p>
 </section>
 <section id="r-packages" class="slide level2">
 <h2>R packages</h2>
@@ -414,10 +414,177 @@ Alton Russell
 <section id="today" class="slide level2">
 <h2>Today</h2>
 <ul>
-<li><p><strong>Well-framed, simple models</strong></p></li>
+<li><p><u><strong>Agent based modelling</strong></u></p></li>
 <li><p>Conceptualizing a model/analysis</p></li>
 <li><p>Parameterizing a model</p></li>
-<li><p>Discuss course project</p></li>
+<li><p>Well-framed, simple models</p></li>
+</ul>
+</section>
+<section id="credit" class="slide level2">
+<h2>Credit</h2>
+<p>Much of this section based on</p>
+<p><a href="https://doi.org/10.1007/s40273-015-0254-2"><em>Chhatwal &amp; He (2015). Economic evaluations with agent-based modelling: An introduction.</em></a></p>
+</section>
+<section id="why-agent-based-models" class="slide level2">
+<h2>Why agent based models?</h2>
+<ul>
+<li>Model autonomous agents interacting with each other and their environment</li>
+</ul>
+<p>Combines benefits of:</p>
+<ul>
+<li><p>Differential equations model</p>
+<ul>
+<li>model ‘infectiousness’ of disease or behavior</li>
+</ul></li>
+<li><p>Microsimulation/discrete event simulation</p>
+<ul>
+<li>flexible, individual-level, easier to instantiate heterogeneity</li>
+</ul></li>
+</ul>
+</section>
+<section id="schematic" class="slide level2">
+<h2>Schematic</h2>
+
+<img data-src="figs/agent_based_transmission.png" class="r-stretch quarto-figure-center"><p class="caption">Chhatwal et. a. 2015</p></section>
+<section id="agents-and-environments" class="slide level2">
+<h2>Agents and environments</h2>
+<ul>
+<li><p><strong>Agents</strong>: usually people, could be animals, vehicles, companies, molecules, cells etc.</p></li>
+<li><p><strong>Environment</strong>: country, city, hospital, school, prison, twitter, airplane, body, organ, etc.</p></li>
+</ul>
+</section>
+<section id="agents" class="slide level2">
+<h2>Agents</h2>
+<ul>
+<li><p>Respond to environment and other agents as programmed</p>
+<ul>
+<li>Behavior can vary by characteristics and history (memory)</li>
+<li>Not centrally controlled</li>
+</ul></li>
+<li><p>Allows estimation of “network effects”</p>
+<ul>
+<li><p>Benefit of intervention depends on others’ behavior</p></li>
+<li><p>e.g., vaccination, sexually transmitted disease test and treat, behavior/social conditioning</p></li>
+</ul></li>
+</ul>
+</section>
+<section id="bottom-up-system-modeling" class="slide level2">
+<h2>“Bottom up” system modeling</h2>
+<ul>
+<li><p>Behavior programmed at the individual level</p></li>
+<li><p>System dynamics observed, not imposed</p></li>
+<li><p>Individual behavior <span class="math inline">\(\rightarrow\)</span> system dynamics:</p>
+<ul>
+<li><p>Sex practices <span class="math inline">\(\rightarrow\)</span> HIV epidemic size</p></li>
+<li><p>quarantine adherence <span class="math inline">\(\rightarrow\)</span> Ebola control</p></li>
+<li><p>Vaccination + mixing while sick <span class="math inline">\(\rightarrow\)</span> flu season peak</p></li>
+</ul></li>
+</ul>
+</section>
+<section id="network-topology" class="slide level2">
+<h2>Network topology</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><img data-src="figs/networkA.png"></p>
+</div><div class="column" style="width:50%;">
+<p><img data-src="figs/networkB.png"></p>
+</div></div>
+</section>
+<section id="network-structure-matters" class="slide level2">
+<h2>Network structure matters</h2>
+<ul>
+<li><p>Homogeneous mixing usually unrealistic</p>
+<ul>
+<li><p>Some have many connections (“high degree”) others have few</p></li>
+<li><p>Some networks are dense, others are sparse</p></li>
+</ul></li>
+<li><p>Create networks by:</p>
+<ul>
+<li><p>Empirically estimating or calibrating from data</p></li>
+<li><p>Algorithmically create via sampling rules</p></li>
+</ul></li>
+<li><p>Network often <u><strong>dynamic</strong></u> (connections dissolve and re-form)</p></li>
+</ul>
+</section>
+<section id="discrete-or-continuous" class="slide level2">
+<h2>Discrete or continuous?</h2>
+<ul>
+<li><p>Two options:</p>
+<ul>
+<li><p>Fixed cycle lengths (like cohort models)</p></li>
+<li><p>Continuous time discrete event approach (like discrete event model)</p></li>
+</ul></li>
+</ul>
+<p>Fixed cycle lengths usually easier to program</p>
+</section>
+<section id="downside-compute" class="slide level2">
+<h2>Downside: compute</h2>
+<ul>
+<li><p>Often most computationally intensive models</p></li>
+<li><p>Microsimulation variance reduction techniques hard to apply</p>
+<ul>
+<li>e.g., common random numbers less useful when one interaction can change everyone’s trajectory</li>
+</ul></li>
+<li><p>Due to complexity, R may not be language of choice (Matlab, C++, Julia likely faster)</p></li>
+</ul>
+</section>
+<section id="ex-prep-for-people-who-inject-drugs1" class="slide level2">
+<h2>Ex: PrEP for people who inject drugs<sup>1</sup></h2>
+<p><strong>Objective:</strong> Evaluate the cost-effectiveness of PrEP for PWID under different targeting strategies (Assume PrEP+Screen+ART and 25% coverage)</p>
+<p><strong>Strategies:</strong></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li><p>No Targeting</p></li>
+<li><p>Enroll Partners</p></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<ul>
+<li><p>Target Most Partners</p></li>
+<li><p>Target Most Infected Partners</p></li>
+</ul>
+</div></div>
+<aside><ol class="aside-footnotes"><li id="fn1"><p>Published in <a href="https://doi.org/10.1097%2FQAD.0000000000001747">Fu, Owens and Brandeau 2019</a>. Material adapted from MS&amp;E 292 by Margaret Brandeau</p></li></ol></aside></section>
+<section id="prep-model" class="slide level2">
+<h2>PrEP model</h2>
+<ul>
+<li><p>Network model</p></li>
+<li><p>Sexual and needlesharing HIV transmission</p></li>
+<li><p>4 HIV stages (acute infection, …, AIDS)</p></li>
+<li><p>Calibrated to data from a large PWID network in Chicago</p></li>
+<li><p>Track costs, QALYs, HIV infections averted</p></li>
+<li><p>Programmed in Matlab</p></li>
+<li><p>Health system perspective</p></li>
+</ul>
+</section>
+<section id="model-schematic" class="slide level2">
+<h2>Model Schematic</h2>
+
+<img data-src="figs/PrEP_network_schematic.png" class="r-stretch"></section>
+<section id="prep-cea-results" class="slide level2">
+<h2>PrEP CEA results</h2>
+<div class="columns">
+<div class="column" style="width:70%;">
+<p><img data-src="figs/PrEP_CEA_results.png"></p>
+</div><div class="column" style="width:30%;">
+<p>“US style” efficiency frontier plots have costs on X axis, QALYs on Y axis.</p>
+</div></div>
+</section>
+<section id="resources-for-abm" class="slide level2">
+<h2>Resources for ABM</h2>
+<ul>
+<li><p><a href="http://rnetlogo.r-forge.r-project.org/">RNetLogo package</a> [<a href="https://www.r-bloggers.com/2014/07/agent-based-models-and-rnetlogo/">blog</a>]</p></li>
+<li><p><a href="https://bookdown.org/f_lennert/book-toolbox_css/agent-based-modeling.html">Agent-based modeling chapter</a> from “Toolbox CSS” by Felix Lennert</p></li>
+<li><p><a href="https://doi.org/10.18637/jss.v084.i08">EpiModel R package</a> (has compartmental and network models)</p></li>
+</ul>
+</section>
+<section id="today-1" class="slide level2">
+<h2>Today</h2>
+<ul>
+<li><p>Agent based modelling</p></li>
+<li><p><u><strong>Conceptualizing a model/analysis</strong></u></p></li>
+<li><p>Parameterizing a model</p></li>
+<li><p>Well-framed, simple models</p></li>
 </ul>
 </section>
 <section id="decision-analysis-is-science-art" class="slide level2">
@@ -441,12 +608,249 @@ Alton Russell
 <li><p>Interpret the results</p></li>
 </ol>
 </section>
-<section id="capturing-what-matters" class="slide level2">
-<h2>Capturing what matters</h2>
+<section id="designing-a-decision-analysis" class="slide level2">
+<h2>Designing a decision analysis</h2>
 <ul>
-<li><p>A ‘standard’ cost-utility analysis (cost per QALY) is often warranted</p></li>
-<li><p>But creatively tailoring how an analysis is framed to the decision context can yield valuable insights</p></li>
-<li><p>Simple models sometimes more effective than complex models</p></li>
+<li><p>Objectives</p></li>
+<li><p>Research question</p></li>
+<li><p>Perspective(s)</p></li>
+<li><p>Intervention(s)/comparators</p></li>
+<li><p>Target population</p></li>
+<li><p>Scope</p></li>
+<li><p>Time horizon</p></li>
+<li><p>Analysis plan</p></li>
+</ul>
+</section>
+<section id="defining-objectives" class="slide level2">
+<h2>Defining objectives</h2>
+<p>If the goal is to inform policy, analysis must</p>
+<ul>
+<li><p>Consider the policy context and controversies</p></li>
+<li><p>Use perspective(s) relevant to the audience(s)</p></li>
+</ul>
+<p>Health policy is a collaborative process with many stakeholders. Need to identify the target audience and understand the evaluation criteria they care about.</p>
+</section>
+<section id="what-is-vs.-what-if" class="slide level2">
+<h2>What is? vs.&nbsp;what if?</h2>
+<p><strong>What is? studies</strong></p>
+<ul>
+<li><p>Inform choice between existing options for current context</p></li>
+<li><p>Data on cost and effectiveness available or readily estimated</p></li>
+</ul>
+<p><strong>What if? studies</strong></p>
+<ul>
+<li><p>Inform choice between potential options for future contexts, often with incomplete information</p>
+<ul>
+<li><p>How cheap does drug need to be?</p></li>
+<li><p>How much potential benefit from developing improved technology?</p></li>
+</ul></li>
+</ul>
+</section>
+<section id="choosing-analytic-framework" class="slide level2">
+<h2>Choosing analytic framework</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li><p>Informed by audience, objective, what’s (un)known</p></li>
+<li><p>Multiple results can and should be reported i.e.&nbsp;– a good CEA reports costs and consequences as well!</p></li>
+<li><p>Preliminary results can also inform what additional analysis is needed</p></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><img data-src="figs/flowchart.png"></p>
+</div></div>
+</section>
+<section id="defining-alternatives" class="slide level2">
+<h2>Defining alternatives</h2>
+<ul>
+<li><p>Many variations often possible</p>
+<ul>
+<li>Example: Breast cancer surveillance: Self-exam? Clinical exam? Mammography? Combinations? Every year? Every 2 years? 4 years? Vary frequency or modality by age?</li>
+</ul></li>
+<li><p>All interventions that would be realistically considered should be included</p></li>
+<li><p>In practice, a limited set of interventions are sometimes used for feasibility</p></li>
+<li><p>“Do nothing” or “status quo” should always be included!</p></li>
+</ul>
+</section>
+<section id="including-all-alternatives" class="slide level2">
+<h2>Including all alternatives</h2>
+<p>Willingness-to-pay = $100,000</p>
+
+<img data-src="figs/include_all_alternatives.png" class="r-stretch"></section>
+<section id="define-target-population" class="slide level2">
+<h2>Define target population</h2>
+<ul>
+<li><p>Often defined by age, sex, geography, disease status, risk profile, etc.</p></li>
+<li><p>Examples:</p>
+<ul>
+<li><p>40-year-old patient presenting for the first time with an adenomatous rectal polyp &gt;2 cm in diameter</p></li>
+<li><p>All blood transfusion recipients in the 50 United States</p></li>
+<li><p>People who inject drugs between the ages of 12 and 40</p></li>
+</ul></li>
+<li><p>May wish to report results for &gt;1 subgroup</p></li>
+</ul>
+</section>
+<section id="what-is-in-scope" class="slide level2">
+<h2>What is in scope?</h2>
+<ul>
+<li><p>Theoretical impact of alternatives nearly endless</p>
+<ul>
+<li><p>Chemo vs.&nbsp;drug: staff time, environmental impact of production, medical waste, replacing out-of-work patient, “domino” effect of replacing the replacement….</p></li>
+<li><p>Cannot model everything!</p></li>
+</ul></li>
+<li><p>Simulate processes and estimate outcomes which:</p>
+<ul>
+<li><p>Likely to have a non-trivial impact on <strong><em>incremental</em></strong> outcomes of strategies</p></li>
+<li><p>Are important to the target audience (“face validity”)</p></li>
+</ul></li>
+</ul>
+</section>
+<section id="time-horizon" class="slide level2">
+<h2>Time horizon</h2>
+<ul>
+<li><p>Long enough to capture the relevant differences in costs and effects</p></li>
+<li><p>Patient lifetime often needed when policies influence when patients die</p></li>
+<li><p>Often, the intervention is ‘active’ for a short period, but longer time horizon used to sum costs and effects</p>
+<ul>
+<li>“We estimated the costs and effects of transfusion-transmitted Zika over the <strong>lifetime of infected transfusion recipients</strong> that resulted from <strong>one year of screening</strong> under each policy”</li>
+</ul></li>
+</ul>
+</section>
+<section id="today-2" class="slide level2">
+<h2>Today</h2>
+<ul>
+<li><p>Agent based modelling</p></li>
+<li><p>Conceptualizing a model/analysis</p></li>
+<li><p><u><strong>Parameterizing a model</strong></u></p></li>
+<li><p>Well-framed, simple models</p></li>
+</ul>
+</section>
+<section id="parameters-are-critical" class="slide level2">
+<h2>Parameters are critical</h2>
+<p>“Garbage in garbage out” applies to decision models</p>
+<p><br></p>
+<p>Should we make models without “enough” data?</p>
+<ul>
+<li><p>Yes, at least in some cases</p></li>
+<li><p>Decision must be made regardless</p></li>
+<li><p>Model with poor data can help elucidate trade-offs, (un)importance of knowledge gaps (guide research/data collection)</p></li>
+<li><p>Uncertainty analysis &amp; foregrounding limitations is critical!</p></li>
+</ul>
+</section>
+<section id="quantitative-data-sources" class="slide level2">
+<h2>Quantitative data sources</h2>
+<ul>
+<li><p>A single large, rigorous randomized controlled trial (RCT) collects all relevant cost and effectiveness (QALY) data on all relevant interventions to enable a CEA <strong>(Rare)</strong></p></li>
+<li><p>A single large, rigorous RCT or a well-done meta-analysis estimates effectiveness for relevant interventions, but costs &amp; utility must be estimated from other sources <strong>(More common)</strong></p></li>
+<li><p>No head-to-head trial comparing all alternatives; many sources that inform different parameter values under different alternatives <strong>(Most common)</strong></p></li>
+</ul>
+</section>
+<section id="quantitative-data-sources-1" class="slide level2">
+<h2>Quantitative data sources</h2>
+<ul>
+<li><p><strong>Cohrane reports</strong> synthesize data from many studies on policy relevant topics</p></li>
+<li><p><strong>Google Scholar and Pubmed</strong></p>
+<ul>
+<li><p>Most relevant English-language publications in both</p></li>
+<li><p>Good to search both</p></li>
+</ul></li>
+<li><p><strong>Tufts CEVR Cost Effectiveness Registry</strong></p>
+<ul>
+<li><p>Most $/QALY analyses indexed</p></li>
+<li><p>Find prior CEAs</p></li>
+<li><p>Search for ICERS and utilities</p></li>
+</ul></li>
+</ul>
+</section>
+<section id="imperfect-hierarchy-of-evidence" class="slide level2">
+<h2>Imperfect hierarchy of evidence</h2>
+<p>“Traditional” hierarchy (best to worst):</p>
+<ul>
+<li><p>Well conducted systematic review</p></li>
+<li><p>Single best study</p></li>
+<li><p>Subjective estimate</p></li>
+</ul>
+<p>Murky in practice</p>
+<ul>
+<li><p>How comparable are studies in systematic reviews?</p></li>
+<li><p>How well do they map to your target population?</p></li>
+<li><p>Sometimes, need to develop your own mini-systematic review</p></li>
+</ul>
+</section>
+<section id="population-intervention-comparison-outcome" class="slide level2">
+<h2>Population Intervention Comparison Outcome</h2>
+<p>Librarians can help!</p>
+
+<img data-src="figs/pico_example.png" class="r-stretch"><p>From <a href="https://www.cambridge.org/core/books/decision-making-in-health-and-medicine/finding-and-summarizing-the-evidence/8C72D78A03DEF4FBF7BEE6E01DD1F312">Hunink et. al.&nbsp;Decision Making in Health and Medicine</a> 2024 Ch. 8</p>
+</section>
+<section id="mini-meta-analysis-for-key-parameters" class="slide level2">
+<h2>Mini meta-analysis for key parameters</h2>
+
+<img data-src="figs/meta_analysis.png" class="r-stretch"><p>Screening for colorectal cancer with faecal occult blood test, <a href="https://doi.org/10.1002/14651858.cd001216.pub2">Hewitson et. al.&nbsp;2007</a></p>
+</section>
+<section id="mini-meta-analysis-for-key-parameters-1" class="slide level2">
+<h2>Mini meta-analysis for key parameters</h2>
+
+<img data-src="figs/pooling_studies.png" class="r-stretch"><p>Supplement of <a href="https://doi.org/10.1111/trf.16704">Russell et. al.&nbsp;2022</a></p>
+</section>
+<section id="sourcing-parameters-from-modeling-studies" class="slide level2">
+<h2>Sourcing parameters from modeling studies</h2>
+<ul>
+<li><p>Recent model of same health condition in same population are useful resources</p></li>
+<li><p>Can borrow methods, parameterize similarly (with citation)</p></li>
+<li><p><strong>BUT</strong>, find and cite the original, empirical source of parameters where possible</p>
+<ul>
+<li>Avoid propagating errors</li>
+<li>Can cite both modeling study and underlying data source</li>
+</ul></li>
+<li><p>Also check for more recent data</p></li>
+</ul>
+</section>
+<section id="expert-opinion" class="slide level2">
+<h2>Expert opinion</h2>
+<ul>
+<li><p>Informal methods (e.g., ask clinical collaborator) common</p></li>
+<li><p>When eliciting, must clarify difference between first order and second order uncertainty</p>
+<ul>
+<li>Largest plausible <strong><em>average</em></strong> cost &lt;&lt; largest plausible <strong><em>patient</em></strong> cost</li>
+</ul></li>
+<li><p>Formal elicitation sometimes warranted</p>
+<ul>
+<li><p>Semi-Delphi processes popular</p></li>
+<li><p>See “Use (and abuse) of expert elicitation in support of decision making for public policy,” <a href="https://www.pnas.org/doi/full/10.1073/pnas.1319946111">Morgan (2013) <em>PNAS</em></a></p></li>
+</ul></li>
+</ul>
+</section>
+<section id="collaborators-can-help" class="slide level2">
+<h2>Collaborators can help</h2>
+<p>Ideally, students doing applied decision analysis have</p>
+<ul>
+<li><p><span class="math inline">\(\geq 1\)</span> mentor/collaborator with experience in decision-analytic modeling</p></li>
+<li><p><span class="math inline">\(\geq 1\)</span> mentor/collaborator with domain area expertise</p></li>
+</ul>
+</section>
+<section id="iterative-process" class="slide level2">
+<h2>Iterative process</h2>
+<div class="columns">
+<div class="column" style="width:65%;">
+<ul>
+<li><p>Develop analysis framework (states, time horizon, consequences, etc)</p></li>
+<li><p>Search for data to instantiate</p></li>
+<li><p>Change model structure because data are formatted differently</p></li>
+<li><p>Add a new policy you did not initially know about</p></li>
+<li><p>Remove an intervention no longer recommended</p></li>
+<li><p>…</p></li>
+</ul>
+</div><div class="column" style="width:35%;">
+<p><strong>Start simple and focus on what’s important! A model should capture important tradeoffs, not perfectly mirror reality</strong></p>
+</div></div>
+</section>
+<section id="today-3" class="slide level2">
+<h2>Today</h2>
+<ul>
+<li><p>Agent based modelling</p></li>
+<li><p>Conceptualizing a model/analysis</p></li>
+<li><p>Parameterizing a model</p></li>
+<li><p><u><strong>Well-framed, simple models</strong></u></p></li>
 </ul>
 </section>
 <section id="free-condoms-at-school" class="slide level2">
@@ -520,276 +924,38 @@ P \gamma + \gamma + \Delta \gamma - 1 &amp;&gt; P \gamma\\
 <section id="scratch-covid-19-models" class="slide level2">
 <h2>Scratch COVID-19 models</h2>
 
-<img data-src="kaplan_scratch_model_paper.png" class="r-stretch"><p><a href="https://doi.org/10.1287/msom.2020.0891">Kaplan 2020, <em>MSOM</em></a></p>
+<img data-src="figs/kaplan_scratch_model_paper.png" class="r-stretch"><p><a href="https://doi.org/10.1287/msom.2020.0891">Kaplan 2020, <em>MSOM</em></a></p>
 <p><a href="https://www.youtube.com/watch?v=FpUEKAcbBkU">Recorded talk on Youtube</a></p>
 <p>Will show 13:08 to 26:40</p>
 </section>
-<section id="today-1" class="slide level2">
-<h2>Today</h2>
+<section id="where-we-are" class="slide level2">
+<h2>Where we are</h2>
 <ul>
-<li><p>Well-framed, simple models</p></li>
-<li><p><strong>Conceptualizing a model/analysis</strong></p></li>
-<li><p>Parameterizing a model</p></li>
-<li><p>Discuss course project</p></li>
-</ul>
-</section>
-<section id="designing-a-decision-analysis" class="slide level2">
-<h2>Designing a decision analysis</h2>
+<li><p>Finishing methods phase</p>
 <ul>
-<li><p>Objectives</p></li>
-<li><p>Research question</p></li>
-<li><p>Perspective(s)</p></li>
-<li><p>Intervention(s)/comparators</p></li>
-<li><p>Target population</p></li>
-<li><p>Scope</p></li>
-<li><p>Time horizon</p></li>
-<li><p>Analysis plan</p></li>
-</ul>
-</section>
-<section id="defining-objectives" class="slide level2">
-<h2>Defining objectives</h2>
-<p>If the goal is to inform policy, analysis must</p>
+<li><p>Six more methods lectures (differential equation models, calibration, validation, uncertainty analysis, equity considerations)</p>
 <ul>
-<li><p>Consider the policy context and controversies</p></li>
-<li><p>Use perspective(s) relevant to the audience(s)</p></li>
-</ul>
-<p>Health policy is a collaborative process with many stakeholders. Need to identify the target audience and understand the evaluation criteria they care about.</p>
-</section>
-<section id="what-is-vs.-what-if" class="slide level2">
-<h2>What is? vs.&nbsp;what if?</h2>
-<p><strong>What is? studies</strong></p>
+<li>Two more programming assignments</li>
+</ul></li>
+</ul></li>
+<li><p>Then, we enter the application phase</p>
 <ul>
-<li><p>Inform choice between existing options for current context</p></li>
-<li><p>Data on cost and effectiveness available or readily estimated</p></li>
-</ul>
-<p><strong>What if? studies</strong></p>
+<li><p>Eight applied guest lectures</p></li>
+<li><p>Two presentations by you</p>
 <ul>
-<li><p>Inform choice between potential options for future contexts, often with incomplete information</p>
-<ul>
-<li><p>How cheap does drug need to be?</p></li>
-<li><p>How much potential benefit from developing improved technology?</p></li>
+<li><p>Open source model</p></li>
+<li><p>Your project</p></li>
+</ul></li>
 </ul></li>
 </ul>
 </section>
-<section id="choosing-analytic-framework" class="slide level2">
-<h2>Choosing analytic framework</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
+<section id="project-proposal" class="slide level2">
+<h2>Project proposal</h2>
 <ul>
-<li><p>Informed by audience, objective, what’s (un)known</p></li>
-<li><p>Multiple results can and should be reported i.e.&nbsp;– a good CEA reports costs and consequences as well!</p></li>
-<li><p>Preliminary results can also inform what additional analysis is needed</p></li>
+<li><p>Due Friday, February 27</p></li>
+<li><p><a href="https://htmlpreview.github.io/?https://github.com/altonrus/epib-678/blob/main/syllabus/info_assignments_nonprogramming.html">Details in “Info on non-programming assignments” in syllabus folder</a></p></li>
+<li><p>You are encouraged to discuss with me in office hours</p></li>
 </ul>
-</div><div class="column" style="width:50%;">
-<p><img data-src="flowchart.png"></p>
-</div></div>
-</section>
-<section id="defining-alternatives" class="slide level2">
-<h2>Defining alternatives</h2>
-<ul>
-<li><p>Many variations often possible</p>
-<ul>
-<li>Example: Breast cancer surveillance: Self-exam? Clinical exam? Mammography? Combinations? Every year? Every 2 years? 4 years? Vary frequency or modality by age?</li>
-</ul></li>
-<li><p>All interventions that would be realistically considered should be included</p></li>
-<li><p>In practice, a limited set of interventions are sometimes used for feasibility</p></li>
-<li><p>“Do nothing” or “status quo” should always be included!</p></li>
-</ul>
-</section>
-<section id="including-all-alternatives" class="slide level2">
-<h2>Including all alternatives</h2>
-<p>Willingness-to-pay = $100,000</p>
-
-<img data-src="include_all_alternatives.png" class="r-stretch"></section>
-<section id="define-target-population" class="slide level2">
-<h2>Define target population</h2>
-<ul>
-<li><p>Often defined by age, sex, geography, disease status, risk profile, etc.</p></li>
-<li><p>Examples:</p>
-<ul>
-<li><p>40-year-old patient presenting for the first time with an adenomatous rectal polyp &gt;2 cm in diameter</p></li>
-<li><p>All blood transfusion recipients in the 50 United States</p></li>
-<li><p>People who inject drugs between the ages of 12 and 40</p></li>
-</ul></li>
-<li><p>May wish to report results for &gt;1 subgroup</p></li>
-</ul>
-</section>
-<section id="whats-in-scope" class="slide level2">
-<h2>What’s in scope?</h2>
-<ul>
-<li><p>Theoretical impact of alternatives nearly endless</p>
-<ul>
-<li><p>Chemo vs.&nbsp;drug: staff time, environmental impact of production, medical waste, replacing out-of-work patient, “domino” effect of replacing the replacement….</p></li>
-<li><p>Cannot model everything!</p></li>
-</ul></li>
-<li><p>Model processes and outcomes that</p>
-<ul>
-<li><p>Make substantial contribution to <strong><em>incremental</em></strong> impact of alternatives</p></li>
-<li><p>Target audience cares about (“face validity”)</p></li>
-</ul></li>
-</ul>
-</section>
-<section id="time-horizon" class="slide level2">
-<h2>Time horizon</h2>
-<ul>
-<li><p>Long enough to capture the relevant differences in costs and effects</p></li>
-<li><p>Patient lifetime often needed when policies influence when patients die</p></li>
-<li><p>Often, the intervention is ‘active’ for a short period, but longer time horizon used to sum costs and effects</p>
-<ul>
-<li>“We estimated the costs and effects of transfusion-transmitted Zika over the <strong>lifetime of infected transfusion recipients</strong> that resulted from <strong>one year of screening</strong> under each policy”</li>
-</ul></li>
-</ul>
-</section>
-<section id="today-2" class="slide level2">
-<h2>Today</h2>
-<ul>
-<li><p>Well-framed, simple models</p></li>
-<li><p>Conceptualizing a model/analysis</p></li>
-<li><p><strong>Parameterizing a model</strong></p></li>
-<li><p>Discuss course project</p></li>
-</ul>
-</section>
-<section id="parameters-are-critical" class="slide level2">
-<h2>Parameters are critical</h2>
-<p>“Garbage in garbage out” applies to decision models</p>
-<p><br></p>
-<p>Should we make models without “enough” data?</p>
-<ul>
-<li><p>Probably, in some cases</p></li>
-<li><p>Decision must be made regardless</p></li>
-<li><p>Model with poor data can help elucidate trade-offs, (un)importance of knowledge gaps (guide research/data collection)</p></li>
-<li><p>Uncertainty analysis &amp; foregrounding limitations is critical!</p></li>
-</ul>
-</section>
-<section id="quantitative-data-sources" class="slide level2">
-<h2>Quantitative data sources</h2>
-<ul>
-<li><p>A single large, rigorous randomized controlled trial (RCT) collects all relevant cost and effectiveness (QALY) data on all relevant interventions to enable a CEA <strong>(Rare)</strong></p></li>
-<li><p>A single large, rigorous RCT or a well-done meta-analysis estimates effectiveness for relevant interventions, but costs &amp; utility must be estimated from other sources. <strong>(More common)</strong></p></li>
-<li><p>No head-to-head trial comparing all alternatives; many sources that inform different parameter values under different alternatives <strong>(Most common)</strong></p></li>
-</ul>
-</section>
-<section id="quantitative-data-sources-1" class="slide level2">
-<h2>Quantitative data sources</h2>
-<ul>
-<li><p><strong>Cohrane reports</strong> synthesize data from many studies on policy relevant topics</p></li>
-<li><p><strong>Google Scholar and Pubmed</strong></p>
-<ul>
-<li><p>Most relevant English-language publications in both</p></li>
-<li><p>Good to search both</p></li>
-</ul></li>
-<li><p><strong>Tufts CEVR Cost Effectiveness Registry</strong></p>
-<ul>
-<li><p>Most $/QALY analyses indexed</p></li>
-<li><p>Find prior CEAs</p></li>
-<li><p>Search for ICERS and utilities</p></li>
-</ul></li>
-</ul>
-</section>
-<section id="imperfect-hierarchy-of-evidence" class="slide level2">
-<h2>Imperfect hierarchy of evidence</h2>
-<p>“Traditional” hierarchy (best to worst):</p>
-<ul>
-<li><p>Well conducted systematic review</p></li>
-<li><p>Single best study</p></li>
-<li><p>Subjective estimate</p></li>
-</ul>
-<p>Murky in practice</p>
-<ul>
-<li><p>How comparable are studies in systematic reviews?</p></li>
-<li><p>How well do they map to your target population?</p></li>
-<li><p>Sometimes, need to develop your own mini-systematic review</p></li>
-</ul>
-</section>
-<section id="population-intervention-comparison-outcome" class="slide level2">
-<h2>Population Intervention Comparison Outcome</h2>
-<p>Librarians can help!</p>
-
-<img data-src="images/pico_example.png" class="r-stretch"><p>From <a href="https://www.cambridge.org/core/books/decision-making-in-health-and-medicine/finding-and-summarizing-the-evidence/8C72D78A03DEF4FBF7BEE6E01DD1F312">Hunink et. al.&nbsp;Decision Making in Health and Medicine</a> 2024 Ch. 8</p>
-</section>
-<section id="mini-meta-analysis-for-key-parameters" class="slide level2">
-<h2>Mini meta-analysis for key parameters</h2>
-
-<img data-src="meta_analysis.png" class="r-stretch"><p>Screening for colorectal cancer with faecal occult blood test, <a href="https://doi.org/10.1002/14651858.cd001216.pub2">Hewitson et. al.&nbsp;2007</a></p>
-</section>
-<section id="mini-meta-analysis-for-key-parameters-1" class="slide level2">
-<h2>Mini meta-analysis for key parameters</h2>
-
-<img data-src="pooling_studies.png" class="r-stretch"><p>Supplement of <a href="https://doi.org/10.1111/trf.16704">Russell et. al.&nbsp;2022</a></p>
-</section>
-<section id="sourcing-parameters-from-modeling-studies" class="slide level2">
-<h2>Sourcing parameters from modeling studies</h2>
-<ul>
-<li><p>Recent model of same health condition in same population is a great source</p></li>
-<li><p>Can borrow methods (with citation)</p></li>
-<li><p><strong>BUT</strong>, find and site original empirical paper</p>
-<ul>
-<li>Avoid propagating errors</li>
-<li>Can site modeling study and underlying data source</li>
-</ul></li>
-<li><p>Also check for more recent data</p></li>
-</ul>
-</section>
-<section id="expert-opinion" class="slide level2">
-<h2>Expert opinion</h2>
-<ul>
-<li><p>Informal methods (e.g., ask clinical collaborator) common</p></li>
-<li><p>Clarify difference between first order and second order uncertainty</p>
-<ul>
-<li>Largest plausible <strong><em>average</em></strong> cost &lt;&lt; largest plausible <strong><em>patient</em></strong> cost</li>
-</ul></li>
-<li><p>Formal elicitation sometimes warranted</p>
-<ul>
-<li><p>Semi-Delphi processes popular</p></li>
-<li><p>See “Use (and abuse) of expert elicitation in support of decision making for public policy,” <a href="https://www.pnas.org/doi/full/10.1073/pnas.1319946111">Morgan (2013) <em>PNAS</em></a></p></li>
-</ul></li>
-</ul>
-</section>
-<section id="collaborators-can-help" class="slide level2">
-<h2>Collaborators can help</h2>
-<p>Ideally, students doing applied decision analysis have</p>
-<ul>
-<li><p><span class="math inline">\(\geq 1\)</span> mentor/collaborator with experience in decision-analytic modeling</p></li>
-<li><p><span class="math inline">\(\geq 1\)</span> mentor/collaborator with domain area expertise</p></li>
-</ul>
-</section>
-<section id="iterative-process" class="slide level2">
-<h2>Iterative process</h2>
-<div class="columns">
-<div class="column" style="width:65%;">
-<ul>
-<li><p>Develop analysis framework (states, time horizon, consequences, etc)</p></li>
-<li><p>Search for data to instantiate</p></li>
-<li><p>Change model structure because data are formatted differently</p></li>
-<li><p>Add a new policy you did not initially know about</p></li>
-<li><p>Remove an intervention no longer recommended</p></li>
-<li><p>…</p></li>
-</ul>
-</div><div class="column" style="width:35%;">
-<p><strong>Start simple and focus on what’s important! A model should capture important tradeoffs, not perfectly mirror reality</strong></p>
-</div></div>
-</section>
-<section id="today-3" class="slide level2">
-<h2>Today</h2>
-<ul>
-<li><p>Well-framed, simple models</p></li>
-<li><p>Conceptualizing a model/analysis</p></li>
-<li><p>Parameterizing a model</p></li>
-<li><p><strong>Discuss course project</strong></p></li>
-</ul>
-</section>
-<section id="applied-assignments" class="slide level2">
-<h2>Applied assignments</h2>
-<ul>
-<li><p>Present an assessment of open-source modeling study in class on Nov 5</p></li>
-<li><p>Develop your own (simplified) applied decision analysis</p>
-<ul>
-<li><p>Proposal due Nov 1</p></li>
-<li><p>Presentation Dec 3</p></li>
-<li><p>Report due Dec 10</p></li>
-</ul></li>
-</ul>
-<p>For detailed expectations and assessment criteria, see <a href="https://htmlpreview.github.io/?https://github.com/altonrus/epib-676/blob/main/syllabus/info_assignments_nonprogramming.html">Info for non-programming assignments</a> in syllabus folder on Github</p>
 </section>
 <section id="recap" class="slide level2">
 <h2>Recap</h2>
@@ -802,11 +968,14 @@ P \gamma + \gamma + \Delta \gamma - 1 &amp;&gt; P \gamma\\
 <section id="logistics" class="slide level2">
 <h2>Logistics</h2>
 <ul>
-<li><p>Assignment 3 due Fri, Oct 4</p></li>
-<li><p>Project proposal due Fri, Nov 1</p>
+<li><p>Complete reading before next class</p></li>
+<li><p><strong>Assignment 3: Simulation</strong> due Mon, Feb 16</p>
 <ul>
-<li>Strongly recommended to discuss with me before</li>
+<li>Will release part 2 by end of today</li>
 </ul></li>
+<li><p><strong>Project proposal</strong> due Fri, February 27</p></li>
+<li><p>Student presentations of open source model in class on Thurs, March 12</p></li>
+<li><p>Office hours: Mondays 2:30pm to 3:30pm, room 1128</p></li>
 </ul>
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">
@@ -814,6 +983,7 @@ P \gamma + \gamma + \Delta \gamma - 1 &amp;&gt; P \gamma\\
 </div>
 </div>
 </section>
+
     </div>
   </div>
 

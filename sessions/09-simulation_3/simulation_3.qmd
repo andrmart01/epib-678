@@ -1,5 +1,5 @@
 ---
-title: "Efficient simulation & ABM"
+title: "Efficient programming and simulation"
 subtitle: "EPIB  676 session 9, McGill University"
 author: "Alton Russell"
 date: "3 Feb 2026"
@@ -275,7 +275,7 @@ For each variable, use $n_i \times n_t$ (or $n_i \times (n_t+1)$) matrix where $
 
 -   $M_e[i,t]$ matrix gives the health accrued accumulated by individual $i$ during cycle $t$
 
-## Vectorization in individual simulation model
+## Vectorization in individual simulation
 
 -   Preallocate all matrices/arrays
 
@@ -285,7 +285,7 @@ For each variable, use $n_i \times n_t$ (or $n_i \times (n_t+1)$) matrix where $
 
     -   Generate random variables en masse with `runif(N)` not `runif(1)` (or `rgamma`, `rbeta`, etc.)
 
-## Vectorization in individual simulation model
+## Vectorization in individual simulation
 
 -   Where possible, avoid loops and use **linear algebra** to compute calculations for the whole cohort (or large subsets) at once
 
@@ -523,194 +523,7 @@ Ease of implementation and benefits differ and can depend on context
 
 -   [**Agent based modelling**]{.underline}
 
-## Credit
-
-Much of this section based on
-
-[*Chhatwal & He (2015). Economic evaluations with agent-based modelling: An introduction.*](https://doi.org/10.1007/s40273-015-0254-2)
-
-## Why agent based models?
-
--   Model autonomous agents interacting with each other and their environment
-
-Combines benefits of:
-
--   Differential equations model
-
-    -   model 'infectiousness' of disease or behavior
-
--   Microsimulation/discrete event simulation
-
-    -   flexible, individual-level, easier to instantiate heterogeneity
-
-## Schematic
-
-[![Chhatwal et. a. 2015](figs/agent_based_transmission.png)](www.doi.org/10.1007/s40273-015-0254-2)
-
-## Agents and environments
-
--   **Agents**: usually people, could be animals, vehicles, companies, molecules, cells etc.
-
--   **Environment**: country, city, hospital, school, prison, twitter, airplane, body, organ, etc.
-
-## Agents
-
--   Respond to environment and other agents as programmed
-
-    -   Behavior can vary by characteristics and history (memory)
-    -   Not centrally controlled
-
--   Allows estimation of "network effects"
-
-    -   Benefit of intervention depends on others' behavior
-
-    -   e.g., vaccination, sexually transmitted disease test and treat, behavior/social conditioning
-
-## "Bottom up" system modeling
-
--   Behavior programmed at the individual level
-
--   System dynamics observed, not imposed
-
--   Individual behavior $\rightarrow$ system dynamics:
-
-    -   Sex practices $\rightarrow$ HIV epidemic size
-
-    -   quarantine adherence $\rightarrow$ Ebola control
-
-    -   Vaccination + mixing while sick $\rightarrow$ flu season peak
-
-## Network topology
-
-::::: columns
-::: {.column width="50%"}
-![](figs/networkA.png)
-:::
-
-::: {.column width="50%"}
-![](figs/networkB.png)
-:::
-:::::
-
-## Network structure matters
-
--   Homogeneous mixing usually unrealistic
-
-    -   Some have many connections ("high degree") others have few
-
-    -   Some networks are dense, others are sparse
-
--   Create networks by:
-
-    -   Empirically estimating or calibrating from data
-
-    -   Algorithmically create via sampling rules
-
--   Network often [**dynamic**]{.underline} (connections dissolve and re-form)
-
-## Discrete or continuous?
-
--   Two options:
-
-    -   Fixed cycle lengths (like cohort models)
-
-    -   Continuous time discrete event approach (like discrete event model)
-
-Fixed cycle lengths usually easier to program
-
-## Downside: compute
-
--   Often most computationally intensive models
-
--   Microsimulation variance reduction techniques hard to apply
-
-    -   e.g., common random numbers less useful when one interaction can change everyone's trajectory
-
--   Due to complexity, R may not be language of choice (Matlab, C++, Julia likely faster)
-
-## Ex: PrEP for people who inject drugs[^1]
-
-[^1]: Published in [Fu, Owens and Brandeau 2019](https://doi.org/10.1097%2FQAD.0000000000001747). Material adapted from MS&E 292 by Margaret Brandeau
-
-**Objective:** Evaluate the cost-effectiveness of PrEP for PWID under different targeting strategies (Assume PrEP+Screen+ART and 25% coverage)
-
-**Strategies:**
-
-::::: columns
-::: {.column width="50%"}
--   No Targeting
-
--   Enroll Partners
-:::
-
-::: {.column width="50%"}
--   Target Most Partners
-
--   Target Most Infected Partners
-:::
-:::::
-
-## PrEP model
-
--   Network model
-
--   Sexual and needlesharing HIV transmission
-
--   4 HIV stages (acute infection, ..., AIDS)
-
--   Calibrated to data from a large PWID network in Chicago
-
--   Track costs, QALYs, HIV infections averted
-
--   Programmed in Matlab
-
--   Health system perspective
-
-## Model Schematic
-
-![](figs/PrEP_network_schematic.png)
-
-## PrEP CEA results
-
-::::: columns
-::: {.column width="70%"}
-![](figs/PrEP_CEA_results.png)
-:::
-
-::: {.column width="30%"}
-"US style" efficiency frontier plots have costs on X axis, QALYs on Y axis.
-:::
-:::::
-
-## Resources for ABM
-
--   [RNetLogo package](http://rnetlogo.r-forge.r-project.org/) \[[blog](https://www.r-bloggers.com/2014/07/agent-based-models-and-rnetlogo/)\]
-
--   [Agent-based modeling chapter](https://bookdown.org/f_lennert/book-toolbox_css/agent-based-modeling.html) from "Toolbox CSS" by Felix Lennert
-
--   [EpiModel R package](https://doi.org/10.18637/jss.v084.i08) (has compartmental and network models)
-
-## Today
-
--   Discrete event simulation
-
--   Agent based model
-
--   System dynamics
-
--   **Choosing a model structure**
-
-## Where we are
-
--   9 of 16 methods lectures completed
-
--   Remaining method lectures cover:
-
-    -   One more model type (differential equations)
-
-    -   Methods for model design, parameterization, calibration, and uncertainty analysis
-
--   Then, we enter the application phase
+## ABM material moved to session 10 
 
 ## Logistics
 

@@ -12,7 +12,7 @@
 
   <meta name="author" content="Alton Russell">
   <meta name="dcterms.date" content="2026-02-03">
-  <title>Efficient simulation &amp; ABM</title>
+  <title>Efficient programming and simulation</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -392,7 +392,7 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Efficient simulation &amp; ABM</h1>
+  <h1 class="title">Efficient programming and simulation</h1>
   <p class="subtitle">EPIB 676 session 9, McGill University</p>
 
 <div class="quarto-title-authors">
@@ -443,7 +443,7 @@ Alton Russell
 <span id="cb2-5"><a href=""></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-  0.012   0.002   0.013 </code></pre>
+  0.012   0.001   0.013 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a><span class="co"># With  pre-allocation</span></span>
 <span id="cb4-2"><a href=""></a><span class="fu">system.time</span>({</span>
@@ -485,11 +485,11 @@ Alton Russell
 <span id="cb6-13"><a href=""></a><span class="fu">system.time</span>(int_est <span class="ot">&lt;-</span> <span class="fu">monte_carlo</span>(N))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-  0.460   0.005   0.468 </code></pre>
+  0.463   0.004   0.470 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a>int_est</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 3.13788</code></pre>
+<pre><code>[1] 3.143232</code></pre>
 </div>
 </div>
 </section>
@@ -502,11 +502,11 @@ Alton Russell
 <span id="cb10-4"><a href=""></a><span class="fu">system.time</span>(int_est <span class="ot">&lt;-</span> <span class="fu">monte_carlo_vec</span>(N))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-  0.008   0.001   0.009 </code></pre>
+  0.007   0.000   0.008 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href=""></a>int_est</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 3.142712</code></pre>
+<pre><code>[1] 3.143264</code></pre>
 </div>
 </div>
 <ul>
@@ -558,7 +558,7 @@ Alton Russell
 <span id="cb16-4"><a href=""></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-  0.001   0.000   0.000 </code></pre>
+  0.001   0.000   0.001 </code></pre>
 </div>
 </div>
 <p>~4x faster!</p>
@@ -577,14 +577,14 @@ Alton Russell
 <span id="cb18-8"><a href=""></a><span class="fu">system.time</span>(<span class="fu">mean_r</span>(x))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-  0.001   0.000   0.002 </code></pre>
+  0.002   0.000   0.002 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href=""></a><span class="fu">library</span>(<span class="st">"compiler"</span>) <span class="co">#comes with R</span></span>
 <span id="cb20-2"><a href=""></a>cmp_mean_r <span class="ot">=</span> <span class="fu">cmpfun</span>(mean_r) <span class="co">#byte compiled version</span></span>
 <span id="cb20-3"><a href=""></a><span class="fu">system.time</span>(<span class="fu">cmp_mean_r</span>(x))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-  0.000   0.000   0.001 </code></pre>
+      0       0       0 </code></pre>
 </div>
 </div>
 </section>
@@ -662,7 +662,7 @@ Alton Russell
 <span id="cb27-8"><a href=""></a>add</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>function (x, y, z) 
-.Call(&lt;pointer: 0x103059d40&gt;, x, y, z)</code></pre>
+.Call(&lt;pointer: 0x105badd40&gt;, x, y, z)</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href=""></a><span class="fu">add</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -687,8 +687,8 @@ Alton Russell
 <li><p><span class="math inline">\(M_e[i,t]\)</span> matrix gives the health accrued accumulated by individual <span class="math inline">\(i\)</span> during cycle <span class="math inline">\(t\)</span></p></li>
 </ul>
 </section>
-<section id="vectorization-in-individual-simulation-model" class="slide level2">
-<h2>Vectorization in individual simulation model</h2>
+<section id="vectorization-in-individual-simulation" class="slide level2">
+<h2>Vectorization in individual simulation</h2>
 <ul>
 <li><p>Preallocate all matrices/arrays</p></li>
 <li><p>Generate baseline characteristics for everyone at once</p>
@@ -698,8 +698,8 @@ Alton Russell
 </ul></li>
 </ul>
 </section>
-<section id="vectorization-in-individual-simulation-model-1" class="slide level2">
-<h2>Vectorization in individual simulation model</h2>
+<section id="vectorization-in-individual-simulation-1" class="slide level2">
+<h2>Vectorization in individual simulation</h2>
 <ul>
 <li><p>Where possible, avoid loops and use <strong>linear algebra</strong> to compute calculations for the whole cohort (or large subsets) at once</p>
 <ul>
@@ -787,7 +787,7 @@ F_X(x) = P(X \leq x) = p \qquad \qquad F^{-1}_X(p) = x
 <span id="cb32-8"><a href=""></a><span class="fu">print</span>(<span class="fu">c</span>(<span class="at">Mean=</span>mu,<span class="at">SE=</span>SE,<span class="at">Lower=</span>mu<span class="sc">-</span>SE,<span class="at">Upper=</span>mu<span class="sc">+</span>SE))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      Mean         SE      Lower      Upper 
-0.30780000 0.01279572 0.29500428 0.32059572 </code></pre>
+0.30920000 0.01281181 0.29638819 0.32201181 </code></pre>
 </div>
 </div>
 </section>
@@ -809,7 +809,7 @@ F_X(x) = P(X \leq x) = p \qquad \qquad F^{-1}_X(p) = x
 <span id="cb34-13"><a href=""></a><span class="fu">print</span>(<span class="fu">c</span>(<span class="at">Mean=</span>mu,<span class="at">SE=</span>SE,<span class="at">Lower=</span>mu<span class="sc">-</span>SE,<span class="at">Upper=</span>mu<span class="sc">+</span>SE))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       Mean          SE       Lower       Upper 
-0.298000000 0.009619594 0.288380406 0.307619594 </code></pre>
+0.304600000 0.009565335 0.295034665 0.314165335 </code></pre>
 </div>
 </div>
 <p>Standard error reduced by ~25%</p>
@@ -844,7 +844,7 @@ Var[X_2 - X_1] = Var[X_1] + Var[X_2] - 2Cov[X_1,X_2]
 <span id="cb36-14"><a href=""></a><span class="fu">print</span>(<span class="fu">c</span>(<span class="at">Diff=</span>mu_diff,<span class="at">SE=</span>SE,<span class="at">Lower=</span>mu_diff<span class="sc">-</span>SE,<span class="at">Upper=</span>mu_diff<span class="sc">+</span>SE))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      Diff         SE      Lower      Upper 
--2.8256952  0.5030338 -3.3287289 -2.3226614 </code></pre>
+-2.5190794  0.4963633 -3.0154427 -2.0227161 </code></pre>
 </div>
 </div>
 <p>Source: <a href="https://berkorbay.github.io/fe522/02_Monte_Carlo_Simulation.html">Berk Orbay</a></p>
@@ -862,7 +862,7 @@ Var[X_2 - X_1] = Var[X_1] + Var[X_2] - 2Cov[X_1,X_2]
 <span id="cb38-8"><a href=""></a><span class="fu">print</span>(<span class="fu">c</span>(<span class="at">Diff=</span>mu_diff,<span class="at">SE=</span>SE,<span class="at">Lower=</span>mu_diff<span class="sc">-</span>SE,<span class="at">Upper=</span>mu_diff<span class="sc">+</span>SE))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       Diff          SE       Lower       Upper 
--2.45708059  0.04596918 -2.50304977 -2.41111141 </code></pre>
+-2.47467811  0.04602386 -2.52070197 -2.42865426 </code></pre>
 </div>
 </div>
 <p>Standard error reduced by ~90%</p>
@@ -882,11 +882,11 @@ Var[X_2 - X_1] = Var[X_1] + Var[X_2] - 2Cov[X_1,X_2]
 <span id="cb40-8"><a href=""></a><span class="co"># Sample n random variables from each stream</span></span>
 <span id="cb40-9"><a href=""></a><span class="fu">rstream.sample</span>(stream1, n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.2603618 0.2112419 0.7165200 0.5964879 0.4512307</code></pre>
+<pre><code>[1] 0.42151284 0.01065986 0.35314906 0.44677283 0.69125605</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href=""></a><span class="fu">rstream.sample</span>(stream2, n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.2896961 0.1802865 0.1595497 0.5389636 0.1223685</code></pre>
+<pre><code>[1] 0.60332053 0.54181870 0.07193159 0.49956357 0.95540658</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href=""></a><span class="co"># Can sample antithetic variates</span></span>
 <span id="cb44-2"><a href=""></a><span class="fu">rstream.antithetic</span>(stream1) <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -933,189 +933,8 @@ Var[X_2 - X_1] = Var[X_1] + Var[X_2] - 2Cov[X_1,X_2]
 <li><p><u><strong>Agent based modelling</strong></u></p></li>
 </ul>
 </section>
-<section id="credit" class="slide level2">
-<h2>Credit</h2>
-<p>Much of this section based on</p>
-<p><a href="https://doi.org/10.1007/s40273-015-0254-2"><em>Chhatwal &amp; He (2015). Economic evaluations with agent-based modelling: An introduction.</em></a></p>
-</section>
-<section id="why-agent-based-models" class="slide level2">
-<h2>Why agent based models?</h2>
-<ul>
-<li>Model autonomous agents interacting with each other and their environment</li>
-</ul>
-<p>Combines benefits of:</p>
-<ul>
-<li><p>Differential equations model</p>
-<ul>
-<li>model ‘infectiousness’ of disease or behavior</li>
-</ul></li>
-<li><p>Microsimulation/discrete event simulation</p>
-<ul>
-<li>flexible, individual-level, easier to instantiate heterogeneity</li>
-</ul></li>
-</ul>
-</section>
-<section id="schematic" class="slide level2">
-<h2>Schematic</h2>
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><a href="www.doi.org/10.1007/s40273-015-0254-2"><img data-src="figs/agent_based_transmission.png" alt="Chhatwal et. a. 2015"></a></p>
-<figcaption>Chhatwal et. a. 2015</figcaption>
-</figure>
-</div>
-</section>
-<section id="agents-and-environments" class="slide level2">
-<h2>Agents and environments</h2>
-<ul>
-<li><p><strong>Agents</strong>: usually people, could be animals, vehicles, companies, molecules, cells etc.</p></li>
-<li><p><strong>Environment</strong>: country, city, hospital, school, prison, twitter, airplane, body, organ, etc.</p></li>
-</ul>
-</section>
-<section id="agents" class="slide level2">
-<h2>Agents</h2>
-<ul>
-<li><p>Respond to environment and other agents as programmed</p>
-<ul>
-<li>Behavior can vary by characteristics and history (memory)</li>
-<li>Not centrally controlled</li>
-</ul></li>
-<li><p>Allows estimation of “network effects”</p>
-<ul>
-<li><p>Benefit of intervention depends on others’ behavior</p></li>
-<li><p>e.g., vaccination, sexually transmitted disease test and treat, behavior/social conditioning</p></li>
-</ul></li>
-</ul>
-</section>
-<section id="bottom-up-system-modeling" class="slide level2">
-<h2>“Bottom up” system modeling</h2>
-<ul>
-<li><p>Behavior programmed at the individual level</p></li>
-<li><p>System dynamics observed, not imposed</p></li>
-<li><p>Individual behavior <span class="math inline">\(\rightarrow\)</span> system dynamics:</p>
-<ul>
-<li><p>Sex practices <span class="math inline">\(\rightarrow\)</span> HIV epidemic size</p></li>
-<li><p>quarantine adherence <span class="math inline">\(\rightarrow\)</span> Ebola control</p></li>
-<li><p>Vaccination + mixing while sick <span class="math inline">\(\rightarrow\)</span> flu season peak</p></li>
-</ul></li>
-</ul>
-</section>
-<section id="network-topology" class="slide level2">
-<h2>Network topology</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
-<p><img data-src="figs/networkA.png"></p>
-</div><div class="column" style="width:50%;">
-<p><img data-src="figs/networkB.png"></p>
-</div></div>
-</section>
-<section id="network-structure-matters" class="slide level2">
-<h2>Network structure matters</h2>
-<ul>
-<li><p>Homogeneous mixing usually unrealistic</p>
-<ul>
-<li><p>Some have many connections (“high degree”) others have few</p></li>
-<li><p>Some networks are dense, others are sparse</p></li>
-</ul></li>
-<li><p>Create networks by:</p>
-<ul>
-<li><p>Empirically estimating or calibrating from data</p></li>
-<li><p>Algorithmically create via sampling rules</p></li>
-</ul></li>
-<li><p>Network often <u><strong>dynamic</strong></u> (connections dissolve and re-form)</p></li>
-</ul>
-</section>
-<section id="discrete-or-continuous" class="slide level2">
-<h2>Discrete or continuous?</h2>
-<ul>
-<li><p>Two options:</p>
-<ul>
-<li><p>Fixed cycle lengths (like cohort models)</p></li>
-<li><p>Continuous time discrete event approach (like discrete event model)</p></li>
-</ul></li>
-</ul>
-<p>Fixed cycle lengths usually easier to program</p>
-</section>
-<section id="downside-compute" class="slide level2">
-<h2>Downside: compute</h2>
-<ul>
-<li><p>Often most computationally intensive models</p></li>
-<li><p>Microsimulation variance reduction techniques hard to apply</p>
-<ul>
-<li>e.g., common random numbers less useful when one interaction can change everyone’s trajectory</li>
-</ul></li>
-<li><p>Due to complexity, R may not be language of choice (Matlab, C++, Julia likely faster)</p></li>
-</ul>
-</section>
-<section id="ex-prep-for-people-who-inject-drugs1" class="slide level2">
-<h2>Ex: PrEP for people who inject drugs<sup>1</sup></h2>
-<p><strong>Objective:</strong> Evaluate the cost-effectiveness of PrEP for PWID under different targeting strategies (Assume PrEP+Screen+ART and 25% coverage)</p>
-<p><strong>Strategies:</strong></p>
-<div class="columns">
-<div class="column" style="width:50%;">
-<ul>
-<li><p>No Targeting</p></li>
-<li><p>Enroll Partners</p></li>
-</ul>
-</div><div class="column" style="width:50%;">
-<ul>
-<li><p>Target Most Partners</p></li>
-<li><p>Target Most Infected Partners</p></li>
-</ul>
-</div></div>
-<aside><ol class="aside-footnotes"><li id="fn1"><p>Published in <a href="https://doi.org/10.1097%2FQAD.0000000000001747">Fu, Owens and Brandeau 2019</a>. Material adapted from MS&amp;E 292 by Margaret Brandeau</p></li></ol></aside></section>
-<section id="prep-model" class="slide level2">
-<h2>PrEP model</h2>
-<ul>
-<li><p>Network model</p></li>
-<li><p>Sexual and needlesharing HIV transmission</p></li>
-<li><p>4 HIV stages (acute infection, …, AIDS)</p></li>
-<li><p>Calibrated to data from a large PWID network in Chicago</p></li>
-<li><p>Track costs, QALYs, HIV infections averted</p></li>
-<li><p>Programmed in Matlab</p></li>
-<li><p>Health system perspective</p></li>
-</ul>
-</section>
-<section id="model-schematic" class="slide level2">
-<h2>Model Schematic</h2>
-
-<img data-src="figs/PrEP_network_schematic.png" class="r-stretch"></section>
-<section id="prep-cea-results" class="slide level2">
-<h2>PrEP CEA results</h2>
-<div class="columns">
-<div class="column" style="width:70%;">
-<p><img data-src="figs/PrEP_CEA_results.png"></p>
-</div><div class="column" style="width:30%;">
-<p>“US style” efficiency frontier plots have costs on X axis, QALYs on Y axis.</p>
-</div></div>
-</section>
-<section id="resources-for-abm" class="slide level2">
-<h2>Resources for ABM</h2>
-<ul>
-<li><p><a href="http://rnetlogo.r-forge.r-project.org/">RNetLogo package</a> [<a href="https://www.r-bloggers.com/2014/07/agent-based-models-and-rnetlogo/">blog</a>]</p></li>
-<li><p><a href="https://bookdown.org/f_lennert/book-toolbox_css/agent-based-modeling.html">Agent-based modeling chapter</a> from “Toolbox CSS” by Felix Lennert</p></li>
-<li><p><a href="https://doi.org/10.18637/jss.v084.i08">EpiModel R package</a> (has compartmental and network models)</p></li>
-</ul>
-</section>
-<section id="today-3" class="slide level2">
-<h2>Today</h2>
-<ul>
-<li><p>Discrete event simulation</p></li>
-<li><p>Agent based model</p></li>
-<li><p>System dynamics</p></li>
-<li><p><strong>Choosing a model structure</strong></p></li>
-</ul>
-</section>
-<section id="where-we-are" class="slide level2">
-<h2>Where we are</h2>
-<ul>
-<li><p>9 of 16 methods lectures completed</p></li>
-<li><p>Remaining method lectures cover:</p>
-<ul>
-<li><p>One more model type (differential equations)</p></li>
-<li><p>Methods for model design, parameterization, calibration, and uncertainty analysis</p></li>
-</ul></li>
-<li><p>Then, we enter the application phase</p></li>
-</ul>
+<section id="abm-material-moved-to-session-10" class="slide level2">
+<h2>ABM material moved to session 10</h2>
 </section>
 <section id="logistics" class="slide level2">
 <h2>Logistics</h2>
@@ -1134,7 +953,6 @@ Var[X_2 - X_1] = Var[X_1] + Var[X_2] - 2Cov[X_1,X_2]
 </div>
 </div>
 </section>
-
     </div>
   </div>
 
